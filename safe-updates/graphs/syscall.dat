@@ -1,0 +1,13 @@
+# Benchmark	Ratio
+400.perlbench	336.33
+401.bzip2	3.22
+403.gcc		112.63
+429.mcf		3.18
+445.gobmk	22.85
+456.hmmer	36.02
+458.sjeng	8.08
+462.libquantum	0.38
+464.h264ref	8.91
+471.omnetpp	11.74
+473.astar	24.63
+483.xalancbmk	117.14

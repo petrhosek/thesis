@@ -1,0 +1,88 @@
+
+\newcommand{\syscallsHandlers}{$86$\xspace}
+
+% Microbenchmarks
+
+\newcommand{\maxInterceptOvh}{$15\%$\xspace}
+
+\newcommand{\closeLeaderOvh}{$36\%$\xspace}
+\newcommand{\closeFollowerOvh}{$20\%$\xspace}
+
+\newcommand{\writeLeaderOvh}{$39\%$\xspace}
+\newcommand{\writeFollowerOvh}{$20\%$\xspace}
+
+\newcommand{\readLeaderOvh}{$121\%$\xspace}
+\newcommand{\readFollowerOvh}{$32\%$\xspace}
+
+\newcommand{\ptracesyscalloverhead}{$36.50\times$\xspace} % 46203
+
+\newcommand{\vdsoNative}{$49$ ticks\xspace} 
+\newcommand{\vdsoIntercept}{$122$ ticks\xspace} 
+\newcommand{\vdsoLeader}{$429$ ticks\xspace} 
+\newcommand{\vdsoFollower}{$189$ ticks\xspace} 
+
+
+% Macrobenchmarks
+
+\newcommand{\nservers}{four\xspace}
+
+\newcommand{\nginxIntercept}{$3\%$\xspace}
+\newcommand{\beanstalkdIntercept}{$11\%$\xspace}
+
+\newcommand{\beanstalkdOneFollower}{$1.52\times$\xspace}
+\newcommand{\lighttpdOneFollower}{$1.12\times$\xspace}
+\newcommand{\nginxOneFollower}{$1.28\times$\xspace}
+\newcommand{\redisOneFollower}{$1.06\times$\xspace}
+
+\newcommand{\beanstalkdSixFollowers}{$1.77\times$\xspace}
+\newcommand{\lighttpdSixFollowers}{$1.15\times$\xspace}
+\newcommand{\nginxSixFollowers}{$1.64\times$\xspace}
+\newcommand{\redisSixFollowers}{$1.25\times$\xspace}
+
+\newcommand{\beanstalkdSevenFollowers}{$1.82\times$\xspace}
+\newcommand{\lighttpdSevenFollowers}{$1.49\times$\xspace}
+\newcommand{\nginxSevenFollowers}{$1.67\times$\xspace}
+\newcommand{\redisSevenFollowers}{$1.27\times$\xspace}
+
+\newcommand{\speczerozeroOneFollower}{$11.3\%$\xspace}
+\newcommand{\speczerosixOneFollower}{$14.2\%$\xspace}
+
+\newcommand{\httpdWebBenchOneFollower}{$XXX$\xspace}
+\newcommand{\httpdAbOneFollower}{$2.4\%$\xspace}
+
+\newcommand{\lighttpdHttploadOneFollower}{$1.01\times$\xspace}
+\newcommand{\lighttpdAbOneFollower}{$1.00\times$\xspace}
+
+\newcommand{\thttpdOneFollower}{$1.00\times$\xspace}
+
+% Comparison
+
+\newcommand{\strataHttpd}{$48\%$\xspace}
+\newcommand{\strataHttpdRelative}{$XXX\%$\xspace}
+\newcommand{\orchestraHttpd}{$50\%$\xspace}
+\newcommand{\orchestraHttpdRelative}{$XXX\%$\xspace}
+\newcommand{\orchestraSpec}{$17\%$\xspace}
+\newcommand{\orchestraSpecRelative}{$XXX\%$\xspace}
+\newcommand{\tachyonLighttpd}{$3.72\times$\xspace}
+\newcommand{\tachyonLighttpdrelative}{$XXX\%$\xspace}
+\newcommand{\tachyonThttpd}{$1.17\times$\xspace}
+\newcommand{\tachyonThttpdRelative}{$XXX\%$\xspace}
+\newcommand{\mxLighttpd}{$3.49\times$\xspace}
+\newcommand{\mxLighttpdRelative}{$XXX\%$\xspace}
+\newcommand{\mxRedis}{$16.72\times$\xspace}
+\newcommand{\mxRedisRelative}{$XXX\%$\xspace}
+\newcommand{\mxSpec}{$17.9\%$\xspace}
+\newcommand{\mxSpecRelative}{$XXX\%$\xspace}
+
+% Scenarios
+
+\newcommand{\redisnormallatency}{\num{42.36}\si{\micro\second}\xspace}
+\newcommand{\redisfailoverlatency}{\num{122.62}\si{\micro\second}\xspace}
+
+\newcommand{\redisRROvhNx}{$14\%$\xspace}
+\newcommand{\redisRROvhScribe}{$53\%$\xspace}
+
+\newcommand{\redisNoSanitizationMedianLength}{$2$\xspace}
+\newcommand{\redisSanitizationMedianLength}{$6$\xspace}
+\newcommand{\redisNoSanitizationAverageLength}{$3$\xspace}
+\newcommand{\redisSanitizationAverageLength}{$24$\xspace}

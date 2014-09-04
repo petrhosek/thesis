@@ -1,0 +1,255 @@
+\chapter{Other applications}
+\label{chap:applications}
+
+\nx is designed as a flexible framework that can support a variety of
+application scenarios involving NVX systems.  In this section, we
+discuss three such scenarios:  transparent failover
+(\S\ref{sec:failover}), live sanitization
+(\S\ref{sec:sanitization}), and record-replay
+(\S\ref{sec:record_replay}).
+
+% \subsubsection{Regression Testing}
+% \label{sec:testing}
+
+% One of the most obvious applications of \nx framework is regression testing.
+% Developers often made various assumption about their programs. When working on
+% a new version, regression testing is often used to ensure that these
+% assumptions still hold even in the new version. Unfortunately, testing is not
+% an exhaustive technique and since regression tests are often written by the
+% same developers as the software itself, there is a high probability that some
+% violations will be violated leading to security bugs~\todo{Give concrete
+% examples.}.
+
+% Executing the regression suite under \nx while running both versions in
+% parallel (possibly even more) might help to reveal the subtle differences,
+% otherwise undetected by the tests. Our current prototype can be instructed to
+% stop the application when a divergence in the event stream is discovered
+% providing a detailed information of the difference (\eg system call and its
+% arguments). \nx may also attempt to continue execution performing different
+% system calls. However, this may not always be possible (\eg in case of network
+% communication), see discussion in \ref{sec:patternmatching} for more details.
+
+
+%The results are summarized in Figure~\ref{fig:scribe_vs_nx}.
+
+%% \begin{figure}[t]
+%%   \begin{center}
+%%     \caption{Performance comparison.}
+%%     \label{fig:scribe_vs_nx}
+%%   \end{center}
+%% \end{figure}
+
+\section{Multi-variant execution}
+\label{sec:multi-variant}
+
+%% \begin{structure}
+%% \item Rewriting rules for system call patterns
+%% \end{structure}
+
+Multiple different variants of the same software version can be run inside an
+NVX system as long as they all issue the same sequence of system
+calls~\cite{mx}.  This limitation is due to the fact that prior NVX systems run
+versions in lockstep (\S\ref{sec:coordination}).
+
+%While software patches often do not affect the sequence of system
+%calls, there are however situations when this happens.  In particular,
+%many divergences in system call traces fall into the following two
+%categories:
+
+%\begin{description}
+  %\item[Addition/removal] This class characterizes situations when one
+    %of the versions performs an additional system call (or conversely
+    %does not perform), typically as a consequence of an additional
+    %check.
+  %\item[Coalescing] This class covers the situations when a (repeated)
+    %sequence of system calls is executed a different number of times
+    %in each version.  E.g., one version might execute two \stt{write}
+    %system calls, while another a single equivalent \stt{write} to
+    %write the same bytes (\eg because extra buffering is used).  
+%\end{description}
+
+%Because \nx does not run the versions in lockstep, it can provide the
+%ability to handle these two cases.  To illustrate, we ran together
+%\lighttpd revision \stt{2436} together with the following revision
+%\stt{2437}, which introduced two extra checks using the system calls
+%\stt{getuid} and \stt{getgid}.  We configured \nx to allow followers to
+%skip these calls, or conversely to execute them if they are not found
+%in the event stream.  After these calls, execution was able to continue
+%as expected, with both versions issuing the same system calls.  In
+%future work, we plan to explore a more general mechanism for writing
+%such \textit{rewrite rules} using BPF filters.
+
+
+%To handle various instances of these classes, we introduced an approach
+%based on pattern matching. The pattern language employed by \nx is
+%similar to regular expressions, but rather than instances of strings, it
+%is used to match instances of system call traces. We have employed
+%regular language which allows us to construct a non-deterministic finite
+%automaton for each pattern using the technique introduced by Ken
+%Thompson~\cite{regexp}.
+
+%The pattern language employed by also \nx allows to match system call
+%arguments, similarly to BPF filters in mode 2 seccomp provided by Linux
+%kernel, which is necessary to match certain traces.
+
+
+
+% and restarts the last system call.  All other followers simply discard
+% the event and continue in execution.
+
+% and then notifies all versions by issuing a special
+% "reranking" event and sends new ranks to all instances over the
+% service channel. When the event is read by individual followers during
+% replay, they receive their new ranks and take the action. 
+
+
+% \todo{Memory consumption?}
+
+% \begin{structure}
+% \item Scaling w/ more versions/variants
+% \item Fail-over mechanism w/ many versions/variants
+% \item Multiple versions: \mx, staged deployment
+% \item Variants: sanitizers? some memory allocation diffs?
+% \item different compilers?  gcc vs llvm?
+% \item sanitizers?
+% \end{structure}
+
+
+
+\section{Honeypots}
+
+\section{Transparent Failover}
+\label{sec:failover}
+
+%[Cite \cite{rx,fo,mx}]
+
+NVX systems introduce a variety of opportunities for increasing
+software reliability and availability via transparent failover.  For
+instance, one can run in parallel multiple variants of an application with
+different memory layouts, different software revisions or different
+implementations of a given interface to survive bugs that occur 
+only in some of them.   
+
+\nx makes it easy to implement transparent failover.  When one of the
+versions crashes, the \stt{SIGSEGV} signal handler installed in each
+version notifies the coordinator, which decides what restart strategy
+to use.  When one of the followers crashes, it unsubscribes it from
+the list of currently-running followers, and discards it without
+affecting other followers.  When the leader crashes, it designates one
+of the followers as the new leader (currently the one with the
+smallest internal ID), and notifies it to switch its system call table
+(\S\ref{sec:rewriting}) to that of the leader, and to restart the last
+system call while discarding the old (crashing) leader.
+
+To demonstrate support for transparent failover, we used the same scenario as
+the one used in evaluation of Mx~\cite{mx}; we ran in parallel two revisions of
+\redis, \stt{a71f072f} and \stt{7fb16bac}, the latter of which had a known
+crash bug.  We then set up a client to send an \stt{HMGET} command that
+triggers the bug, and measured the increase in latency for that command.  When
+the buggy version is a follower, we do not observe any increase in latency, as
+expected.  When the buggy version is a leader, the latency increases from
+\redisnormallatency to \redisfailoverlatency.  As expected, we observed no
+extra degradation in throughput for the commands that follow.
+
+\section{Live Sanitization}
+\label{sec:sanitization}
+
+Sanitization is one of the most effective testing techniques for
+revealing low-level bugs such as uninitialized pointer dereferences and
+use-after-free errors.  Both Clang and GNU C Compiler now include a set
+of sanitizers---AddressSanitizer (ASan), MemorySanitizer (MSan),
+ThreadSanitizer (TSan)---which can be used to statically instrument
+the code with various checks.  Unfortunately, these checks introduce
+extra overhead (\eg $~2\times$ for ASan, $~3\times$ for MSan and
+$~5$-$15\times$ for TSan).  which is why these sanitizers are typically
+only used in off-line testing. However, during testing developers only
+use a limited set of inputs which might not reveal all bugs.
+
+One possible solution is to record execution traces during deployment
+and then replay them in a testing environment with sanitization
+enabled. However, this approach is unlikely to work in practice for
+several reasons. First, since we do not know in advance which traces
+are potentially interesting (\eg trigger sanitization checks) and
+which are not, we have to potentially collect and replay a huge number
+of execution traces. Even with some form of deduplication, this is
+still often impractical. Second, for long running applications such as
+servers, the log size will quickly grow to a large size. Third, many
+customers will refuse to share the logs from their production
+deployment.
+% While we may attempt to anonymize these logs, this could
+% potentially hide interesting cases.
+
+With \nx, we can perform live sanitization by running the native
+unsanitized version as the leader, with sanitized versions as
+followers. While sanitization itself introduces a performance
+overhead, since followers do not need to execute any I/O operations
+and merely replay them, they often can keep up with the follower thus
+allowing users to run sanitized versions in production without
+introducing any significant overhead.
+
+To demonstrate this, we build revision \stt{7f77235} of \redis twice:
+once with Clang without any sanitization, once with ASan enabled.  We
+then ran both versions in parallel using \varan and used the same
+benchmark with the same settings as for our performance evaluation
+(\S\ref{sec:c10k}). As expected, we have not measured any slowdown
+compared to the scenario with two non-sanitized versions being run in
+parallel. To get a better insight into the effect of running the
+sanitized version with \varan, we have measured the median length of
+the log, \ie the distance between the leader and the follower. With
+sanitization, this length increases from
+\redisNoSanitizationMedianLength to \redisSanitizationMedianLength,
+which does not impose any problems (\varan uses a default ring buffer
+size of 64k events).
+
+\section{Record-Replay}
+\label{sec:record_replay}
+
+Although \nx shares similarities with record-replay systems, there are
+significant differences; in particular, the log is of fixed size and
+only kept in-memory.  However, it is possible to easily extend \nx to
+provide full record-replay capabilities by implementing two artificial
+clients:
+\begin{inparaenum}[(i)]
+\item one acting as a \emph{follower} whose only goal is to write the
+  content of the ring buffer to persistent storage, and
+\item one acting as a \emph{leader}, reading the content of the log
+  from the persistent storage and publishing events into the ring
+  buffer for consumption by other clients.
+\end{inparaenum}
+
+Compared to some of the previous record-replay systems, \varan has a
+number of advantages. First, decoupling the logic responsible for
+reading/writing the log from the actual application into a separate
+process allows the application to run at nearly full speed and utilize
+the multiple cores available in modern CPUs.  Second, since \nx was
+designed to run multiple instances at the same time, we can replay
+multiple versions at once, \eg to determine which versions of the
+application from a given range are susceptible to a crash reported by
+the user.
+
+We have implemented a simple prototype of the two aforementioned
+clients on top of \nx and compared its performance against
+\scribe~\cite{scribe}, a state-of-the-art record-replay system
+implemented in the kernel.  Unfortunately, because \scribe is
+implemented in the kernel and is only maintained for an old 32-bit
+Linux kernel (2.6.35), we had to run our experiments inside a virtual
+machine (provided by \scribe's authors as the source tree was broken
+at the time of our experiments). This experience clearly shows one of
+the main disadvantages of kernel-level frameworks---the difficulty of
+maintaining the code base. To allow for more faithfull comparison we
+ran \nx inside the same virtual machine.
+
+We used \redis as a benchmark, running the same workload as before,
+and configured both systems to record the execution to
+persistent storage.  We recorded an overhead of \redisRROvhScribe for
+\scribe,\footnote{The overhead we measured for \scribe
+is higher than overhead reported in~\cite{scribe}; however, please keep in
+mind that the original work used less aggressive benchmarks such as \httpd.
+The use of a virtual machine may have also affected the result.}
+compared to \redisRROvhNx for \nx.
+%(but remember that we ran it inside a virtual machine)
+
+% Despite being implemented in the kernel, \scribe
+% performed worse than \nx on our \redis experiments: the overhead
+% introduced by \scribe was \redisRROvhScribe, compared to only
+% \redisRROvhNx for \nx.

@@ -1,0 +1,201 @@
+%% \begin{figure}[t]
+%%   \centering
+%%   \includegraphics[width=\columnwidth]{safe-updates/graphs/diff}
+%%   \caption{Source code differences across 164 versions of {\footnotesize \texttt{lighttpd}}.}
+%%   \label{fig:differences}
+%% \end{figure}
+
+
+Our approach is based largely on the assumption that during software
+evolution, the changes to the external behaviour of an application are
+relatively small.  In the context of Linux applications, the external
+behaviour of an application consists of its sequence of system calls,
+which are the primary mechanism for an application to change the state of
+its environment.  Note that the key insight here is that we are only
+concerned with \textit{externally observable behaviour}, and are
+oblivious to the way the external behaviour is generated.  As a trivial
+example, given two versions of a routine that outputs the smallest
+element of an array, our approach considers them equivalent even if
+the first version scans the array from the first to the last element,
+while the other scans it in reverse order.
+
+To verify this assumption, we compared 164 successive revisions of the
+\lighttpd web server, namely revisions in the range 2379--2635 of
+branch \textstt{lighttpd-1.4.x}, which were developed and released
+over a span of approximately ten months, from January to October 2009.
+%19 January 2009 to 11 October 2009).
+To understand the amount of code changes in these versions, we 
+computed the number of lines of code (LOC) that have changed from
+one version to the next.  
+%% Figure~\ref{fig:differences} summarises these differences.  This graph
+%% shows that patches in \lighttpd are relatively small, most of them
+%% affecting less than 30 LOC.
+During this period, code patches in \lighttpd varied between
+\lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
+\lighttpdMedPatch~LOC.\looseness=-1
+
+%% This suite consists of 19 tests files, each of them consisting of
+%% number of individual tests. 
+%% For the purpose of our experiment, we have selected a subset of 7 core
+%% test files excluding those targeting standalone modules.
+
+To compare the external behaviour of each version, we traced the system
+calls made by these versions using the
+\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}}
+tool, while running all the tests from the \lighttpd regression suite
+targeting the core functionality (a total of seven tests, but
+each test contains a large number of test cases issuing HTTP requests).
+
+To eliminate possible sources of non-determinism, we have disabled
+address-space randomisation while running the tests. To further account for any
+non-deterministic behaviour, we have repeated the tracing three times for each
+test case and compared the resulting traces across runs.  All tests were
+executed on a machine running a Linux 2.6.40.6 x86-64 kernel and the GNU C
+library 2.14.
+
+The system call traces were further normalised and post-processed.  We
+first split the original trace on a per-process basis, and
+%% so that the trace of each different process used
+%% by \lighttpd was stored in an individual file.
+%% Moreover, we used the order in which processes were started as a basis
+%% for the naming scheme to allow comparison of the traces for each
+%% process across different runs and versions.
+%%
+normalised all differences caused by timing (which would not
+affect \mx's operation), \eg we collapsed all sequences of
+\textstt{accept}-\textstt{poll} system calls, which represent repeated
+polling operations.
+%
+%and we eliminated all logging-related system calls
+%
+We have also collapsed all
+\textstt{read}-\textstt{stat}-\textstt{read} and
+\textstt{read}-\textstt{open}-\textstt{close} sequences sometimes
+used to check for file existence, as occurrence is often dependent
+on result of previous system calls (\ie if one of the previous
+calls returned \textstt{EAGAIN} error code). This was necessary to
+eliminate possible source of non-determinism and to allow further
+comparison of traces.
+
+Trace files were then post-processed by eliminating individual system
+call arguments and return values.  This post-processing step might
+reduce the precision of our comparison, but we performed it
+for two different reasons:%
+\begin{inparaenum}[(1)]
+\item many system calls accept as arguments addresses of data structures
+residing in the virtual address space, and these addresses may differ
+across versions (but \mx handles this while mediating the effect of
+system calls, as described in \S\ref{sec:mxm}).
+
+\item some system calls return information on current system resources
+(\eg number of processes and threads, amount of free/used memory)
+which would differ from one run to the other.
+\end{inparaenum}
+%
+Finally, 
+%% we concatenated the traces of all \lighttpd processes spawned
+%% by each version.  In the end, we had one trace for each run of a
+%% \lighttpd version on a test case in the regression suite.  
+for each test case, we compared the traces of consecutive \lighttpd
+versions using the edit distance.
+
+%% The differences in system call traces across all 164 revisions are
+%% summarised in Table~\ref{tab:differences}. These results clearly show
+%% that our assumption is correct and in the majority of cases (96.76\%),
+%% the sequences of system calls 
+
+%% external behaviour observable via system
+%% calls tracing.  In the remaining cases, these changes were \ldots, such
+%% as the one introduced in revision 2612 as a result of
+%% replacing \textstt{poll} system calls with their
+%% \textstt{epoll} counter-parts.
+
+%% as a result of newly implemented
+%% support for SELinux resulting in 25 changes over 59 tests, were caused mainly by
+%% different ordering of system calls or by splitting individual call into multiple
+%% different calls.
+
+%% \begin{table}
+%%   \centering
+%%   \begin{tabular}{r @{\qquad}c c}
+%%     \hline
+%%     \#Differences & Tests & Percentage \\
+%%     \hline
+%%     0 & 1104 & 96.757\% \\
+%%     1 & 8 & 0.701\% \\ 
+%%     2 & 13 & 1.140\% \\
+%%     6 & 7 & 0.613\% \\
+%%     10 & 1 & 0.088\% \\
+%%     12 & 1 & 0.088\% \\
+%%     19 & 1 & 0.088\% \\
+%%     25 & 1 & 0.088\% \\
+%%     29 & 1 & 0.088\% \\
+%%     37 & 1 & 0.088\% \\
+%%     39 & 1 & 0.088\% \\
+%%     47 & 1 & 0.088\% \\
+%%     77 & 1 & 0.088\% \\
+%%     \end{tabular}
+%%   \caption{Differences in post-processed system call traces between 164
+%%   revisions of \lighttpd.}% over the subset of \lighttpd's regression suite.}
+%%   \label{tab:differences}
+%% \end{table}
+
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\columnwidth]{evolution/graphs/lighttpd-traces}
+    \caption{Correlation of differences in post-processed system call
+      traces with differences in source code across 164 revisions of
+      \lighttpd.  The seven named revisions
+      are the only ones introducing external behaviour changes.}
+    \label{fig:correlation}
+  \end{center}
+\end{figure}
+
+
+Our results are shown in Figure~\ref{fig:correlation}, which
+correlates the differences in post-processed system call traces with
+the source code changes.  The graph shows that changes in externally
+observable behaviour occur only sporadically.  In fact, 156 versions
+(which account for around 95\% of all the versions considered)
+introduce \textit{no changes} in external behaviour.  In particular,
+the revision which introduced the bug described in \sref{sec:example}
+is one of the versions that introduces no changes, yet this revision
+is responsible for a critical crash bug.
+
+%% We believe this initial study supports our original assumption, and is
+%% encouraging for the viability of our approach. 
+%% %% provides some initial evidence in support of the assumption that
+%% %% changes to external behaviour are relatively small, which is
+%% %% encouraging for the viability of our approach.
+%% We next discuss our experience applying \mx to \redis
+%% (\S\ref{sec:redis}) and \lighttpd (\S\ref{sec:lighttpd}).
+
+
+
+Table~\ref{tab:perversion} aggregates the changes to external behaviour
+on a per-version basis.  As shown in this Table, 156 versions (which
+account for 95.706\% of all versions considered) introduced no changes
+in external behaviour, while the other versions introduced between 1
+and 273 differences. 
+
+\begin{table}
+  \centering
+  \begin{tabular}{r @{\qquad}c c}
+    \hline
+    \#Differences & Versions & Percentage \\
+    \hline
+    0 & 156 & 95.706\% \\
+    1 & 1 & 0.613\% \\
+    7 & 1 & 0.613\% \\
+    10 & 1 & 0.613\% \\ 
+    14 & 1 & 0.613\% \\
+    24 & 1 & 0.613\% \\
+    42 & 1 & 0.613\% \\
+    273 & 1 & 0.613\% \\
+    \hline
+  \end{tabular}
+  \caption{Differences in post-processed system call traces between 164
+  revisions of \lighttpd aggregated per version on the subset of \lighttpd's
+  regression suite.}
+  \label{tab:perversion}
+\end{table}

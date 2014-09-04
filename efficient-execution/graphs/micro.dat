@@ -1,0 +1,6 @@
+Benchmark	Base	Ratio
+close 1261  1330  1718  257
+write 1430  1564  1994  291 
+read  1486  1528  3290  1969
+open  2583  2976  8788  7342
+time  49    122   429   189 

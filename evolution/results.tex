@@ -1,0 +1,113 @@
+\newcommand{\numSystems}[0]{six\xspace}
+\newcommand{\numYears}[0]{twelve\xspace}
+
+%%these are wall-clock times
+\newcommand{\redisCompileTime}[0]{19\xspace}
+\newcommand{\redisTestTime}[0]{315\xspace}
+
+\newcommand{\zeromqCompileTime}[0]{21\xspace}
+\newcommand{\zeromqTestTime}[0]{10\xspace}
+
+\newcommand{\lighttpdCompileTime}[0]{17\xspace}
+\newcommand{\lighttpdTestTime}[0]{3\xspace}
+
+\newcommand{\memcachedCompileTime}[0]{9\xspace}
+\newcommand{\memcachedTestTime}[0]{110\xspace}
+
+\newcommand{\binutilsCompileTime}[0]{43\xspace}
+\newcommand{\binutilsTestTime}[0]{10\xspace}
+
+\newcommand{\gitCompileTime}[0]{49\xspace}
+\newcommand{\gitTestTime}[0]{1836\xspace}
+
+\newcommand{\memcachedOriginsLineCoverage}[0]{44.1\%\xspace}
+\newcommand{\memcachedOriginsInRange}[0]{24}
+\newcommand{\memcachedOriginsOutOfRange}[0]{21\xspace}
+
+\newcommand{\redisOriginsLineCoverage}[0]{52.8\%\xspace}
+\newcommand{\redisOriginsInRange}[0]{9}
+\newcommand{\redisOriginsOutOfRange}[0]{11}
+
+\newcommand{\zeromqOriginsLineCoverage}[0]{43.3\%\xspace}
+\newcommand{\zeromqOriginsInRange}[0]{14}
+\newcommand{\zeromqOriginsOutOfRange}[0]{30}
+
+%\newcommand{\memcachedBugs}[0]{45\xspace}
+%\newcommand{\memcachedFixCoverage}[0]{72\%\xspace}
+%\newcommand{\memcachedBugCoverage}[0]{78\%\xspace}
+%\newcommand{\memcachedBugsFullyCovered}[0]{25\xspace}
+%\newcommand{\memcachedFixesFullyCovered}[0]{28\xspace}
+%\newcommand{\memcachedFixesWithoutCode}[0]{4\xspace}
+%\newcommand{\memcachedBugsWithoutCode}[0]{5\xspace}
+%
+%\newcommand{\zeromqBugs}[0]{25\xspace}
+%\newcommand{\zeromqFixCoverage}[0]{46\%\xspace}
+%\newcommand{\zeromqBugCoverage}[0]{50\%\xspace}
+%\newcommand{\zeromqFixesFullyCovered}[0]{10\xspace}
+%\newcommand{\zeromqBugsFullyCovered}[0]{13\xspace}
+%\newcommand{\zeromqFixesWithoutCode}[0]{3\xspace}
+%\newcommand{\zeromqBugsWithoutCode}[0]{5\xspace}
+%
+%\newcommand{\redisBugs}[0]{25\xspace}
+%\newcommand{\redisFixCoverage}[0]{63\%\xspace}
+%\newcommand{\redisBugCoverage}[0]{67\%\xspace}
+%\newcommand{\redisFixesFullyCovered}[0]{14\xspace}
+%\newcommand{\redisBugsFullyCovered}[0]{13\xspace}
+%\newcommand{\redisFixesWithoutCode}[0]{3\xspace}
+%\newcommand{\redisBugsWithoutCode}[0]{4\xspace}
+
+%% Redis https://github.com/antirez/redis.git (branch unstable)
+%% 1000 revisions fb293cc - 347ab78, 600sec test timout
+\input{evolution/results/redis}
+\input{evolution/results/redis-nondet}
+\input{evolution/results/redis-bf}
+
+%% ZeroMQ@https://github.com/zeromq/zeromq4-x.git
+%% 500 revisions 6f32361 - 573d7b0, 120sec test timeout
+\input{evolution/results/zeromq}
+\input{evolution/results/zeromq-nondet}
+\input{evolution/results/zeromq-bf}
+
+%% lighttpd@git://git.lighttpd.net/lighttpd/lighttpd2
+%% 274 revisions (eea9b56 - 0d40b25) (prev fail to compile), 200sec timeout
+\input{evolution/results/lighttpd}
+\input{evolution/results/lighttpd-nondet}
+
+%% memcached@git://github.com/memcached/memcached.git
+%%  286 revisions compiling (ee0c3d5 - 87e2f36) (prev fail to compile), 200sec timeout
+\input{evolution/results/memcached}
+\input{evolution/results/memcached-nondet}
+\input{evolution/results/memcached-bf}
+
+%% diffutils@git://git.sv.gnu.org/diffutils.git
+%%  189/177 revisions/compiling (3850429 - b2f1e4b) (prev/later fail to compile), 200sec timeout
+
+%% binutils@git://sourceware.org/git/binutils.git
+%%  3950/381/303 all/affecting binutils not compiling/affecting binutils compiling revisions (4343fe0 - a0a1bb0), 60sec timeout
+\input{evolution/results/binutils}
+\input{evolution/results/binutils-nondet}
+
+%% git@https://github.com/git/git.git
+\input{evolution/results/git}
+\input{evolution/results/git-nondet}
+
+%% override the latent patch coverage here so we don't have to run
+%% Petr's analysis every time the results are updated
+\renewcommand{\lighttpdLatentOne}[0]{0.9\%\xspace}
+\renewcommand{\lighttpdLatentFive}[0]{5.0\%\xspace}
+\renewcommand{\lighttpdLatentTen}[0]{6.1\%\xspace}
+\renewcommand{\binutilsLatentOne}[0]{0.1\%\xspace}
+\renewcommand{\binutilsLatentFive}[0]{0.3\%\xspace}
+\renewcommand{\binutilsLatentTen}[0]{0.3\%\xspace}
+\renewcommand{\memcachedLatentOne}[0]{2.1\%\xspace}
+\renewcommand{\memcachedLatentFive}[0]{3.4\%\xspace}
+\renewcommand{\memcachedLatentTen}[0]{3.5\%\xspace}
+\renewcommand{\zeromqLatentOne}[0]{0.4\%\xspace}
+\renewcommand{\zeromqLatentFive}[0]{3.5\%\xspace}
+\renewcommand{\zeromqLatentTen}[0]{6.0\%\xspace}
+\renewcommand{\redisLatentOne}[0]{5.2\%\xspace}
+\renewcommand{\redisLatentFive}[0]{5.5\%\xspace}
+\renewcommand{\redisLatentTen}[0]{6.4\%\xspace}
+\renewcommand{\gitLatentOne}[0]{0\%\xspace}
+\renewcommand{\gitLatentFive}[0]{0\%\xspace}
+\renewcommand{\gitLatentTen}[0]{0\%\xspace}

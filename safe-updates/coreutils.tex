@@ -1,0 +1,201 @@
+\begin{table}[t]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textsc{Utility} & \textsc{Bug description} & \textsc{Bug span} \\
+\midrule
+\mdsum & \multirow{2}{*}{Buffer underflow} & \multirow{2}{*}{v5.1 -- v6.11} \\
+\shasum & & \\
+\midrule
+\mkdir & \multirow{2}{*}{\textstt{NULL}-pointer dereference} & \multirow{2}{*}{v5.1 -- v6.11} \\
+\mkfifo & & \\
+\mknod & & \\
+\midrule
+\cut & Buffer overflow & v5.3 -- v8.11 \\
+\bottomrule
+\end{tabular}
+\caption{Utilities from \gnu \coreutils, the crash bugs used, and the 
+versions in which these bugs were introduced and fixed.  We group
+together utilities affected by the same or similar bugs.}
+\label{tbl:cu-bugs}
+\end{table}
+
+As an initial evaluation of \mx's ability to survive crashes, we have used
+applications from the \gnu \coreutils utility
+suite,\footnote{\url{http://www.gnu.org/software/coreutils/}} which provides
+the core user-level environment on most UNIX systems.  We have selected a
+number of bugs reported on the \coreutils mailing list, all of which trigger
+segmentation faults.  The bugs are described in Table~\ref{tbl:cu-bugs},
+together with the utilities affected by each bug and the versions in which they
+were introduced and fixed.
+
+The bug affecting both \mdsum and \shasum utilities introduced in 5.1 and later
+fixed in 6.11 caused a crash due to buffer underflow when checking an invalid
+BSD-style input. Another bug we have considered affected \mkdir, \mkfifo and
+\mknod utilities; this bug, which was reported in 6.10 and fixed in 6.11
+resulted in crash when diagnosing invalid context.  Finally, the bug affecting
+\cut utility, introduced in 5.3 and later fixed in 8.11, resulted in segfault
+when using large unbounded range. 
+
+For all these bugs, we configured \mx to run the version that fixed the bug
+together with the one just before.  (we could have also run the version that
+introduced the bug with the one just before, but we could not immediately tell
+where the bug was introduced, and we cannot build versions earlier than 6.10
+due to changes in GCC and GNU C library).  \mx successfully intercepted the
+crash and recovered the execution by using the strategy described in
+\sref{sec:rem}.
+
+We discuss below the bug in the \cut utility (used to remove sections from each
+line of file), triggered by the following invocation:
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt,language=bash]
+$ cut -c1234567890- --output-d=: foo
+\end{lstlisting}
+
+This bug is triggered by the conditional statement on line~\ref{line:cond}:
+
+\begin{lstlisting}[firstnumber=525]
+if (output_delimiter_specified /*@\label{line:cond}@*/
+    && !complement
+    && eol_range_start && !is_printable_field (rsi_candidate))
+\end{lstlisting}
+
+This code uses the lower bound of the size of the printable field
+vector; however, when calculating the size of this vector, ranges going
+to the end of line (\ie \lstinline`0-`) are not considered eventually
+resulting in invalid memory access. 
+% The bug is caused by a buffer overflow whose root cause is the
+% incorrect calculation of the size of a dynamically allocated buffer
+% used internally by \cut.
+When \mx intercepts this bug, it uses the
+last checkpoint to recover the execution of the crashing version. This
+checkpoint is taken after the \textstt{brk} system call triggered by
+the \textstt{malloc} call that allocates the buffer. 
+% in function \textstt{bindtextdomain} on line~\ref{line:bind}.
+% \begin{lstlisting}[firstnumber=767]
+% bindtextdomain (PACKAGE, LOCALEDIR); /*@\label{line:bind}@*/
+% \end{lstlisting}
+The recovered process uses the code of the other version to correctly
+calculate the size of the field vector and switches back to the original
+code during the allocation of this buffer as
+%code during the allocation of this buffer on line~\ref{line:alloc} as
+function \textstt{xzalloc} triggers \textstt{mmap64} system call, just
+before executing the conditional statement on line~\ref{line:cond},
+which originally triggered the bug.
+
+%% \begin{lstlisting}[firstnumber=504]
+%% printable_field = xzalloc (max_range_endpoint / CHAR_BIT + 1); /*@\label{line:alloc}@*/
+%% \end{lstlisting}
+
+%% \begin{table}
+%% {\tiny
+%% \begin{tabular}{l|c}
+%% Utility & Invocations \\ \hline
+%% [ & 13 \\
+%% arch & 0 \\
+%% base64 & 158 \\
+%% basename & 47 \\
+%% cat & 1333 \\
+%% chcon & 23 \\
+%% chgrp & 69 \\
+%% chmod & 531 \\
+%% chown & 48 \\
+%% chroot & 20 \\
+%% cksum & 15 \\
+%% comm & 42 \\
+%% cp & 312 \\
+%% csplit & 23 \\
+%% cut & 238 \\
+%% date & 475 \\
+%% dd & 86 \\
+%% df & 32 \\
+%% dircolors & 19 \\
+%% dirname & 40 \\
+%% dir & 15 \\
+%% du & 86 \\
+%% echo & 24 \\
+%% env & 1976 \\
+%% expand & 20 \\
+%% expr & 609 \\
+%% factor & 47 \\
+%% false & 9 \\
+%% fmt & 28 \\
+%% fold & 20 \\
+%% groups & 20 \\
+%% head & 592 \\
+%% hostid & 15 \\
+%% hostname & 0 \\
+%% id & 108 \\
+%% install & 0 \\
+%% join & 64 \\
+%% kill & 16 \\
+%% link & 15 \\
+%% ln & 721 \\
+%% logname & 15 \\
+%% ls & 358 \\
+%% md5sum & 44 \\
+%% mkdir & 463 \\
+%% mkfifo & 30 \\
+%% mknod & 22 \\
+%% mktemp & 406 \\
+%% mv & 208 \\
+%% nice & 70 \\
+%% nl & 22 \\
+%% nohup & 23 \\
+%% nproc & 31 \\
+%% od & 470 \\
+%% paste & 26 \\
+%% pathchk & 21 \\
+%% pinky & 15 \\
+%% printenv & 32 \\
+%% printf & 91 \\
+%% pr & 733 \\
+%% ptx & 33 \\
+%% pwd & 32 \\
+%% readlink & 199 \\
+%% rmdir & 31 \\
+%% rm & 1749 \\
+%% runcon & 16 \\
+%% seq & 98 \\
+%% sha1sum & 262 \\
+%% sha224sum & 19 \\
+%% sha256sum & 21 \\
+%% sha384sum & 21 \\
+%% sha512sum & 21 \\
+%% shred & 24 \\
+%% shuf & 21 \\
+%% sleep & 52 \\
+%% sort & 482 \\
+%% split & 29 \\
+%% stat & 255 \\
+%% stdbuf & 28 \\
+%% stty & 139 \\
+%% su & 0 \\
+%% sum & 37 \\
+%% sync & 15 \\
+%% tac & 78 \\
+%% tail & 182 \\
+%% tee & 60 \\
+%% test & 349 \\
+%% timeout & 55 \\
+%% touch & 1301 \\
+%% tr & 1050 \\
+%% true & 29 \\
+%% truncate & 51 \\
+%% tsort & 25 \\
+%% tty & 18 \\
+%% uname & 15 \\
+%% unexpand & 54 \\
+%% uniq & 414 \\
+%% unlink & 15 \\
+%% uptime & 15 \\
+%% users & 15 \\
+%% vdir & 15 \\
+%% wc & 1371 \\
+%% whoami & 15 \\
+%% who & 15 \\
+%% yes & 16 \\ \hline
+%% \end{tabular} }
+%% \caption{Results for each individual utility from \coreutils suite.}
+%% \end{table}
+

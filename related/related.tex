@@ -1,0 +1,369 @@
+\chapter{Related Work}
+\label{chap:related}
+
+This section provides a brief overview of previous work in the area.  We first
+discuss other scenarios which involve the execution of multiple program
+versions, and then discuss related work in the virtualization space.
+
+\section{N-version programming}
+
+The original idea of concurrently running multiple versions of the same
+application was first explored in the context of $N$-version programming, a
+software development approach introduced in the 1970's in which multiple teams
+of programmers independently develop functionally equivalent versions of the
+same program in order to minimise the risk of having the same bugs in all
+versions~\cite{chen1995}. During runtime, these versions are executed in
+parallel atop $N$-version execution environment (NVX)  in order to improve the
+fault tolerance of the overall. Both version generation and the synchronization
+mechanism required manual effort.
+
+%system and majority voting is used to continue in the best possible way when a
+%divergence occurs.
+
+%N-version programming was introduced in the seventies by Chen and
+%Avizienis~\cite{chen1995}.  The core idea was to have multiple teams
+%of programmers develop the same software independently and then run
+%the produced implementations in parallel in order to improve the fault
+%tolerance of the overall system.  Both version generation and the
+%synchronization mechanism required manual effort.
+
+Cook and Dage~\cite{cook:icse99} proposed a multi-version framework for
+upgrading components.  Users formally specify the specific input subdomain that
+each component version should handle, after which versions are run in parallel
+and the output of the version whose domain includes the current input is
+selected as the overall output of the computation.  The system was implemented
+at the level of leaf procedures in the Tcl language.  The key difference with
+\mx is that this framework requires a formal description of what input domain
+should be handled by each version; in comparison, \mx targets crash bugs and is
+fully automatic.  Moreover, \mx's goal is to have all versions alive at all
+times, so crash recovery plays a key role.  Finally, \mx has to carefully
+synchronise access to shared state, which is not an issue at the level of Tcl
+leaf procedures.
+
+More recently, researchers have proposed additional techniques that fit within
+the $N$-version programming paradigm, \eg by using heap over-provisioning and
+full randomisation of object placement and memory reuse to run multiple
+replicas and reduce the likelihood that a memory error will have any
+effect~\cite{diehard06}, employing complementary thread schedules to survive
+concurrency errors~\cite{compl-schedules11}, or using genetic programming to
+automatically generate a large number of application variants that can be
+combined to reduce the probability of failure or improve various non-functional
+requirements~\cite{gismoe}. Yumerefendi \etal~\cite{tightlip} run multiple
+sandboxed copies of the same process to detect potential privacy leaks and to
+enforce access control and privacy management; Shye \etal~\cite{shye2009} use
+multiple instances of the same application in order to overcome transient
+hardware failures. Cadar \etal have also argued that automatically generated
+software variants are a good way for exploiting the highly parallel nature of
+modern hardware platforms~\cite{multiplicity}.
+
+\subsection{N-version execution}
+
+Cox \etal~\cite{cox2006} propose a general framework for increasing
+application security by running in parallel several
+automatically-generated diversified variants of the same program.  The
+technique was implemented in two prototypes, one in which variants are
+run on different machines, and one in which they are run on the same
+machine and synchronised at the system call level, using a modified
+Linux kernel.
+By using multiple variants with potentially disjoint exploit sets,
+the proposed approach helps applications survive certain classes of
+security vulnerabilities such as buffer overflows, as attackers
+would need to simultaneously compromise all variants.
+Within this paradigm, the Orchestra framework~\cite{orchestra09} uses
+a modified compiler to produce two versions of the same application
+with stacks growing in opposite directions, runs them in parallel on
+top of an unprivileged user-space monitor, and raises an alarm if any
+divergence is detected to protect against stack-based buffer overflow
+attacks.
+
+Trachsel \etal use a similar approach to increase performance, where
+program variants are obtained by using different (compiler)
+optimisations and algorithms~\cite{trachsel10}.  The goal is to
+increase the overall system performance by always selecting the
+variant which finishes its execution first. Thereby, no
+synchronisation across variants is needed.  %Also ManySAT~\cite{manysat}
+%% \todo{\ldots missing rest of the sentence}
+
+There are two key differences between our approach and the work
+discussed in the last two paragraphs.  First, we do not rely on
+automatically-generated variants, but instead run in parallel existing
+software versions, which raises a number of different technical
+challenges.  
+This means that in our case, the variants are not
+semantically equivalent, this eliminates the challenge of generating
+diversified variants and creates opportunities in terms of recovery
+from failures, but also introduces additional challenges in terms of
+synchronising the execution of the different versions.  
+Second, this body of work has mostly focused on detecting divergences,
+while our main concern is to \textit{survive} them (keeping all
+versions alive), in order to increase both the security and
+availability of the overall application.
+
+An approach closer to the original N-version programming paradigm is
+Cocktail~\cite{cocktail}, which proposes the idea of running different
+web browsers in parallel under the assumption that any two of them are
+unlikely to be vulnerable to the same attacks.  Compared to \mx and
+other techniques inspired by the N-version programming paradigm,
+Cocktail's task is simplified by exclusively targeting web browsers,
+which implement common web standards.
+
+Recent work on NVX systems has moved in the direction of
+opportunistically using existing versions---\eg different browser
+implementations~\cite{cocktail} or different software
+revisions~\cite{mx}---or automatically synthesizing them---\eg by
+varying the memory layout~\cite{cox2006,diehard06}, or the direction
+of stack growth~\cite{orchestra09}.  Significant effort has also been
+expended on running multiple versions in parallel in the context of
+online and offline
+testing~\cite{back-to-back90,onlinevalidation,bandaid-patch07,tachyon12}.
+\nx targets NVX systems that use
+system-call level synchronization and is oblivious to the way in which
+the versions are generated.
+
+Recent NVX systems that synchronize versions at the level of system
+calls use either the \ptrace interface~\cite{orchestra09,tachyon12,mx}
+or kernel modifications~\cite{cox2006} to implement monitors.  As
+discussed, \stt{ptrace}-based systems incur an unacceptable overhead
+on I/O-bound applications---for instance, \tachyon~\cite{tachyon12}
+reports an overhead of \tachyonLighttpd on \lighttpd and \mx~\cite{mx}
+achieved an overhead of up to \mxRedis in one of the Redis
+experiments.  By contrast, kernel-based systems~\cite{cox2006} achieve
+overheads competitive to \varan~\footnote{although we were not able to compare
+directly with \cite{cox2006}, as they use a different benchmark and a
+single-core machine} ---but the major downside of kernel-level approaches are
+the increase in the size of the trusted computing base (TCB), the additional
+privileges required for deployment, and the difficulty of maintaining the
+kernel patches.  Finally, all existing NVX systems operating at the level of
+system calls, both user- and kernel-level, require lockstep execution, which
+introduces significant limitations both in terms of performance and
+flexibility, as discussed in detail in Sections~\ref{sec:coordination} and
+\ref{sec:patternmatching}.
+
+\section{Software testing}
+
+Back-to-back testing~\cite{back-to-back90}, where the same input is
+sent to different variants or versions of an application and their
+outputs compared for equivalence, has been used since the 1970s.  More
+recently, delta execution~\cite{onlinevalidation} proposes to run two
+different versions of a single application, splitting the execution at
+points where the two versions differ, and comparing their behaviour to
+test the patch for errors and validate its functionality.  Band-aid
+patching~\cite{bandaid-patch07} proposes an online patch testing
+system that also splits execution before a patch, and then
+retroactively selects one code version based on certain criteria.
+Similarly, Tachyon~\cite{tachyon12} is an online patch testing system
+%developed in recent independent work 
+in which the old and the new version of an application are run
+concurrently; when a divergence is detected, the options are to either
+halt the program, or to create a manual rewrite rule specifying how to
+handle the divergence.
+
+The idea of running multiple executions concurrently has also been
+used in an offline testing context.  For instance,
+d'Amorin \etal~\cite{delta-exec-oop} optimise the state-space
+exploration of object oriented code by running the same program on
+multiple inputs simultaneously, while Kim \etal~\cite{shared-exec12}
+improve the testing of software product lines by sharing executions
+across a program family.
+
+By comparison with this body of work, our focus is on managing
+divergences across software versions at runtime in order to keep the
+application running, and therefore runtime deployment and automatic
+crash recovery play a central role in \mx.
+
+\section{Software updates}
+
+Closely related to the execution of multiple versions is the management of
+multiple versions, environment and software updates, such as deciding when to
+upgrade, applying updates, \etc Previous work on improving the software update
+process has looked at different aspects related to managing and deploying new
+software versions. 
+
+\subsection{Dynamic software updates}
+
+Dynamic software updating (DSU) systems such as Ginseng~\cite{ginseng},
+UpStare~\cite{upstare} or Kitsune~\cite{kitsune} are concerned with the problem
+of updating programs while they are running.  As opposed to \mx, the two
+versions co-exist only for the duration of the software update, but DSU and the
+\rem component of \mx face similar challenges when switching execution from one
+version to another.  We hope that some of the technique developed in DSU
+research will also benefit the recovery mechanism of \mx and vice versa.
+
+\subsection{Update management and distribution}
+
+Solution inspired by $N$-version programming been proposed by Michael
+Franz~\cite{unibus:nspw10}---instead of executing multiple versions in parallel,
+the author proposed to distribute unique version of every program to every
+user. Such versions should be created automatically by a ``multicompiler'',
+and distributed to users through ``App Store''. This would increase security as
+it would be much more difficult to generate attack vectors by reverse
+engineering of security patches for these diversified versions.
+
+%To make such a solution work in practice, the way to manage large number of
+%different versions and the overall update process is needed.
+%Crameri~\etal~\cite{crameri:updates} proposed a framework for staged deployment
+%which integrates upgrade deployment, user-machine testing and problem reporting
+%into the overall upgrade process. The framework itself clusters users'
+%machines according to their environment, tests the upgrades using cluster
+%representatives and allows deployment of complex upgrades.
+
+%Beattie~\etal~\cite{beattie2002} considered the issue of timing the application
+%of security updates---patching too early could result in breaking the system by
+%applying broken patch, patching too late could on the other hand lead to risk
+%of penetration by an attacker exploiting a well known security issue. Using the
+%cost functions of corruption and penetration, based upon real world empirical
+%data, they have shown that 10 and 30 days after the patch's release date are
+%the optimal times to apply the patch to minimize the risk of defective patch.
+%Such delay still opens a lot of opportunities for potential attackers.
+
+Other prior work on improving software updating has looked at different aspects
+related to managing and deploying new software versions.  For example, Beattie
+\etal~\cite{beattie2002} have considered the issue of timing the application of
+security updates---patching too early could result in breaking the system by
+applying broken patch, patching too late could on the other hand lead to risk
+of penetration by an attacker exploiting a well known security issue---while
+Crameri \etal~\cite{crameri:updates} proposed a framework for staged
+deployment, in which user machines are clustered according to their environment
+and software updates are tested across clusters using several different
+strategies.
+
+In relation to this work, \mx tries to ease the decision of applying a software
+update, because incorporating a new version should only increase the security
+and reliability of the overall multi-version application.  However, in practice
+the number of versions that can be run in parallel is dictated by the number of
+available resources (\eg the number of available CPU cores), so effective
+update strategies are still needed in this context, and work in this area could
+provide helpful solutions to this problem.
+
+%In relation to this work, \mx tries to encourage users to always apply
+%a software update, but it would still benefit from effective update
+%strategies to decide what versions to keep when resources are
+%limited.
+
+Many large-scale services, such as Facebook and Flickr use a {\it
+continuous deployment} approach, where new versions are continuously
+released to users~\cite{johnson2009,flickr}, but each version is often
+made accessible only to a fraction of users to prevent complete outage
+in case of newly introduced errors.  While this approach helps
+minimize the number of users affected by new bugs, certain bugs may
+manifest themselves only following prolonged operation, after the
+release has been deployed to the entire user base.  We believe our
+proposed approach is complementary to continuous deployment, and could
+be effectively combined with it.
+
+\section{Fault tolerance}
+
+Research on surviving software failures has received a lot of
+attention in the
+past~\cite{rx,compl-schedules11,fo,exec-trans06,vigilante,clearview,microreboots}.
+%and our proposed approach can benefit from the techniques developed in
+%this context.
+
+\section{Surviving software failures}
+
+\mx's main focus is on surviving errors.  Prior work in this area has 
+employed several techniques to accomplish this goal.  For example,
+Rx~\cite{rx} helps applications recover from software failures by
+rolling back the program to a recent checkpoint upon a software
+failure, and then re-executing it in a modified environment.  \mx
+similarly rolls back execution to a recent checkpoint, but instead of
+modifying the environment, it uses the code of a different version to
+survive the bug.  The two approaches are complementary, and could be
+easily combined to support a larger number of errors and application
+types.
+
+Failure-oblivious computing~\cite{fo} helps software survive memory
+errors by simply discarding invalid writes and fabricating values to
+return for invalid reads, enabling applications to continue their
+normal execution path.  Similar to failure-oblivious computing,
+execution transactions~\cite{exec-trans06} help survive software bugs
+by terminating the function in which the bug has occurred and
+continuing to execute the code immediately following the
+corresponding function call.  Our approach shares some of the
+philosophy of these two techniques, as we cannot always guarantee that
+the crashing version will correctly execute through the divergence
+when using the other version's code.
+% (see \S\ref{sec:rem}).  
+However, by using a previously correct piece of code to execute
+through the crash and regularly checking for divergences in the
+external behaviour, our approach provides stronger guarantees than
+those obtained by fabricating read values or terminating the function
+in which the bug occurred.
+
+Research on automatic generation of filters based on vulnerability
+%~\cite{song:oakland06,vigilante,bouncer,shieldgen} 
+signatures~\cite{song:oakland06,vigilante} 
+or on patch
+%~\cite{clearview,demsky:repair,candea:dimmunix}
+generation in deployed systems~\cite{clearview}
+also target applications with high-availability requirements, and the
+generated patches work by installing lightweight input filters or by changing
+the values of memory locations at runtime.
+
+Recovery Oriented Computing~\cite{roc} advocates the re-engineering of
+software systems to allow applications to recover from errors.  Within
+this paradigm, microrebooting~\cite{microreboots} proposes building
+systems out of individually recoverable components, which can be
+rebooted to survive bugs, without disturbing the rest of the
+application.
+
+\section{Software fault isolation}
+
+$N$-version execution environment requires some form of application sandboxing
+and software fault isolation. The goal is to isolate the running application
+from underlying system and especially, to prevent software failures in any of
+the versions being executed from affecting the rest of the system including
+other applications.
+
+The use of software-based fault isolation for executing untrusted code has
+been described already in~\cite{sfi:sosp93} for the RISC machines with simple
+instruction set. On the other hand, the first effective implementation of
+software fault isolation for the CISC architecture has been shown much later
+in~\cite{cisc-sfi:usenix-sec06}.
+
+Douceur \etal shown in~\cite{douceur08} how to use sandboxing to enable
+leveraging of existing libraries and programs on the web. To achieve that, they
+used application-level virtualization; their implementation use system call
+mediation together with their own platform abstraction layer to run each
+library or program in so-called \emph{picoprocesses} which can be seen as
+stripped down virtual machine. The biggest downside of this approach is the
+need for code modifications which significantly reduces usability of this
+approach.
+
+Similar idea has been implemented by Yee et al. in~\cite{nacl} as an
+extension to Google Chrome web browser providing sandbox for untrusted native
+x86 code.  This can be used to develop web applications with performance of
+native applications. Their implementation consists of two parts---inner sandbox
+which uses lightweight static analysis do detect security defects and outer
+sandbox which mediates system calls. %The implementation has been further
+%improved in~\cite{sehr2010} with support for ARM and x86-64 architectures and
+%recently has been extended in~\cite{ansel2011} by adding support for
+%Just-In-Time (JIT) compilation sandboxing. Again, the disadvantage here is the
+%need for modifications of existing code and the use of modified GNU compiler
+%toolchain to generate compliant binaries.
+
+\section{System call interposition}
+
+System call interposition has been an active area of
+research~\cite{jain1999,provos2002,janus}.  \nx
+draws inspiration from the Ostia delegating architecture~\cite{ostia},
+and from the selective binary rewriting approach implemented by
+\emph{BIRD}~\cite{bird} and
+\emph{seccompsandbox}.\footnote{\url{https://code.google.com/p/seccompsandbox/}}
+
+Event streaming in \nx can be seen as a variant of
+record-replay. However, unlike traditional record-replay
+systems that require a persistent log~\cite{scribe,jockey,geels06,r2},
+\nx keeps the shared ring buffer in memory, and deallocates events as
+soon as they are not needed, which minimizes performance overhead and
+space requirements in the NVX context. As we show in
+Chapter~\ref{chap:applications}, \nx can also be efficiently extended into a
+traditional record-replay framework.
+
+\subsection{ptrace}
+
+\subsection{Kernel-based mechanisms}
+
+\section{Binary rewriting}
+
+\section{Record \& replay}

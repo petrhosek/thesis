@@ -1,0 +1,169 @@
+\subsection{C10k servers}
+\label{sec:c10k}
+
+Existing NVX systems, including those based on \stt{ptrace}, can already
+run CPU-bound applications efficiently with overhead typically $<20\%$.
+As a result, we focus our evaluation on high-performance, heavily
+I/O-bound C10k servers which%
+\begin{inparaenum}[(1)]
+\item represent the worst-case scenario for a system-call monitor; and
+\item form the backbone of modern, highly-scalable web applications, for
+  which security and availability are critical.
+\end{inparaenum}
+
+The \nservers server applications used in our evaluations are
+summarized in Table~\ref{tbl:apps} (the size is measured in lines of
+code, as reported by the \stt{cloc} tool). For our performance experiments, we
+ran the same version of each application multiple times with different number
+of instances (in practice you would typically run different versions). Each
+experiment was performed six times, with the first measurement used to warm up
+the caches and discarded.  The overhead was calculated as a median of the
+remaining five measurements.
+
+\begin{table}
+  \centering
+\begin{tabular}{lcrl}
+  \toprule
+  \textsc{Application} & \textsc{Size} & \textsc{Threading} \\
+  \midrule
+  Beanstalkd & 6,365 & single-threaded \\
+  Lighttpd & 38,590 & single-threaded\\
+  % Memcached & 9,779 &  multi-threaded\\
+  % MongoDB & 898,293 & multi-threaded \\
+  Nginx & 101,852 & multi-process\\
+  Redis & 34,625 & multi-threaded\\
+  \bottomrule
+\end{tabular}
+  \caption{Server applications used in the evaluation.}
+  \label{tbl:apps}
+\end{table}
+
+% \begin{figure}[!t]
+%   \centering
+%   \includegraphics[width=\columnwidth]{results/macro.pdf}
+%   \caption{Performance overhead for the \beanstalkd, \lighttpd and \nginx servers for different number of followers.}
+%   \label{fig:servers}
+% \end{figure}
+
+% \begin{figure*}[!t]
+%  \centering
+%  \includegraphics[width=0.6\textwidth]{results/c10k.pdf}
+%  \caption{Performance overhead for the \beanstalkd, \lighttpd and \nginx servers for different number of followers.}
+%  \label{fig:servers}
+% \end{figure*}
+
+% \begin{figure*}[!t]
+%  \centering
+%  \includegraphics[width=0.6\textwidth]{results/macro_redis.pdf}
+%  \caption{Performance overhead for \redis operations for different number of followers.}
+%  \label{fig:redis}
+% \end{figure*}
+
+We give a short overview of each benchmark and the way in which we
+measure performance (namely throughput) in our experiments:
+
+\boldtext{\textit{Beanstalkd}} %\footnote{\url{http://kr.github.io/beanstalkd/}}
+is a simple and fast work queue, used by a number of websites to
+distribute jobs among workers. We used revision \stt{157d88b} from the
+official \textit{Git} repository, the latest revision at the time of
+writing.  To measure performance, we used
+\stt{beanstalkd-benchmark} %\footnote{\url{https://github.com/fangli/beanstalkd-benchmark}}
+with $10$ concurrent workers each performing $10,000$ push operations
+using $256$ bytes of data per operation.
+%The results are summarized in Figure~\ref{fig:macro_beanstalkd}.
+
+\boldtext{\textit{Lighttpd}} %\footnote{\url{http://www.lighttpd.net/}}
+is a lightweight web server optimized for high performance
+environments. The version used for the measurements was 1.4.36,
+the latest version in the 1.4.x series at the time of writing.
+We measured the performance of serving a simple HTML webpage using
+\stt{wrk}, which was run for $10$s with $10$ clients.
+
+%% \stt{weighttpd}\footnote{\url{https://github.com/lighttpd/weighttp}},
+%% which is the benchmarking tool developed by the authors of
+%% \lighttpd. We set up \stt{weighttpd} to perform $100,000$ requests,
+%% using $10$ concurrent clients running in $2$ threads.
+%The results can be seen in Figure~\ref{fig:macro_lighttpd}.
+
+
+%% \boldtext{\textit{Memcached}}\footnote{\url{http://memcached.org/}} is a
+%% high-performance, distributed memory object caching system, used by
+%% many high-profile websites to alleviate database load.
+
+%% To measure the performance overhead introduced by \nx when running
+%% \memcached, we used \stt{memslap}, a load generation and benchmarking
+%% tool for \memcached, which is a part of
+%% \stt{libmemcached}.\footnote{\url{http://libmemcached.org/}}
+
+\boldtext{\textit{Nginx}} %\footnote{\url{http://nginx.org/}}
+is highly popular reverse proxy server often used as an HTTP web
+server, load balancer or cache. We used version 1.5.12, the
+latest at the time of writing.  We measured
+performance using the same workload as for \lighttpd.
+
+%% measured the performance of serving
+%% a simple HTML webpage using
+%% \stt{wrk},\footnote{\url{https://github.com/wg/wrk}} which was run for
+%% $10$s with $10$ clients.
+
+\boldtext{\textit{Redis}} %\footnote{\url{http://redis.io/}}
+is a high-performance in-memory, key-value data store, used by many
+well-known services. % such as Twitter, GitHub and StackOverflow.
+% Pinterest, Snapchat, Craigslist, Digg, Flickr 
+We used version 2.9.11 in our experiments.  To measure
+performance, we used
+\emph{redis-benchmark}, %\footnote{\url{http://redis.io/topics/benchmarks}}
+distributed as a part of Redis. The benchmark issues different types
+of commands supported by Redis and measures both the throughput and
+the latency for each type. We used the default workload, \ie 50
+clients issuing 10,000 requests and calculated and average overhead
+across all commands. 
+
+\begin{figure}[!t]
+ \centering
+ \includegraphics[width=\columnwidth]{efficient-execution/graphs/macro.pdf}
+ \caption{Performance overhead for the \beanstalkd, \lighttpd, \nginx and \redis servers for different number of followers.}
+ \label{fig:servers}
+\end{figure}
+
+The first part of Figure~\ref{fig:servers} shows the results for all servers. All performance
+numbers are obtained using the client-side tools presented above.  Since the
+client machine is located on the same rack as the server, these numbers
+represent a worst-case scenario, as the network latency would hide some of the
+overhead for a more distant client machine.
+
+%Figures~\ref{fig:servers} and \ref{fig:redis} show the results for all
+%servers.  The results for \redis are shown separately, because \redis
+%has 16 different command types.  All performance numbers are obtained
+%using the client-side tools presented above.  Since the client machine
+%is located on the same rack as the server, these numbers represent a
+%worst-case scenario, as the network latency would hide some of the
+%overhead for a more distant client machine.
+
+For each benchmark, we show one bar, normalized relative to native
+execution, showing the performance of \nx using a given number of
+followers.  We stop at six followers, because our machine has eight
+threads, and we also need one thread for the leader and one for the
+coordinator.  
+%For space reasons, for \redis we show results for only 0, 3 and 6 followers.
+
+The set of bars for 0 followers measure the interception overhead
+of \nx using binary rewriting.  This overhead is negligible for
+\lighttpd and most \redis operations, \nginxIntercept for \nginx, and
+\beanstalkdIntercept for \beanstalkd.
+
+For all benchmarks, we see that the performance overhead increases
+slightly with the number of followers.  For instance, the overhead for
+\beanstalkd increases from \beanstalkdOneFollower for one follower to
+\beanstalkdSixFollowers for six followers, while the overhead for
+\lighttpd increases from \lighttpdOneFollower to
+\lighttpdSixFollowers.
+
+The figure also shows that there is a significant difference across
+benchmarks: the worst performer is \beanstalkd, which sees performance
+degradations in the range of 55\%-81\%, while the best performers are
+\lighttpd, with only 12\%-15\% overhead and some operations in \redis
+(not shown separately in Figure~\ref{fig:servers})
+%such as \stt{LRANGE\_300}, \stt{LRANGE\_500} and \stt{LRANGE\_600}
+with under 3\% overhead.
+

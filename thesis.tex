@@ -1,0 +1,273 @@
+% rubber: bibtex.crossrefs 10000
+\documentclass[a4paper,12pt,oneside,minionpro,dottedtoc]{thesis}
+
+\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=3cm]{geometry}
+
+\title{Multi-version Software Updates}
+\author{Petr Hosek}
+\date{December 2014}
+\university{Imperial College London}
+\department{Department of Computing}
+\supervisor{Dr Cristian Cadar}
+\dedication{}
+
+\usepackage{listings}
+\lstset{
+  language=C,
+  captionpos=b,
+  basicstyle=\small\ttfamily,
+  commentstyle=\textit,
+  keywordstyle=\bfseries,
+  numbers=left,
+  numberstyle=\small,
+  numbersep=5pt,
+  escapeinside={/*@}{@*/},
+  tabsize=2,
+  breaklines=true,
+  extendedchars=true,
+  columns=fullflexible,
+  xleftmargin=16pt,
+  showspaces=false,
+  showtabs=false,
+  showstringspaces=false,
+  moredelim=**[is][\bfseries]{@}{@},
+}
+
+\lstdefinelanguage
+   [x64]{Assembler}
+   [x86masm]{Assembler}
+   {morekeywords={CDQE,CQO,CMPSQ,CMPXCHG16B,JRCXZ,LODSQ,MOVSXD,%
+                  POPFQ,PUSHFQ,SCASQ,STOSQ,IRETQ,RDTSCP,SWAPGS,%
+                  SYSCALL,SYSRET,SYSENTER,SYSEXIT,%
+                  rax,rdx,rcx,rbx,rsi,rdi,rsp,rbp,%
+                  r8,r8d,r8w,r8b,r9,r9d,r9w,r9b}}
+
+\lstdefinelanguage
+  [bpf]{Assembler}
+  {morekeywords={ldb,ldh,ld,ldi,ldx,ldxi,ldxb,st,stx,jmp,ja,jeq,jneq,%
+                 jne,jlt,jle,jgt,jge,jset,add,sub,mul,div,mod,neg,and,xor,or,%
+                 lsh,rsh,ret,tax,txa},%
+   alsoletter=.,alsodigit=?,%
+   sensitive=false,%
+   morestring=[b]",%
+   morestring=[b]',%
+   morecomment=[l];%
+   }[keywords,comments,strings]
+
+\usepackage{color}
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{siunitx}
+\usepackage[normalem]{ulem}
+\usepackage{multirow}
+\usepackage{flushend}
+\usepackage{paralist}
+\setlength{\parskip}{0cm}
+\setlength{\parindent}{1em}
+
+\usepackage{tikz}
+
+\newcommand*\circl[1]{%
+  \begin{tikzpicture}[baseline=(C.base)]
+    \node[draw,circle,inner sep=0.25pt](C) {#1};
+  \end{tikzpicture}}
+
+\newcommand{\boldtext}[1]{\vspace{0.05in}\noindent\textbf{#1}}
+\newcommand{\textstt}[1]{{\small \texttt{#1}}\xspace}
+%\newcommand{\textssc}[1]{{\small \textsc{#1}}\xspace}
+\renewcommand{\textssc}[1]{\textls[80]{\scshape\MakeTextLowercase{#1}}}
+
+\newcommand{\mx}[0]{\textsc{Mx}\xspace}
+\newcommand{\mxe}[0]{\textsc{MxE}\xspace}
+\newcommand{\sea}[0]{\textsc{Sea}\xspace}
+\newcommand{\rem}[0]{\textsc{Rem}\xspace}
+\newcommand{\mxm}[0]{\textsc{Mxm}\xspace}
+\newcommand{\mv}[0]{\textsc{MV}\xspace}
+
+\newcommand{\ptrace}[0]{\stt{ptrace}\xspace}
+\newcommand{\redisbenchmark}[0]{\textstt{redis-benchmark}}
+\newcommand{\httpload}[0]{\textstt{http\_load}}
+\newcommand{\spec}[0]{\textit{SPEC~CPU2006}\xspace}
+\newcommand{\vsftpd}[0]{\emph{vsftpd}\xspace}
+\newcommand{\vim}[0]{\emph{Vim}\xspace}
+\newcommand{\gchrome}[0]{\emph{Google Chrome}\xspace}
+\newcommand{\chrome}[0]{\emph{Chrome}\xspace}
+\newcommand{\coreutils}[0]{\emph{Coreutils}\xspace}
+
+\newcommand{\binutils}[0]{\textit{Binutils}\xspace}
+\newcommand{\gnu}[0]{\textit{GNU}\xspace}
+\newcommand{\mdsum}[0]{\textstt{md5sum}}
+\newcommand{\shasum}[0]{\textstt{sha1sum}}
+\newcommand{\mkdir}[0]{\textstt{mkdir}}
+\newcommand{\mkfifo}[0]{\textstt{mkfifo}}
+\newcommand{\mknod}[0]{\textstt{mknod}}
+\newcommand{\cut}[0]{\textstt{cut}}
+
+\newcommand{\todo}[1]{\noindent{\color{red}[{\bf todo:} #1]}}
+\newcommand{\sidenote}[1]{{\marginpar{\bf\color{red}[#1]}}}
+\newcommand{\gap}[2]{\uline{#1} \noindent{\color{red}[#2]}}
+
+\newenvironment{structure}{\color{blue}
+\begin{list}{\labelitemi}{\leftmargin=1em}{%
+\setlength{\topsep}{0pt}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}}
+{\end{list}}
+
+\newenvironment{structure*}{\color{blue}
+\begin{enumerate}\setlength{\topsep}{0pt}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}
+{\end{enumerate}}
+
+\newcommand{\ie}{i.e.\ }
+\newcommand{\eg}{e.g.\ }
+\newcommand{\etal}{et al.}
+\newcommand{\vs}{vs.\ }
+\newcommand{\etc}{etc.\ }
+\newcommand{\resp}{\emph{resp.}\ }
+
+\newcommand{\sref}[1]{\S\ref{#1}}
+
+%%%
+
+\newcounter{enumcount}
+\newenvironment{enumnoind}
+ {\begin{list}{(\arabic{enumcount})~~}{\usecounter{enumcount} 
+  \labelsep=0em \labelwidth=0em \leftmargin=0em \itemindent=0em}}
+ {\end{list}}
+
+\definecolor{lightGrey}{rgb}{0.8, 0.8, 0.8}
+\newcommand{\Hilight}{\makebox[0pt][l]{\color{lightGrey}\rule[-0.45em]{\linewidth}{1.5em}}}
+\newcommand{\topic}{}
+
+\hyphenation{ex-e-cu-tion}
+\hyphenation{non-de-ter-min-is-tic}
+
+\newcommand{\stt}[1]{\texttt{\small #1}}
+\newcommand{\heading}[1]{\vspace{0.1in} \noindent \textit{#1}}
+
+\newcommand{\hl}[1]{\textit{\textbf{#1}}}
+%\newcommand{\hl}[1]{#1}
+
+\newcommand{\covrig}{\textsc{Covrig}\xspace}
+\newcommand{\katch}{\textsc{katch}\xspace}
+\newcommand{\klee}{\textsc{klee}\xspace}
+\newcommand{\llvm}{\textsc{llvm}\xspace}
+\newcommand{\stp}{\textsc{stp}\xspace}
+\newcommand{\symex}{\textsc{SE}\xspace}
+\newcommand{\zesti}{\textsc{zesti}\xspace}
+
+\newcommand{\diff}{\stt{diff}\xspace}
+\newcommand{\gcov}{\stt{gcov}\xspace}
+\newcommand{\eloc}{\xspace{\small ELOC}\xspace}
+
+\newcommand{\diffutils}{Diffutils\xspace}
+\newcommand{\findutils}{Findutils\xspace}
+\newcommand{\zeromq}{{\O}MQ\xspace}
+\newcommand{\git}{Git\xspace}
+
+\newcommand{\true}{\stt{true}\xspace}
+\newcommand{\false}{\stt{false}\xspace}
+
+\newcommand{\nx}[0]{\textsc{Varan}\xspace}
+\newcommand{\varan}[0]{\textsc{Varan}\xspace}
+\newcommand{\nxlib}[0]{\textsc{VaranLib}\xspace}
+
+\newcommand{\linux}{Linux\xspace}
+\newcommand{\docker}{Docker\xspace}
+\newcommand{\fabric}{Fabric\xspace}
+\newcommand{\lxc}{LXC\xspace}
+\newcommand{\github}{GitHub\xspace}
+\newcommand{\cloudstack}{CloudStack\xspace}
+\newcommand{\xen}{Xen\xspace}
+\newcommand{\kvm}{KVM\xspace}
+
+\newcommand{\apache}[0]{\textit{Apache httpd}\xspace}
+\newcommand{\httpd}[0]{\textit{Apache httpd}\xspace}
+\newcommand{\beanstalkd}[0]{\textit{Beanstalkd}\xspace}
+\newcommand{\lighttpd}[0]{\textit{lighttpd}\xspace}
+\newcommand{\memcached}[0]{\textit{Memcached}\xspace}
+\newcommand{\nginx}[0]{\textit{Nginx}\xspace}
+\newcommand{\redis}[0]{\textit{Redis}\xspace}
+\newcommand{\speccpu}[0]{\textit{SPEC CPU}\xspace}
+\newcommand{\speczerozero}[0]{\textit{SPEC CPU2000}\xspace}
+\newcommand{\speczerosix}[0]{\textit{SPEC CPU2006}\xspace}
+\newcommand{\thttpd}[0]{\textit{thttpd}\xspace}
+
+\newcommand{\orchestra}[0]{\textit{Orchestra}\xspace}
+\newcommand{\scribe}[0]{\textit{Scribe}\xspace}
+\newcommand{\strata}[0]{\textit{Strata}\xspace}
+\newcommand{\tachyon}[0]{\textit{Tachyon}\xspace}
+%%%
+
+\input{evolution/rqs}
+\input{evolution/results}
+\input{safe-updates/results}
+\input{efficient-execution/results}
+
+%\usepackage[T1]{fontenc}
+%\usepackage{textcomp}
+
+%\usepackage[minionint,mathlf]{MinionPro}
+%\renewcommand{\sfdefault}{Myriad-LF}
+
+%\usepackage{gnuplot-lua-tikz}
+
+\begin{document}
+
+\maketitle
+
+\pdfbookmark[0]{Colophon}{colophon}
+\section*{Colophon}
+
+\preface
+\begin{abstract}
+Software updates present a difficult challenge to the software
+maintenance process.  Too often, updates result in failures, and users
+face the uncomfortable choice between using an old stable version
+which misses recent features and bug fixes, and using a new version
+which improves the software in certain ways, only to introduce other
+bugs and security vulnerabilities.
+
+In this position paper, we propose a radically new approach for
+performing software updates: whenever a new update becomes available,
+instead of upgrading the software to the new version, we instead
+run the new version in parallel with the old one.  By carefully
+coordinating their executions and selecting the behavior of the more
+reliable version when they diverge, we can preserve the stability of
+the old version without giving up the features and bug fixes added to
+the new version.
+
+We are currently focusing on a prototype system targeting multicore
+CPUs, but we believe this approach could also be deployed on other
+parallel platforms, such as GPGPUs and cloud environments.
+\end{abstract}
+
+\makededication
+
+\tableofcontents
+\listoftables
+\listoffigures
+\listoflistings
+
+\body
+
+\input{overview/overview}
+\input{multi-version/multi-version}
+\input{evolution/evolution}
+
+\input{safe-updates/safe-updates}
+\input{efficient-execution/efficient-execution}
+
+\input{applications/applications}
+\input{related/related}
+\input{conclusion/conclusion}
+\addcontentsline{toc}{chapter}{References}
+{
+  \bibliographystyle{alpha}
+  \bibliography{bibliography/bibliography}
+}
+
+\appendix
+% include all appendices
+
+\end{document}

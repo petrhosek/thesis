@@ -1,0 +1,12 @@
+\newcounter{coverage}
+\newtheorem{question}[coverage]{RQ}
+
+\newcommand{\rqone}{Do executable and test code evolve in sync?}
+\newcommand{\rqtwo}{How many patches touch only code, only tests, none, or both?}
+\newcommand{\rqthree}{What is the distribution of patch sizes? How spread out is each patch through the code?}
+\newcommand{\rqfour}{Is test suite execution deterministic?}
+\newcommand{\rqfive}{How does the overall code coverage evolve?  Is it stable over time?}
+\newcommand{\rqsix}{What is the distribution of patch coverage across revisions?}
+\newcommand{\rqseven}{What fraction of patch code is tested within a few revisions after it is added, \ie what is the {\em latent patch coverage}?}
+\newcommand{\rqeight}{Are bug fixes better covered than other types of patches?}
+\newcommand{\rqnine}{Is the coverage of buggy code less than average?}

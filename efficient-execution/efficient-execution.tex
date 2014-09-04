@@ -1,0 +1,100 @@
+\chapter{Efficient Multi-version Execution}
+
+The key component of multi-version execution system is a runtime monitor that
+enables the execution of multiple versions in parallel. Unfortunately, existing
+monitors impose either a large performance overhead and/or rely on intrusive
+kernel-level changes that increase the size of the trusted computing base.
+Moreover, none of the existing solutions scales well with the number of
+versions, since the runtime monitor acts as a performance bottleneck.
+
+While synchronization can be performed at different levels, the most common
+approach is to do it at the level of system calls, for several different
+reasons:  first, many patches do not change the the sequence of system calls,
+\ie the program's \textit{external behavior} (\S\ref{sec:behavior-evolution}).
+%Second, system calls are the main way in which the application communicates
+%with the outside environment, and therefore the ultimate target of attackers.
+Second, as the main communication mechanism between applications and the
+environment, system calls must be virtualized in order to enable the multiple
+versions to act as one to the outside world.
+
+%With the widespread availability of multi-core processors, running multiple
+%diversified variants or several different versions of an application in
+%parallel is becoming a viable approach for increasing software security and
+%reliability.  The key component of such N-version execution (NVX) systems is a
+%runtime monitor that enables the execution of multiple versions in parallel.
+
+%In this chapter, we introduce \nx, a multi-version execition framework that
+%combines binary rewriting with a novel event-streaming architecture to
+%significantly reduce performance overhead and scale well with the number of
+%versions, without relying on intrusive kernel modifications.
+
+%Our evaluation shows that \nx can be used to run multi-version applications
+%based on a number of popular C10k network servers with only a modest
+%performance overhead.
+
+The main challenge in implementing a multi-version execution monitor at the
+system call level is the trade-off between performance, security, flexibility
+and ease of debugging.  Many
+implementations~\cite{orchestra09,tachyon12}, including
+Mx (\S\ref{sec:mx}), use the \stt{ptrace} mechanism offered by most UNIX-based
+operating systems.  While easy-to-use and not requiring kernel modifications,
+\stt{ptrace} is slow, and these systems see performance degradations of up to
+two orders of magnitude. A much faster approach is to implement the monitor in
+kernel space~\cite{cox2006}, but this requires kernel patches and/or new kernel
+modules, and more importantly leads to an increased trusted computing base, as
+the monitor runs in privileged mode.  Furthermore, none of these approaches
+scale well with the number of variants (as the monitor is both a communication
+and synchronization bottleneck), none are debug-friendly (\stt{ptrace}
+disallows the use of \stt{gdb}, while kernel debugging has its well-known set
+of limitations) and none of them have been designed to be flexible with respect
+to small variations in system call sequences (which can occur for certain
+diversification transformations and across program versions).
+
+%In this chapter, we introduce \nx, a multi-version execution framework that
+%combines binary rewriting with a novel event-streaming architecture to
+%significantly reduce performance overhead and scale well with the number of
+%versions, without relying on intrusive kernel modifications.
+
+In this chapter, we introduce \nx,\footnote{\varan's name comes from the
+scientific name \emph{Varanus}, commonly known as the \emph{monitor} lizard.
+Varan is also a name of the Kaiju monster that first appeared in the 1958 movie
+\emph{Varan the Unbelievable}.} a multi-version execution system that
+combines binary rewriting with a novel event-streaming architecture to
+significantly reduce performance overhead and scale well with the number of
+versions, without relying on intrusive kernel modifications. \nx monitor
+operates at the system call level, runs in user space (and therefore in
+unprivileged mode), introduces a small performance overhead for popular C10k
+network servers and negligible for CPU-bound applications, scale well with the
+number of versions, and provide a flexible mechanism for handling small
+divergences in the system calls sequences issued across versions.
+
+\input{efficient-execution/overview}
+\input{efficient-execution/prototype}
+\input{efficient-execution/evaluation}
+
+%\section{Challenges}
+%\subsection{System call interception}
+%\subsection{Event-based architecture}
+%\subsection{System call rewriting}
+
+%\chapter{\nx prototype system}
+
+%\section{Address space setup}
+%\section{Communication channels}
+%\section{Binary rewriting}
+%\subsection{System calls}
+%\subsection{Virtual system calls}
+%\subsection{Function calls}
+%\section{Event streaming}
+%\subsection{Interprocess communication}
+%\subsection{Shared ring buffer}
+%\section{Handling non-determinism}
+%\subsection{Multi-process and multi-threaded applications}
+%\subsection{Rewrite rules for system calls}
+
+%\chapter{Performance Evaluation}
+%\label{chap:performance-evaluation}
+
+%\section{Microbenchmarks}
+%\section{Macrobenchmarks}
+%\section{Comparison with prior NVX systems}

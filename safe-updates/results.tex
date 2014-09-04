@@ -1,0 +1,203 @@
+\newcommand{\mxSLOC}[0]{28,200\xspace}
+
+% number of syscalls in Linux-x64 2.6.39
+\newcommand{\syscallsTotal}[0]{311\xspace}
+% number of syscalls implemented in Mx
+\newcommand{\syscallsImplemented}[0]{131\xspace}
+
+
+%% lighttpd feasibility study: data across 164 analysed versions
+
+% size of the smallest patch (in LOC)
+\newcommand{\lighttpdMinPatch}[0]{1\xspace} 
+
+% size of the smallest patch (in LOC)
+\newcommand{\lighttpdMaxPatch}[0]{2959\xspace} 
+
+% size of the patch median (in LOC)
+\newcommand{\lighttpdMedPatch}[0]{33\xspace} 
+
+
+
+%%% redis bug %%%
+% URL: http://code.google.com/p/redis/issues/detail?id=344
+
+% lower bound
+\newcommand{\redisLB}[0]{09aeb57\xspace}
+% upper bound
+\newcommand{\redisUB}[0]{3f97346\xspace}
+
+
+%%% lighttpd bug 2169 %%%
+% URL: http://redmine.lighttpd.net/issues/2169
+
+% lower bound
+\newcommand{\lighttpdOneLB}[0]{2,436\xspace}
+% upper bound
+\newcommand{\lighttpdOneUB}[0]{2,523\xspace}
+
+
+%%% lighttpd bug 2140 %%%
+% URL: http://redmine.lighttpd.net/issues/2140
+
+% lower bound
+\newcommand{\lighttpdTwoLB}[0]{2,696\xspace}
+% upper bound
+\newcommand{\lighttpdTwoUB}[0]{2,708\xspace}
+
+
+%% bug bounds: maximum distance between versions and time span between versions
+
+% first lighttpd bug (described in overview)
+% Bounds for lighttpd #2169 are 2436-2523
+%
+% These are the breaking changes:
+% r2436 2009-04-09 17:51:52 +0100 (Thu, 09 Apr 2009)
+% Add proper SUID bit detection (fixes #416)
+% 
+% r2524 2009-06-11 10:53:34 +0100 (Thu, 11 Jun 2009)
+% Add support for "real" entropy from /dev/[u]random (fixes #1977)
+\newcommand{\maxDistLighttpdOne}[0]{87\xspace}
+\newcommand{\timeSpanLighttpdOne}[0]{2 months 2 days\xspace}
+
+% second lighttpd bug (2140)
+\newcommand{\maxDistLighttpdTwo}[0]{12\xspace}
+\newcommand{\timeSpanLighttpdTwo}[0]{2 months 1 day\xspace}
+
+% redis bug
+\newcommand{\maxDistRedis}[0]{27\xspace}
+\newcommand{\timeSpanRedis}[0]{6 days\xspace}
+
+% md5sum bug
+\newcommand{\maxDistMdsum}[0]{1,124\xspace} % v6.10..v7.6
+\newcommand{\timeSpanMdsum}[0]{over one year and seven months\xspace} % 1 year 7 months 20 days
+
+% mkdir bug
+\newcommand{\maxDistMkdir}[0]{2,937\xspace} % v6.10..latest (v8.21)
+\newcommand{\timeSpanMkdir}[0]{over four years\xspace} % 4 years 23 days
+
+% cut bug
+\newcommand{\maxDistCut}[0]{1,201\xspace} % v8.6..latest (v8.21)
+\newcommand{\timeSpanCut}[0]{over two years and three months\xspace} % 2 years 3 months 30 days
+
+%% performance numbers
+
+% lighttpd throughtput and latency 
+% 10000 fetches, 5 max parallel, 1k file, 100k each
+\newcommand{\tputLighttpdNat}[0]{732.34 fetches/sec\xspace}
+\newcommand{\tputLighttpdNoCkpt}[0]{563.54 fetches/sec\xspace}
+\newcommand{\tputLighttpdMx}[0]{210.02 fetches/sec\xspace}
+
+\newcommand{\latLighttpdNat}[0]{0.70ms\xspace}
+\newcommand{\latLighttpdNoCkpt}[0]{3.18ms\xspace}
+\newcommand{\latLighttpdMx}[0]{5.54ms\xspace}
+
+\newcommand{\maxLighttpdOver}[0]{$3.49\times$\xspace}
+\newcommand{\minLighttpdOver}[0]{$2.60\times$\xspace}
+\newcommand{\avgLighttpdOverNoCkpt}[0]{$1.95\times$\xspace}
+\newcommand{\avgLighttpdOver}[0]{$6.90\times$\xspace}
+
+% server in London, client in Mountain View
+\newcommand{\maxLighttpdRemote}[0]{$1.04\times$\xspace}
+\newcommand{\minLighttpdRemote}[0]{$1.01\times$\xspace}
+
+% redis throughtput and latency 
+\newcommand{\tputRedisNatMax}[0]{53,191.49 reqs/sec\xspace}
+\newcommand{\tputRedisNatMin}[0]{4,570.38 reqs/sec\xspace}
+\newcommand{\tputRedisNoCkptMax}[0]{7,022.47 reqs/sec\xspace}
+\newcommand{\tputRedisNoCkptMin}[0]{2,100.12 reqs/sec\xspace}
+\newcommand{\tputRedisMxMax}[0]{3,180.40 reqs/sec\xspace}
+\newcommand{\tputRedisMxMin}[0]{1,221.68 reqs/sec\xspace}
+
+\newcommand{\latRedisNatMax}[0]{$<3$ms\xspace}
+\newcommand{\latRedisNatMin}[0]{$<1$ms\xspace}
+\newcommand{\latRedisNoCkptMax}[0]{$<11$ms\xspace}
+\newcommand{\latRedisNoCkptMin}[0]{$<3$ms\xspace}
+\newcommand{\latRedisMxMax}[0]{$<13$ms\xspace}
+\newcommand{\latRedisMxMin}[0]{$<16$ms\xspace}
+
+% \mathord{\sim}
+\newcommand{\maxRedisOver}[0]{$16.72\times$\xspace}
+\newcommand{\minRedisOver}[0]{$3.74\times$\xspace}
+\newcommand{\avgRedisOverNoCkpt}[0]{$3.53\times$\xspace}
+\newcommand{\avgRedisOver}[0]{$12.43\times$\xspace}
+
+% server in London, client in Mountain View
+\newcommand{\maxRedisRemote}[0]{$1.05\times$\xspace}
+\newcommand{\minRedisRemote}[0]{$1.00\times$\xspace}
+
+
+% performance overhead
+\newcommand{\numSPECbench}[0]{29\xspace}
+\newcommand{\maxOverSPECNoCkpt}[0]{3.23\%\xspace}
+\newcommand{\minOverSPECNoCkpt}[0]{55.95\%\xspace}
+\newcommand{\avgOverSPECNoCkpt}[0]{18.75\%\xspace}
+\newcommand{\minOverSPEC}[0]{3.43\%\xspace}
+\newcommand{\maxOverSPEC}[0]{105.16\%\xspace}
+\newcommand{\avgOverSPEC}[0]{17.91\%\xspace}
+
+\newcommand{\avgOverhead}[0]{17.9\%\xspace}
+
+% coreutils overhead
+% mkdir a
+\newcommand{\avgMkdirNative}[0]{$1$ms\xspace}
+\newcommand{\avgMkdirMx}[0]{$4$ms\xspace}
+
+% small 1.307MB, large 129.7MB
+\newcommand{\avgCutSmallNativeTime}[0]{$0.00$s\xspace}
+\newcommand{\avgCutLargeNativeTime}[0]{$0.35$s\xspace}
+\newcommand{\avgCutSmallTimeNoCkpt}[0]{$0.00$s\xspace}
+\newcommand{\avgCutLargeTimeNoCkpt}[0]{$1.08$s\xspace}
+\newcommand{\avgCutSmallTime}[0]{$0.10$s\xspace}
+\newcommand{\avgCutLargeTime}[0]{$8.94$s\xspace}
+
+\newcommand{\avgCutSmallOverNoCkpt}[0]{N/A}
+\newcommand{\avgCutLargeOverNoCkpt}[0]{$3.08\times$\xspace}
+\newcommand{\avgCutSmallOver}[0]{$9.52\times$\xspace}
+\newcommand{\avgCutLargeOver}[0]{$25.54\times$\xspace}
+
+% small 1MB, medium 10MB, large 100MB, big 1000MB
+\newcommand{\avgMdsumSmallNativeTime}[0]{$0.00$s\xspace}
+\newcommand{\avgMdsumMediumNativeTime}[0]{$0.01$s\xspace}
+\newcommand{\avgMdsumLargeNativeTime}[0]{$0.17$s\xspace}
+\newcommand{\avgMdsumBigNativeTime}[0]{$1.80$s\xspace}
+\newcommand{\avgMdsumSmallTimeNoCkpt}[0]{$0.01$s\xspace}
+\newcommand{\avgMdsumMediumTimeNoCkpt}[0]{$0.06$s\xspace}
+\newcommand{\avgMdsumLargeTimeNoCkpt}[0]{$0.65$s\xspace}
+\newcommand{\avgMdsumBigTimeNoCkpt}[0]{$6.67$s\xspace}
+\newcommand{\avgMdsumSmallTime}[0]{$0.04$s\xspace}
+\newcommand{\avgMdsumMediumTime}[0]{$0.65$s\xspace}
+\newcommand{\avgMdsumLargeTime}[0]{$6.60$s\xspace}
+\newcommand{\avgMdsumBigTime}[0]{$57.75$s\xspace}
+
+\newcommand{\avgMdsumSmallOverNoCkpt}[0]{N/A}
+\newcommand{\avgMdsumMediumOverNoCkpt}[0]{$6.00\times$\xspace}
+\newcommand{\avgMdsumLargeOverNoCkpt}[0]{$3.84\times$\xspace}
+\newcommand{\avgMdsumBigOverNoCkpt}[0]{$3.71\times$\xspace}
+\newcommand{\avgMdsumSmallOver}[0]{unmeasurable}
+\newcommand{\avgMdsumMediumOver}[0]{$64.96\times$\xspace}
+\newcommand{\avgMdsumLargeOver}[0]{$38.67\times$\xspace}
+\newcommand{\avgMdsumBigOver}[0]{$32.06\times$\xspace}
+
+% coreutils 100ms cutoff
+
+\newcommand{\mdsumCutoffSize}[0]{$1.25$MB\xspace} % dd if=/dev/urandom of=file bs=1k count=1250
+\newcommand{\mdsumCutoffNativeTime}[0]{$6.10$ms\xspace}
+\newcommand{\mdsumCutoffTime}[0]{$99.00$ms\xspace}
+\newcommand{\mdsumCutoffOver}[0]{$16.23\times$\xspace}
+
+% 1.225
+\newcommand{\shasumCutoffSize}[0]{$1.22$MB\xspace} % dd if=/dev/urandom of=file bs=1k count=1225
+\newcommand{\shasumCutoffNativeTime}[0]{$8.30$ms\xspace}
+\newcommand{\shasumCutoffTime}[0]{$99.60$ms\xspace}
+\newcommand{\shasumCutoffOver}[0]{$12.00\times$\xspace}
+
+\newcommand{\mkdirCutoffSize}[0]{$115$ nested directories\xspace} % p='a'; for ((i=1; i<=115; i++) ); do p=”${p}/a${i}”; done; echo $p
+\newcommand{\mkdirCutoffNativeTime}[0]{$8.60$ms\xspace}
+\newcommand{\mkdirCutoffTime}[0]{$100.10$ms\xspace}
+\newcommand{\mkdirCutoffOver}[0]{$11.64\times$\xspace}
+
+\newcommand{\cutCutoffSize}[0]{$1.10$MB\xspace} % cat redis.trace | head -n 15500 > file
+\newcommand{\cutCutoffNativeTime}[0]{$7.10$ms\xspace}
+\newcommand{\cutCutoffTime}[0]{$100.00$ms\xspace}
+\newcommand{\cutCutoffOver}[0]{$14.08\times$\xspace}

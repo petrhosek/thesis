@@ -1,0 +1,79 @@
+To evaluate \mx on \lighttpd, we have used two different crash bugs.
+The first bug is the one described in detail in
+\sref{sec:example}, related to the ETag and compression
+functionalities.  As previously discussed, the crash is triggered by a
+very small change, which decrements the upper bound of a \textstt{for}
+loop by one.  \mx successfully protects the application against this
+crash, and allows the new version to survive it by using the code of
+the old version.
+
+%As we discuss in \sref{sec:bounds}, \mx
+%allows users to incorporate all the changes in the
+%next \maxDistLighttpdOne revisions following the buggy patch, while
+%still protecting the overall application against this crash.
+
+%% the behaviour of the new version, except in the case when the new
+%% version crashes, when the buggy line is effectively replaced by the
+%% old working code.
+
+
+%To evaluate \mx on \lighttpd, we have focused on two critical bugs,
+%\#1601 and \#2140. Both of these bugs result in segmentation fault
+%causing \lighttpd to crash.
+
+%The bug \#1601 affects the HTTP redirection functionality, in particular
+%the \texttt{\%n} substitution with condition substring. This functionality has
+%been introduced in revision \texttt{510}. However, there is an incorrect
+%comparison in one of the conditions which causes segmentation fault when
+%appending matched parts to buffer if there was no matching regular expression.
+%The affected code can be seen in Listing~\ref{lst:510}.
+
+%\begin{lstlisting}[label=lst:510, caption={Original correct version of the function}]
+%cond_cache_t *cache = &con->cond_cache[dc->context_ndx];
+%if (n > cache->patterncount) {
+  %return 0;
+%}
+%\end{lstlisting}
+
+%The fix to this bug consists of a single changed line as can be seen in
+%Listing~\ref{lst:2138} and has been incorporated in revision \texttt{2138}, yet
+%this bug remained undetected for nearly three years (August 8, 2005 --- March
+%26, 2008) rendering \lighttpd webserver vulnerable to attack.
+
+%\begin{lstlisting}[label=lst:2138, caption={Refactored failing version of the function}]
+%cond_cache_t *cache = &con->cond_cache[dc->context_ndx];
+%if (n >= cache->patterncount) {
+  %return 0;
+%}
+%\end{lstlisting}
+
+The other crash bug we
+reproduced
+affects the URL rewrite functionality.\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/issues/2140}}
+%This seems to have been to have been present in \lighttpd since the
+%first revision, we
+This is also caused by an incorrect bound in a \textstt{for} loop.
+More precisely, the loop: 
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+for (k=0; k < pattern_len; k++)
+\end{lstlisting}
+
+\noindent should have been:
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+for (k=0; k@+1@ < pattern_len; k++)
+\end{lstlisting}
+
+The bug seems to have been present since the very first version
+added to the repository.  It was reported in December 2009, and
+fixed one month later.  As a result, we are running \mx using the last
+version containing the bug together with the one that fixed it.  While
+this bug does not fit within the pattern targeted by \mx (where a
+newer revision introduces the bug), from a technical perspective it is
+equally challenging.  \mx is able to successfully run the two versions
+in parallel, and help the old version survive the crash bug.
+
+%% Both \lighttpd bugs \#1601 and \#2140 are very simple - their fix
+%% consist of a single character yet still they made \lighttpd server
+%% vulnerable to a potential attack.

@@ -1,0 +1,93 @@
+\chapter{Multi-version Software Updates}
+\label{chap:safe-updates}
+
+Software updates are an integral part of the software maintenance
+process, with new software versions being released on a continuous
+basis.  Unfortunately, software updates often result in failures,
+which makes many users reluctant to incorporate the latest patches
+made available by developers.  As a result, users rely instead on
+outdated versions, which despite their relative stability, miss recent
+features and bug fixes and may be plagued by security vulnerabilities.
+
+One of the main reasons for which users hesitate to install updates is
+that a significant number of them result in failures.  It is only too
+easy to find examples of updates that fix a bug or a security
+vulnerability only to introduce another problem in 
+the code. Our goal is to improve the software update
+process in such a way as to encourage users to upgrade to the latest
+software version, without sacrificing the stability of the older
+version.
+
+We tackle this problem using a simple but effective multi-version
+based approach.  Whenever a new update becomes available, instead of
+upgrading the software to the new version, we run the new version in
+parallel with the old one; by carefully coordinating their executions
+and selecting the behaviour of the more reliable version when they
+diverge, we create a more secure and dependable multi-version
+application.
+
+We implemented this approach in a prototype system called \mx, which
+targets crash bugs in Linux applications running on multi-core
+processors. \mx allows a new and an old version of an application to
+run concurrently, without requiring any
+modifications to the application itself or the operating system, nor any
+input from the user.
+%
+% To achieve this goal, \mx combines static and
+% dynamic techniques: it uses static analysis at the binary-level to
+% construct mappings between the old and the new versions, 
+%
+The synchronisation of the two versions is performed at the system
+call level, using system call interposition and synchronisation.  When
+one of the versions crashes, \mx transparently restarts it via a
+lightweight checkpointing mechanism and often allows it to survive the bug
+by using the code of the other version.
+
+We evaluate \mx by showing that it can successfully survive crashes in
+several real applications, specifically several \coreutils utilities and
+two popular servers, \lighttpd and \redis.
+
+Software systems are constantly evolving, with new versions and
+patches being released on a continuous basis.  Unfortunately, software
+updates present a high risk, with many releases introducing new bugs
+and security vulnerabilities.
+
+\section{Overview}
+
+\section{Motivating Example}
+\label{sec:example}
+\input{safe-updates/example}
+
+\section{Challenges}
+
+\section{Mx Prototype System}
+\label{sec:mx}
+\input{safe-updates/prototype}
+
+\section{Reliability Evaluation}
+\label{sec:reliability-evaluation}
+\input{safe-updates/evaluation}
+
+%\section{Introduction}
+%\label{sec:intro}
+%\input{safe-updates/intro}
+
+%\section{Feasibility Study}
+%\label{sec:evolution}
+%\input{safe-updates/evolution}
+
+%\section{Mx Prototype System}
+%\label{sec:implementation}
+%\input{safe-updates/prototype}
+
+%\section{Evaluation}
+%\label{sec:evaluation}
+%\input{safe-updates/evaluation}
+
+%\section{Discussion}
+%\label{sec:discussion}
+%\input{safe-updates/discussion}
+
+%\section{Conclusion}
+%\label{sec:conclusion}
+%\input{safe-updates/conclusion}

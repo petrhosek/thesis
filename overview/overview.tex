@@ -1,0 +1,130 @@
+\chapter{Overview}
+\label{chap:overview}
+
+With the growing size of the modern computer software systems, the number of
+errors present in such systems grows steeply.  Moreover, with increasing size
+of the code base, the possibility of finding bugs, both manually and
+automatically, is decreasing very rapidly. On the other hand, increasing
+reliance on computers and computer software systems in every aspect of human
+lives implies strong need for reliable software systems.
+
+The last decade has seen the emergence of new hardware platforms, ranging from
+multi-core processors to large-scale data centers, which provide an abundance
+of computational resources and a high degree of parallelism. These platforms
+already benefit applications with a great amount of inherent concurrency
+through data-processing systems such as MapReduce~\cite{map-reduce},
+Hadoop~\cite{hadoop} or Dryad~\cite{dryad}. However, there has been little
+progress in exploiting this abundance of resources to improve the safety,
+reliability and security of software systems which interacts with user, such as
+text editors, productivity tools or business applications suites, to name only
+a few.
+
+Typical data centers are designed for peak load to ensure service-level
+agreements are met. Servers are rarely completely idle but they do not operate
+near their maximum utilization; most of the time, they operate at between 10\%
+and 50\% of their maximum utilization levels. However, even an energy-efficient
+server consumes half its full power when doing virtually no work --- and for
+normal servers, this ratio is much worse~\cite{barroso2007}.
+
+%Therefore, instead of dynamically switch off unused servers which does not
+%prove to be effective, we aim to use the abundance of these resources (i.e.,
+%processing power) to increase software availability and reliability.
+
+The goal of this project, which fits within the overall theme of {\it
+multiplicity computing}~\cite{multiplicity}, is to exploit the abundance of
+resources made available by these platforms (\eg idle processor time) to
+improve the software update process to increase software availability and
+reliability.
+
+Software updates are an integral part of the software maintenance process, but
+unfortunately present a high risk, with many users and administrators refusing
+to upgrade their software and relying instead on outdated versions, which often
+leaves them and their systems exposed to software bugs and security
+vulnerabilities. Our goal is to improve software updates process to provide
+benefits of the newer version without sacrificing the stability of the older
+version.
+
+Nowadays, many large-scale services such as Google, Facebook and Flickr already
+use {\it continuous deployment}, whereby new versions are continuously released
+to users~\cite{johnson2009}.  Multiple versions can be released throughout the
+day, and each version is often accessible only to a fraction of users to
+prevent complete outage in case of an error caused by one of the new versions.
+
+While this approach helps minimize the number of users affected by new bugs, it
+is not foolproof. In particular, bugs introduced by new releases may manifest
+themselves only in coincidental cases or following prolonged operation, after
+the release has been deployed to the entire user base. Errors and failures
+affecting majority of the user-base therefore occurs even to these applications
+(\eg recent Blogger~\cite{blogger-incident2011} or
+Skype~\cite{skype-incident2011} incidents). Such outages might cause
+significant financial losses and it is therefore critical to avoid them.
+
+We aim to tackle the software update problem using a simple but effective
+approach based on multi-version execution.
+%using application-level virtualization, technique that can be easily integrated
+%with the continuous deployment approach.
+Whenever a new system update becomes available, instead of upgrading the
+software to the newest version, we {\it run the new version in parallel with
+the old}. As new versions arrive, we continue to execute them in parallel with
+the existing ones, until all available resources have been exhausted, or a
+user-specified threshold has been reached.  At that point, we can either
+discard the very oldest versions, or we can use more sophisticated replacement
+strategies.
+
+This approach can be extended to work with a large number of
+versions run in parallel and can be configured to balance conflicting
+requirements such as performance, reliability and energy consumption. The
+approach can also be applied to several different platforms, ranging from
+multi-core processors to large-scale data centers.
+
+%We aim to tackle this problem using a simple but effective approach based on
+%application-level virtualization.  Whenever a new program update becomes
+%available, instead of upgrading the software to the newest version, we {\it
+%run the new version in parallel with the old}.  As new versions arrive, we
+%continue to execute them in parallel with the existing ones, until all
+%available resources have been exhausted, or a user-specified threshold has
+%been reached.  At that point, we can either discard the very oldest versions,
+%or we can use more sophisticated replacement strategies.  This approach can
+%be extended to work with a large number of versions run in parallel, and can
+%be applied to several different platforms, ranging from multicore processors
+%to large-scale data centers.  
+
+%% There are three main challenges that we need to address to make this
+%% approach viable.  First, we need to implement mechanisms for
+%% coordinating the parallel execution of multiple program versions.
+%% Second, when executions diverge, we need to select the output of the
+%% more reliable one, and merge them back once executions converge again.
+%% Finally, we need to ensure that the overall system is able to scale up
+%% and down the number of program versions run in parallel in order to
+%% balance conflicting requirements such as performance, reliability, and
+%% energy consumption.
+
+%The rest of this paper is organized as follows. Section~\ref{sec:background}
+%discusses related work and  Section~\ref{sec:motivation} motivates our
+%approach by using a scenarios based on Google Chrome web browser and Vim text
+%editor.  Then, Section~\ref{sec:challenges} discusses the main challenges that
+%we need to address to make this approach work in practice and
+%Section~\ref{sec:prototype} presents a protype implementing safe updates
+%in the context of multi-core processors. Finally, Section~\ref{sec:opportunities}
+%describes the potential future work and Section~\ref{sec:conclusion} concludes.
+
+%The rest of this paper is organized as follows. Section~\ref{sec:background}
+%discusses related work and  Section~\ref{sec:motivation} motivates our
+%approach by using a scenarios based on Google Chrome web browser and Vim text
+%editor.  Then, Section~\ref{sec:challenges} discusses the main challenges that
+%we need to address to make this approach work in practice and
+%Section~\ref{sec:prototype} presents a protype implementing safe updates
+%in the context of multi-core processors while Section~\ref{sec:evaluation}
+%shows a case study for our approach. Finally, Section~\ref{sec:opportunities}
+%describes future work and Section~\ref{sec:conclusion} concludes.
+
+%% Following work presents our approach approach, its advantages and
+%% disadvantages. Furthermore, it provides comparison and summarizes
+%% differences from the existing solutions aiming to achieve similar
+%% goals.
+
+\section{Problem statement}
+
+\section{Organization}
+
+\section{Previous work}
