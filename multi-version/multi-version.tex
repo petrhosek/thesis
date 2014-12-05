@@ -1,9 +1,86 @@
 \chapter{Multi-version Execution}
 \label{chap:multi-version}
 
+An indisputable fact is that software contains bugs. These bugs cause software
+failures which can lead to anything from minor discomfort and loss of service
+to major disasters including loss of lives. Software reliability is the
+probability of failure-free operation for specified period of time in a
+specified environment.
+
+There are two basic approaches to increase software reliability. One is fault
+avoidance, using formal specification and verification methods, and a rigorous
+software development process. Another approach is fault tolerance, through
+replication, redundancy and diversity. Two popular software fault tolerance
+methods that use diversity are $N$-version programming~\cite{avizienis:nvp} and
+recovery block~\cite{randell:rb}.
+
+%$N$-version programming (NVP) has been first introduced in 1970's as a way to
+%increase reliability of software by having independent teams to design and
+%implement the same functionality multiple times from the same specification as
+%different program versions. 
+
+The idea behind $N$-version programming (NVP) is to have independent teams to
+design and implement the same functionality multiple times from the same
+specification as different program versions. These versions are then run in
+parallel using an $N$-version execution environment (NVX) and their results are
+voted on and the majority of the outputs is selected.
+
+$N$-version programming depends on the assumption that software errors in
+different versions are independent. Otherwise, these versions are not effective
+at detecting errors as the different versions are likely to contain the same
+bugs. The experiment done by Knight and Leveson~\cite{knight86,knight90} shown
+that the assumption of independence does not hold and independently developed
+versions had the same or similar software faults 50\% of the time in more than
+one version since programmers tended to commit certain classes of mistakes
+dependently.
+
+Despite the criticism, $N$-version programming is still widely accepted as an
+effective technique for improving reliability. The problem is that even small
+probability of correlated bugs in different version significantly reduces the
+potential reliability improvement, which makes the $N$-version programming less
+cost-effective compared to other fault-tolerance due to a need for developing
+$N$ different version. Lui Sha~\cite{lui01} compared different fault tolerance
+approaches and suggested that, assuming finite software development cycle, it
+is better to invest resources into a single reliable implementation rather than
+three different implementations which will be run in parallel.
+
+The issue of cost related to development of multiple independent versions has
+been partially addressed by multi-variant program execution, which can be seen
+as an evolution of $N$-version programming. Rather developing different versions
+of the same application manually, these are generated from a single version
+using different techniques such as \ldots.
+
+Rather than executing $N$ different versions of the same program, we could also
+run different programs where one program acts as a specification and other
+implementations are checked against the specification at runtime.  This is the
+basic idea behind runtime monitoring and checking \todo{citation?}. In runtime
+monitoring and checking, one program is the implementation while another is the
+specification. The implementation is checked against the specification at
+runtime, which is easier than proving the equivalence statically (or formally).
+Furthemore, the specification can be less efficient and thus simple. The example
+shown by Lui Sha in~\cite{lui01} uses Bubblesort as a runtime specification for
+Quicksort.
+
+%However, Hatton~\cite{hatton97} argued that even dependent $N$-version
+%programming provides significant reliability improvement and it is therefore
+%more cost-effective to develop $N$ average versions rather than one good
+%version.
+
 \section{N-version \vs multi-version execution}
 
+While $N$-version execution and multi-version execution techniques have many
+similarities, there are several key differences.
+
+First and foremost, in $N$-version execution the different version are developed
+by different teams while multi-version execution uses the consequent revisions,
+which are product of natural software evolution.
+
 \section{Two applications of multi-version execution}
+
+While multi-version execution can be applied in many different scenarios, as
+further shown in Chapter~\ref{chap:applications}, the technique was designed to
+in the context of software updates.  
+
 \subsection{Fail recovery for updated software}
 \subsection{Parallel execution of software versions}
 %\input{nversion-updates/prototype}
@@ -13,15 +90,14 @@
 \section{Parallel software execution}
 
 \section{Scenarios}
-\label{nversion-updates:motivation}
+\label{multi-version:scenarios}
 
-In this section we motivate our approach using existing scenarios
-involving the \chrome browser and the \vim editor, as well as the \lighttpd
-and \vsftpd servers.  These correspond to two categories of
-applications that could benefit from our multi-version software update
-approach: desktop applications such as web browsers and office tools
-for which reliability is a key concern; and network servers, with
-stringent security and dependability requirements.
+In this section we motivate our approach using existing scenarios involving the
+\chrome browser and the \vim editor, as well as the \lighttpd and \vsftpd
+servers.  These correspond to two categories of applications that could benefit
+from our multi-version software update approach: desktop applications such as
+web browsers and office tools for which reliability is a key concern; and
+network servers, with stringent security and dependability requirements.
 
 %% We also believe, that the proposed approach might facilitate and
 %% improve the
@@ -36,49 +112,46 @@ stringent security and dependability requirements.
 %\subsection{Google Chrome Web Browser}
 %\label{sub:chrome}
 
-\gchrome\footnote{\url{http://www.google.com/chrome}} is one of the most widely 
-used web browsers.  Even though \chrome releases are tested
-extensively before deployment, they sometimes introduce new bugs that
-affect the stability of the browser.  A concrete example is version
-$6.0.466.0$, which introduced a bug that caused \chrome to crash when
-trying to load certain web pages over
+\gchrome\footnote{\url{http://www.google.com/chrome}} is one of the most widely
+used web browsers.  Even though \chrome releases are tested extensively before
+deployment, they sometimes introduce new bugs that affect the stability of the
+browser.  A concrete example is version $6.0.466.0$, which introduced a bug
+that caused \chrome to crash when trying to load certain web pages over
 SSL.\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49197}}
-One might argue that in this case the user should downgrade to an
-older version and wait until the bug is fixed. However, versions
-immediately preceding $6.0.466.0$ suffer from a different
+One might argue that in this case the user should downgrade to an older version
+and wait until the bug is fixed. However, versions immediately preceding
+$6.0.466.0$ suffer from a different
 bug,\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49721}}
-which was introduced in version $6.0.438.0$ and which crashes Chrome
-during certain sequences of repeated back and forward navigation.
+which was introduced in version $6.0.438.0$ and which crashes Chrome during
+certain sequences of repeated back and forward navigation.
 
-\vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular 
-editors under UNIX.  In version $7.1.127$, while trying to fix a
-memory leak, \vim developers introduced a double \textstt{free} bug
-that caused \vim to crash whenever the user tried to use a path
-completion feature.  This bug made its way into \textit{Ubuntu}
-$8.04$, affecting a large number of
+\vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
+text editors.  In version $7.1.127$, while trying to fix a memory leak,
+\vim developers introduced a double \textstt{free} bug that caused \vim to
+crash whenever the user tried to use a path completion feature.  This bug made
+its way into \textit{Ubuntu} $8.04$, affecting a large number of
 users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
 %% This bug remained undetected until version $7.1.138$, which has been
 %% distributed with Ubuntu $8.04$ one of the most popular Linux
 %% distributions.  The bug was caused by a
 
-\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular 
-web-server used by several high-traffic websites such as YouTube,
-Wikipedia, and Meebo. Despite its popularity, faulty updates are still
-a common occurrence in \lighttpd.
+\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular web-server used
+by several high-traffic websites such as YouTube, Wikipedia, and Meebo. Despite
+its popularity, faulty updates are still a common occurrence in \lighttpd.
 %, as evident from its bug tracking database. 
 As one example, a patch introduced in April
 2009\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
 (correctly) fixed the way HTTP ETags are computed.
 %% The patch was a one-line change, which discarded the terminating zero
 %% when computing a hash.
-Unfortunately, this fix broke the support for compression, which
-relied on the previous way in which ETags were computed and resulted in
-a segmentation fault whenever a client requested HTTP compression.
-This issue was only 
-diagnosed and reported in March
-2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and
-fixed at the end of April 2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}} more than one
-year after it was introduced, leaving the server vulnerable to
+Unfortunately, this fix broke the support for compression, which relied on the
+previous way in which ETags were computed and resulted in a segmentation fault
+whenever a client requested HTTP compression.  This issue was only diagnosed
+and reported in March
+2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed at the
+end of April
+2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
+more than one year after it was introduced, leaving the server vulnerable to
 possible attacks in between.
 
 \vsftpd\footnote{\url{https://security.appspot.com/vsftpd.html}} is a fast and 

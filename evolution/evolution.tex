@@ -122,3 +122,38 @@ with the goal of answering the following list of research questions
 \section{External Behavior Evolution}
 \label{sec:behavior-evolution}
 \input{evolution/external}
+
+\section{Threats to Validity}
+\label{evolution:threats}
+
+The main threat to validity in our study regards the generalisation of
+our results.  The patterns we have observed in our data may not
+generalise to other systems, or even to other development periods
+for the same systems.  However, we regard the selected systems to be
+representative for open-source C/C++ code, and the analysis period was
+chosen in an unbiased way, starting with the current version at the
+time of our experiments.
+
+Errors in the software underlying our framework could have interfered with
+our experiments. Both Docker and Linux Containers were under development
+and not recommended for use in production systems at the time of our study.
+Furthermore, in case of some applications, we have observed test failures
+caused by the AUFS filesystem used by Docker. However, we have thoroughly
+investigated these failures and we believe they did not affect the results
+presented in our study.
+
+Given the large quantity of data that we collected from a large number
+of software revisions, errors in our scripts cannot be excluded.
+%However, we and the ISSTA artifact evaluation committee have
+%thouroughly checked our results and scripts, and we are making our
+%framework and data available for further validation.
+% In addition, our artifact submission was
+% found to exceed expectations by the ISSTA artifact evaluation
+% committee.
+
+\section{Discussion}
+\label{evolution:discussion}
+
+We believe this study provides evidence in support of the assumption that
+changes to the external behaviour are relatively small, which is encouraging
+for the viability and applicability of the multi-version execution approach.

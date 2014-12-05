@@ -86,9 +86,9 @@ application).
 
 There are two key disadvantages in this approach.  First, the
 centralized monitor acts as a bottleneck, which can have a significant
-impact on performance.  Note that in addition to the synchronization
-overhead, this centralized monitor makes the NVX application execute
-at the speed of the slowest individual version.
+impact on performance.  Note that in addition to the synchronization overhead,
+this centralized monitor makes the multi-version application execute at the
+speed of the slowest individual version.
 
 Second, this approach is totally inflexible to any divergence in the
 sequence of system calls executed across versions; this is an issue
@@ -152,14 +152,13 @@ special handlers and then starts executing the variants
 \subsection{Rewrite rules for system call sequences}
 \label{sec:rw}
 
-In addition to eliminating the central monitor bottleneck, our
-event-streaming architecture also supports (small) divergences between
-the system call sequences of different versions.  For example,
-different software versions (revisions) can be run inside an NVX only
-as long as they all issue the same sequence of system calls~\cite{mx}.
-However, software patches sometimes change the external behavior of an
-application; in particular, many divergences in system call traces
-fall into the following two categories:
+In addition to eliminating the central monitor bottleneck, our event-streaming
+architecture also supports (small) divergences between the system call
+sequences of different versions.  For example, different software versions
+(revisions) can be run inside an NVX environment only as long as they all issue
+the same sequence of system calls~\cite{mx}.  However, software patches
+sometimes change the external behavior of an application; in particular, many
+divergences in system call traces fall into the following two categories:
 \begin{inparaenum}[(i)]
 \item \emph{addition/removal}, characterizing situations when one
   of the versions performs an additional system call (or conversely

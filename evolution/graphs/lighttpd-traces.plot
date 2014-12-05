@@ -1,5 +1,7 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,9.0cm
-set output 'lighttpd-traces.pdf'
+set output 'traces.pdf'
+
+set multiplot layout 2,1
 
 set style fill solid border -1
 set key under nobox
@@ -19,10 +21,16 @@ set ytics nomirror
 
 set grid x
 set yrange [0:1.0]
-set xrange [2379:2635]
+set xrange [0:]
+#set xrange [2379:2635]
 
 set xlabel "Revisions"
 set ylabel "Differences (Normalized)"
 
-plot 'lighttpd-traces.dat' using 1:2 with lines linecolor rgb '#00B5E5' title 'traces', \
+set title "Lighttpd" offset 0,-0.6
+plot 'traces-lighttpd.dat' using 1:2 with lines linecolor rgb '#00B5E5' title 'traces', \
                         '' using 1:3 with lines linecolor rgb '#CB2027' title 'source code'
+
+set title "Vim" offset 0,-0.6
+plot 'traces-vim.dat' using 1:2 with lines linecolor rgb '#00B5E5' title 'traces', \
+                   '' using 1:3 with lines linecolor rgb '#CB2027' title 'source code'

@@ -6,177 +6,193 @@
 %% \end{figure}
 
 
-Our approach is based largely on the assumption that during software
-evolution, the changes to the external behaviour of an application are
-relatively small.  In the context of Linux applications, the external
-behaviour of an application consists of its sequence of system calls,
-which are the primary mechanism for an application to change the state of
-its environment.  Note that the key insight here is that we are only
-concerned with \textit{externally observable behaviour}, and are
-oblivious to the way the external behaviour is generated.  As a trivial
-example, given two versions of a routine that outputs the smallest
-element of an array, our approach considers them equivalent even if
-the first version scans the array from the first to the last element,
-while the other scans it in reverse order.
+Our approach is based largely on the assumption that during software evolution,
+the changes to the external behaviour of an application are relatively small.
+In the context of Linux applications, the external behaviour of an application
+consists of its sequence of system calls, which are the primary mechanism for
+an application to change the state of its environment.  Note that the key
+insight here is that we are only concerned with \emph{externally observable
+behaviour}, and are oblivious to the way the external behaviour is generated.
 
-To verify this assumption, we compared 164 successive revisions of the
-\lighttpd web server, namely revisions in the range 2379--2635 of
-branch \textstt{lighttpd-1.4.x}, which were developed and released
-over a span of approximately ten months, from January to October 2009.
-%19 January 2009 to 11 October 2009).
-To understand the amount of code changes in these versions, we 
-computed the number of lines of code (LOC) that have changed from
-one version to the next.  
+To verify this assumption, we used the \covrig infrastructure to trace the
+external behavior of two applications across different revisions and compare
+these traces:
+
+\begin{enumerate}
+\item[\lighttpd\footnote{\url{http://www.lighttpd.net/}}] is a popular and
+  lightweight web server used by several high-traffic websites. 
+
+\item[\vim\footnote{\url{http://www.vim.org/}}] is arguably one of the most
+  popular text editors.
+\end{enumerate}
+
+\paragraph{Selection of revisions} The revision intervals for both applications
+were selected to contain the two known bugs---in particular, for \vim the bug
+introduced in the version 7.1.127 affecting the path completion feature, and for
+\lighttpd the bug introduced in the revision 2436 affecting the ETag handling. The
+version interval we used in case of \vim was 7.1--7.1.330. These versions were
+developed and released in slightly-over one year time-frame (from 12 May 2007
+to 21 June 2008). In case of \lighttpd, we used the interval spanning revisions
+2379--2635 (overlapping versions 1.4.21--1.4.24), which were developed in
+approximately ten months time frame (from 3 February to 11 October 2009).
+
 %% Figure~\ref{fig:differences} summarises these differences.  This graph
 %% shows that patches in \lighttpd are relatively small, most of them
 %% affecting less than 30 LOC.
 During this period, code patches in \lighttpd varied between
 \lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
-\lighttpdMedPatch~LOC.\looseness=-1
+\lighttpdMedPatch~LOC.
 
 %% This suite consists of 19 tests files, each of them consisting of
 %% number of individual tests. 
 %% For the purpose of our experiment, we have selected a subset of 7 core
 %% test files excluding those targeting standalone modules.
 
-To compare the external behaviour of each version, we traced the system
-calls made by these versions using the
-\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}}
-tool, while running all the tests from the \lighttpd regression suite
-targeting the core functionality (a total of seven tests, but
-each test contains a large number of test cases issuing HTTP requests).
+\paragraph{Setup} To compare the external behaviour of each version, we traced
+the system calls made by these versions using the
+\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}} tool.
 
-To eliminate possible sources of non-determinism, we have disabled
+%while running all the tests from the \lighttpd regression suite targeting the
+%core functionality (a total of seven tests, but each test contains a large
+%number of test cases issuing HTTP requests).
+%while running tests from the Vim regression suite. This suite consists
+%of 64 tests, which aim to exercise most of the functionality provided by Vim
+%text editor. For the purpose of our experiment, we have selected a subset
+%of 60 tests excluding those targeting GUI.
+
+All tests were executed on a machine running a 64-bit version of Ubuntu 10.04.
+To build the applications, we used the existing build targets and configuration
+options. \vim versions were compiled using the commands:
+\begin{lstlisting}[language=bash,numbers=none]
+./configure --without-x --disable-gui
+\end{lstlisting}
+and
+\begin{lstlisting}[language=bash,numbers=none]
+make -j 4 CFLAGS="-O2 -D_FORTIFY_SOURCE=1 -fno-strength-reduce -Wall"
+\end{lstlisting}
+The \texttt{-D\_FORTIFY\_SOURCE=1} compiler flag was used to overcome an issue
+introduced by the GCC compiler
+optimization,\footnote{\url{https://groups.google.com/d/topic/vim_dev/HU5aZfCv4iM/discussion}}
+which caused some of the tests from the Vim regression suite to crash.
+
+To eliminate possible sources of non-determinism, we have disabled the
 address-space randomisation while running the tests. To further account for any
 non-deterministic behaviour, we have repeated the tracing three times for each
-test case and compared the resulting traces across runs.  All tests were
-executed on a machine running a Linux 2.6.40.6 x86-64 kernel and the GNU C
-library 2.14.
+test case and compared the traces across runs.
 
-The system call traces were further normalised and post-processed.  We
-first split the original trace on a per-process basis, and
-%% so that the trace of each different process used
-%% by \lighttpd was stored in an individual file.
-%% Moreover, we used the order in which processes were started as a basis
-%% for the naming scheme to allow comparison of the traces for each
-%% process across different runs and versions.
-%%
-normalised all differences caused by timing (which would not
-affect \mx's operation), \eg we collapsed all sequences of
-\textstt{accept}-\textstt{poll} system calls, which represent repeated
-polling operations.
-%
-%and we eliminated all logging-related system calls
-%
-We have also collapsed all
-\textstt{read}-\textstt{stat}-\textstt{read} and
-\textstt{read}-\textstt{open}-\textstt{close} sequences sometimes
-used to check for file existence, as occurrence is often dependent
-on result of previous system calls (\ie if one of the previous
-calls returned \textstt{EAGAIN} error code). This was necessary to
-eliminate possible source of non-determinism and to allow further
-comparison of traces.
+The system call traces were further normalised and post-processed.  We first
+split the original trace on a per-process basis so that the trace for each
+process was stored in an individual file.  Moreover, we used the order in which
+processes were started as a basis for the naming scheme to allow comparison of
+the traces across different runs and versions. We then normalised all
+differences caused by timing, \eg we collapsed all sequences of
+\textstt{accept+poll} system calls, which represent repeated polling
+operations.  We have also collapsed all \textstt{read+stat+read} and
+\textstt{read+open+close} sequences sometimes used to check for file existence,
+as their occurrence is often dependent on the result of previous system calls
+(\ie if one of the previous calls returned \textstt{EAGAIN} error code). This
+was necessary to eliminate any inherent non-determinism in the traces and to
+allow further comparison.
 
-Trace files were then post-processed by eliminating individual system
-call arguments and return values.  This post-processing step might
-reduce the precision of our comparison, but we performed it
-for two different reasons:%
+Trace files were then post-processed by eliminating individual system call
+arguments and return values.  This post-processing step might reduce the
+precision of our comparison, but we performed it for two different reasons:%
 \begin{inparaenum}[(1)]
-\item many system calls accept as arguments addresses of data structures
-residing in the virtual address space, and these addresses may differ
-across versions (but \mx handles this while mediating the effect of
-system calls, as described in \S\ref{sec:mxm}).
-
-\item some system calls return information on current system resources
-(\eg number of processes and threads, amount of free/used memory)
-which would differ from one run to the other.
+\item many system calls have indirect arguments, accepting address of data
+  structure residing in the process address space, and these addresses may
+  differ across versions;
+\item the return value of many system calls depend on the current system
+  resource usage (\eg number of running processes and threads, amount of
+  available memory) which could differ from one run to another.
 \end{inparaenum}
-%
-Finally, 
-%% we concatenated the traces of all \lighttpd processes spawned
-%% by each version.  In the end, we had one trace for each run of a
-%% \lighttpd version on a test case in the regression suite.  
-for each test case, we compared the traces of consecutive \lighttpd
-versions using the edit distance.
+Finally, we concatenated the trace files for all tests in a each revision,
+ending up with one trace for each run of the test suite. We then compared the
+traces of consecutive revisions using the edit distance.
 
-%% The differences in system call traces across all 164 revisions are
-%% summarised in Table~\ref{tab:differences}. These results clearly show
-%% that our assumption is correct and in the majority of cases (96.76\%),
-%% the sequences of system calls 
-
-%% external behaviour observable via system
-%% calls tracing.  In the remaining cases, these changes were \ldots, such
-%% as the one introduced in revision 2612 as a result of
-%% replacing \textstt{poll} system calls with their
-%% \textstt{epoll} counter-parts.
-
-%% as a result of newly implemented
-%% support for SELinux resulting in 25 changes over 59 tests, were caused mainly by
-%% different ordering of system calls or by splitting individual call into multiple
-%% different calls.
-
-%% \begin{table}
-%%   \centering
-%%   \begin{tabular}{r @{\qquad}c c}
-%%     \hline
-%%     \#Differences & Tests & Percentage \\
-%%     \hline
-%%     0 & 1104 & 96.757\% \\
-%%     1 & 8 & 0.701\% \\ 
-%%     2 & 13 & 1.140\% \\
-%%     6 & 7 & 0.613\% \\
-%%     10 & 1 & 0.088\% \\
-%%     12 & 1 & 0.088\% \\
-%%     19 & 1 & 0.088\% \\
-%%     25 & 1 & 0.088\% \\
-%%     29 & 1 & 0.088\% \\
-%%     37 & 1 & 0.088\% \\
-%%     39 & 1 & 0.088\% \\
-%%     47 & 1 & 0.088\% \\
-%%     77 & 1 & 0.088\% \\
-%%     \end{tabular}
-%%   \caption{Differences in post-processed system call traces between 164
-%%   revisions of \lighttpd.}% over the subset of \lighttpd's regression suite.}
-%%   \label{tab:differences}
-%% \end{table}
+\subsection{Trace Differences}
 
 \begin{figure}[t]
   \begin{center}
-    \includegraphics[width=\columnwidth]{evolution/graphs/lighttpd-traces}
+    \includegraphics[width=\columnwidth]{evolution/graphs/traces}
     \caption{Correlation of differences in post-processed system call
-      traces with differences in source code across 164 revisions of
-      \lighttpd.  The seven named revisions
+      traces with differences in source code. The named versions
       are the only ones introducing external behaviour changes.}
     \label{fig:correlation}
   \end{center}
 \end{figure}
 
+Our results are shown in Figure~\ref{fig:correlation}, which correlates the
+differences in post-processed system call traces with the source code changes.
+The graph shows that changes in externally observable behaviour occur only
+sporadically.  In fact, 156 out of 163 revisions of \lighttpd and 322 out 329
+revisions of \vim (which account for more than 95\% of all the revisions
+considered in both cases) introduced \textit{no changes} in external behaviour.
+In particular, the revisions which introduced bugs described in
+\sref{multi-version:scenarios} are among revisions which did not introduce any
+changes, yet these revisions are responsible for critical crash bugs.
 
-Our results are shown in Figure~\ref{fig:correlation}, which
-correlates the differences in post-processed system call traces with
-the source code changes.  The graph shows that changes in externally
-observable behaviour occur only sporadically.  In fact, 156 versions
-(which account for around 95\% of all the versions considered)
-introduce \textit{no changes} in external behaviour.  In particular,
-the revision which introduced the bug described in \sref{sec:example}
-is one of the versions that introduces no changes, yet this revision
-is responsible for a critical crash bug.
+To better understand the results, we have also looked at the number of
+differences per version. Results in Table~\ref{tab:perversion} show that
+differences in system calls are not evenly spaced but they are often located
+in particular versions, such as the aforementioned change in version 7.1.296
+responsible for 3489 differences across all tests.
 
-%% We believe this initial study supports our original assumption, and is
-%% encouraging for the viability of our approach. 
-%% %% provides some initial evidence in support of the assumption that
-%% %% changes to external behaviour are relatively small, which is
-%% %% encouraging for the viability of our approach.
-%% We next discuss our experience applying \mx to \redis
-%% (\S\ref{sec:redis}) and \lighttpd (\S\ref{sec:lighttpd}).
+\begin{table}
+  \centering
+  \begin{tabular}{r @{\qquad}c}
+    \toprule
+    Version & \#Differences \\
+    \midrule
+    7.1.017 & 182 \\
+    7.1.025 & 2 \\
+    7.1.045 & 16 \\
+    7.1.186 & 69 \\
+    7.1.256 & 3 \\
+    7.1.270 & 2 \\
+    7.1.296 & 3489 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
+\begin{table}
+  \centering
+  \begin{tabular}{r @{\qquad}c}
+    \toprule
+    Revision & \#Differences \\
+    \midrule
+    2436 & 182 \\
+    2466 & 2 \\
+    2524 & 16 \\
+    2550 & 69 \\
+    2578 & 3 \\
+    2606 & 2 \\
+    2612 & 3489 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-
-Table~\ref{tab:perversion} aggregates the changes to external behaviour
-on a per-version basis.  As shown in this Table, 156 versions (which
-account for 95.706\% of all versions considered) introduced no changes
-in external behaviour, while the other versions introduced between 1
-and 273 differences. 
+\begin{table}
+  \centering
+  \begin{tabular}{r @{\qquad}c c}
+    \toprule
+    & \multicolumn{2}{c}{Frequency} \\
+    \cmidrule(r){2-3}
+    \#Differences & Versions & Percentage \\
+    \midrule
+    0 & 322 & 97.872\% \\
+    2 & 2 & 0.608\% \\
+    3 & 1 & 0.304\% \\
+    16 & 1 & 0.304\% \\ 
+    69 & 1 & 0.304\% \\
+    182 & 1 & 0.304\% \\
+    3489 & 1 & 0.304\% \\
+    \bottomrule
+  \end{tabular}
+  \caption{Differences in post-processed system call traces between 330
+  versions of Vim text editor aggregated per version on Vim's regression
+  suite.}
+  \label{tab:perversion}
+\end{table}
 
 \begin{table}
   \centering
@@ -199,3 +215,113 @@ and 273 differences.
   regression suite.}
   \label{tab:perversion}
 \end{table}
+
+% Differences in system call traces across all 330 versions are summarized in
+% Table~\ref{tab:differences}. These results clearly show that our assumption is
+% correct and in majority of cases (99.59\%), there were no differences in
+% application behavior, observable via system calls tracing.  Remaining changes,
+% such as the one introduced in version 7.1.296 as a result of newly implemented
+% support for SELinux resulting in 25 changes over 59 tests, were caused mainly by
+% different ordering of system calls or by splitting individual call into multiple
+% different calls.
+
+% \begin{table}
+%   \centering
+%   \begin{tabular}{r @{\qquad}c c}
+%     \toprule
+%     & \multicolumn{2}{c}{Frequency} \\
+%     \cmidrule(r){2-3}
+%     \#Differences & Tests & Percentage \\
+%     \midrule
+%     0 & 19654 & 99.564\% \\
+%     1 & 5 & 0.025\% \\ 
+%     2 & 9 & 0.010\% \\
+%     3 & 2 & 0.046\% \\
+%     4 & 3 & 0.015\% \\
+%     6 & 3 & 0.015\% \\
+%     10 & 1 & 0.005\% \\
+%     16 & 1 & 0.005\% \\
+%     25 & 59 & 0.299\% \\
+%     33 & 1 & 0.005\% \\
+%     156 & 1 & 0.005\% \\
+%     2014 & 1 & 0.005\% \\
+%     \bottomrule
+%   \end{tabular}
+%   \caption{Differences in post-processed system call traces between 330
+%   versions of Vim text editor over the entire Vim's regression suite.}
+%   \label{tab:differences}
+% \end{table}
+
+The most important finding is that in version 7.1.127, which introduced the
+bug in path completion functionality described in Section~\ref{sub:vim}, there
+were no observable differences in system call traces when running the complete
+regression suite. Yet this version still introduced critical bug, which
+affected thousands of users. This clearly demonstrates viability and necessity
+of our approach.
+
+We have also looked at differences in source code across all 330 versions of
+Vim text editor. Histogram which can be seen in the
+Figure~\ref{fig:differences} summarizes these differences.  This graph shows
+that in the majority of cases, differences across versions in terms of LOC are
+very small, with patches consisting of 5-10 changed LOC being the most common.
+
+% \begin{figure}[!ht]
+%   \begin{center}
+%     \includegraphics[width=\textwidth]{differences}
+%     \caption{Source code differences between 330 versions of Vim text editor.}
+%     \label{fig:differences}
+%   \end{center}
+% \end{figure}
+
+For comparison, we have also correlated differences in post-processed system
+call traces with differences in source code. From the
+Figure~\ref{fig:correlation} and measurements described herein before, it is
+obvious that while number of changes in code-base grow continuously between
+each version, changes in externally observable behavior (\ie system calls)
+occur only sporadically. Again, this result supports our original assumption
+and further motivates our approach.
+
+% \begin{figure}[!ht]
+%   \begin{center}
+%     \includegraphics[width=\textwidth]{correlation}
+%     \caption{Correlation of differences in post-processed system calls traces
+%     with differences in source code between 330 versions of Vim text editor.}
+%     \label{fig:correlation}
+%   \end{center}
+% \end{figure}
+
+To verify this assumption, we compared 164 successive revisions of the
+\lighttpd web server, namely revisions in the range 2379--2635 of
+branch \textstt{lighttpd-1.4.x}, which were developed and released
+over a span of approximately ten months, from January to October 2009.
+%19 January 2009 to 11 October 2009).
+To understand the amount of code changes in these versions, we 
+computed the number of lines of code (LOC) that have changed from
+one version to the next.  
+%% Figure~\ref{fig:differences} summarises these differences.  This graph
+%% shows that patches in \lighttpd are relatively small, most of them
+%% affecting less than 30 LOC.
+During this period, code patches in \lighttpd varied between
+\lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
+\lighttpdMedPatch~LOC.
+
+%% This suite consists of 19 tests files, each of them consisting of
+%% number of individual tests. 
+%% For the purpose of our experiment, we have selected a subset of 7 core
+%% test files excluding those targeting standalone modules.
+
+%% The differences in system call traces across all 164 revisions are
+%% summarised in Table~\ref{tab:differences}. These results clearly show
+%% that our assumption is correct and in the majority of cases (96.76\%),
+%% the sequences of system calls 
+
+%% external behaviour observable via system
+%% calls tracing.  In the remaining cases, these changes were \ldots, such
+%% as the one introduced in revision 2612 as a result of
+%% replacing \textstt{poll} system calls with their
+%% \textstt{epoll} counter-parts.
+
+%% as a result of newly implemented
+%% support for SELinux resulting in 25 changes over 59 tests, were caused mainly by
+%% different ordering of system calls or by splitting individual call into multiple
+%% different calls.

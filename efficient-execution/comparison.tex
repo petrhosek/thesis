@@ -5,13 +5,13 @@ While \S\ref{sec:microbenchmarks} and \S\ref{sec:c10k} illustrate the
 worst-case synthetic and real-world scenarios for a system-call
 monitor, in order to compare \varan directly with prior NVX systems,
 we have also run it on the same set of benchmarks used to evaluate
-prior systems.  In particular, we chose to compare against three %four
+prior systems.  In particular, we chose to compare against two %four
 state-of-the-art NVX systems: %\strata~\cite{cox2006},
-\orchestra~\cite{orchestra09}, \mx~\cite{mx} and
-\tachyon~\cite{tachyon12}.  These systems and their benchmarks are
-briefly described  in the first three columns of Table~\ref{tbl:eval-systems}.
-To our knowledge, we are the first to perform an extensive performance
-comparison of existing NVX systems.
+\orchestra~\cite{orchestra09} and \tachyon~\cite{tachyon12}.  These systems and
+their benchmarks are briefly described  in the first three columns of
+Table~\ref{tbl:eval-systems}.  To our knowledge, we are the first to perform an
+extensive performance comparison of existing NVX systems. We also compare \nx
+against \mx~(\S\ref{sec:mx}) for completeness.
 
 \begin{table}[t]
 	\centering
@@ -27,7 +27,7 @@ comparison of existing NVX systems.
   \tachyon~\cite{tachyon12} & ptrace & \lighttpd (ApacheBench) & \tachyonLighttpd & \lighttpdAbOneFollower \\
                             & & \thttpd (ApacheBench) & \tachyonThttpd & \thttpdOneFollower \\
   \midrule
-  \mx~\cite{mx} & ptrace & \lighttpd (http\_load) & \mxLighttpd & \lighttpdHttploadOneFollower \\
+  \mx & ptrace & \lighttpd (http\_load) & \mxLighttpd & \lighttpdHttploadOneFollower \\
                       &  & \redis (redis-benchmark) & \mxRedis & \redisOneFollower \\
                       &  & \speczerosix & \mxSpec & \speczerosixOneFollower \\
   \bottomrule
@@ -50,7 +50,7 @@ multiple versions with minimum additional overhead.
 
 \boldtext{\speczerozero} %\footnote{\url{http://www.spec.org/cpu2000/}}
 was used to evaluate \orchestra. We used the latest available version
-1.3.1.  The cummulative results are reported in
+1.3.1.  The cumulative results are reported in
 Table~\ref{tbl:eval-systems}, as for all other benchmarks.  \orchestra
 reported \orchestraSpec overhead when running two instances of
 \speczerozero in parallel, while \nx introduced only
@@ -59,11 +59,16 @@ applications contained in the \speczerozero suite and for different
 number of followers can be seen in Figure~\ref{fig:spec2000}.
 
 \boldtext{\speczerosix} %\footnote{\url{http://www.spec.org/cpu2006/}}
-has been previously used by \mx. We used the latest version 1.2.  The
-overhead reported by \mx was \mxSpec, while \nx introduced only
-\speczerosixOneFollower overhead.
+has been used to evaluate the performance of \mx (\S\ref{sec:performance}). The
+execution overhead of \mx is \mxSpec, while overhead introduced by \nx is only
+\speczerosixOneFollower. The results for individual benchmarks can be seen in
+Figure~\ref{fig:spec2006}.
+
+%has been previously used by \mx. We used the latest version 1.2.  The
+%overhead reported by \mx was \mxSpec, while \nx introduced only
+%\speczerosixOneFollower overhead.
 %in contrast, \nx introduced only \speczerosixOneFollower.
-Individual results can be seen in Figure~\ref{fig:spec2006}.
+%Individual results can be seen in Figure~\ref{fig:spec2006}.
 
 \boldtext{\httpd} %\footnote{\url{https://httpd.apache.org/}}
 was used by \orchestra.  We used version 1.3.29, same as in the
@@ -91,16 +96,14 @@ different number of folllowers.
 %\emph{ApacheBench}, which is an improvement over previous work.
 
 \boldtext{\lighttpd} %\footnote{\url{http://www.lighttpd.net/}}
-has been used to evaluate both \mx and \tachyon.  We used version
-1.4.36 (neither \mx nor \tachyon reported the version used). \mx used
+has been used to evaluate both \mx and \tachyon.  We used the latest
+version 1.4.36 (\tachyon did not report the version used). \mx used
 the \emph{http\_load} benchmark and reported \mxLighttpd overhead
 while \tachyon used the \emph{ApacheBench} benchmark and reported a
 \tachyonLighttpd overhead.  When benchmarked using \emph{http\_load},
 \varan introduced a \lighttpdHttploadOneFollower overhead, while with
-\emph{ApacheBench} it introduced no noticeable
-overhead. %\lighttpdAbOneFollower.  
-In both
-cases, this marks a significant improvement over the previous work.
+\emph{ApacheBench} it introduced no noticeable overhead.  In both cases, this
+marks a significant improvement over the previous work.
 
 \boldtext{\thttpd} %\footnote{\url{http://www.acme.com/software/thttpd/}}
 was shown to introduce \tachyonThttpd overhead when running atop \tachyon using

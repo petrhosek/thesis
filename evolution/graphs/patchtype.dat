@@ -1,6 +1,8 @@
+Beanstalkd 155 57 38 156
 Binutils 180 20 50 124
 Git 77 100 73 204
-Lighttpd 182 16 52 87
+lighttpd 250 0 0 228
+"lighttpd 2.0" 182 16 52 87
 Memcached 130 68 52 123
 Redis 218 1 31 61
-Zeromq 135 66 49 128
+"ØMQ" 135 66 49 128

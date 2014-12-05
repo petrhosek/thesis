@@ -8,74 +8,117 @@ automatically, is decreasing very rapidly. On the other hand, increasing
 reliance on computers and computer software systems in every aspect of human
 lives implies strong need for reliable software systems.
 
-The last decade has seen the emergence of new hardware platforms, ranging from
-multi-core processors to large-scale data centers, which provide an abundance
-of computational resources and a high degree of parallelism. These platforms
-already benefit applications with a great amount of inherent concurrency
-through data-processing systems such as MapReduce~\cite{map-reduce},
-Hadoop~\cite{hadoop} or Dryad~\cite{dryad}. However, there has been little
-progress in exploiting this abundance of resources to improve the safety,
-reliability and security of software systems which interacts with user, such as
-text editors, productivity tools or business applications suites, to name only
-a few.
-
-Typical data centers are designed for peak load to ensure service-level
-agreements are met. Servers are rarely completely idle but they do not operate
-near their maximum utilization; most of the time, they operate at between 10\%
-and 50\% of their maximum utilization levels. However, even an energy-efficient
-server consumes half its full power when doing virtually no work --- and for
-normal servers, this ratio is much worse~\cite{barroso2007}.
-
-%Therefore, instead of dynamically switch off unused servers which does not
-%prove to be effective, we aim to use the abundance of these resources (i.e.,
-%processing power) to increase software availability and reliability.
-
-The goal of this project, which fits within the overall theme of {\it
-multiplicity computing}~\cite{multiplicity}, is to exploit the abundance of
-resources made available by these platforms (\eg idle processor time) to
-improve the software update process to increase software availability and
-reliability.
-
 Software updates are an integral part of the software maintenance process, but
 unfortunately present a high risk, with many users and administrators refusing
 to upgrade their software and relying instead on outdated versions, which often
 leaves them and their systems exposed to software bugs and security
-vulnerabilities. Our goal is to improve software updates process to provide
-benefits of the newer version without sacrificing the stability of the older
-version.
+vulnerabilities.
 
-Nowadays, many large-scale services such as Google, Facebook and Flickr already
-use {\it continuous deployment}, whereby new versions are continuously released
-to users~\cite{johnson2009}.  Multiple versions can be released throughout the
-day, and each version is often accessible only to a fraction of users to
-prevent complete outage in case of an error caused by one of the new versions.
+The Hearbleed bug~\cite{heartbleed} is a prime example of this behavior. A
+fixed version of OpenSSL was released on the same day the Heartbleed bug was
+publicly disclosed.  However, a month after the publication, despite the wide
+media coverage, 1.5\% (12,043) of the 800,000 most popular sites in the world
+were still using the vulnerable version of OpenSSL making their servers
+susceptible to attacks~\cite{heartbleed-prevalent}.
 
-While this approach helps minimize the number of users affected by new bugs, it
-is not foolproof. In particular, bugs introduced by new releases may manifest
-themselves only in coincidental cases or following prolonged operation, after
-the release has been deployed to the entire user base. Errors and failures
-affecting majority of the user-base therefore occurs even to these applications
-(\eg recent Blogger~\cite{blogger-incident2011} or
-Skype~\cite{skype-incident2011} incidents). Such outages might cause
-significant financial losses and it is therefore critical to avoid them.
+Nowadays, many services including the large-scale services such as Google,
+Facebook or Amazon employ \emph{continuous deployment}, whereby new versions
+are continuously released to users~\cite{johnson2009}. Multiple versions can be
+released throughout the day, and each version is often accessible only to a
+fraction of users to prevent complete outage in case of an error caused by one
+of the new versions.
 
-We aim to tackle the software update problem using a simple but effective
-approach based on multi-version execution.
-%using application-level virtualization, technique that can be easily integrated
-%with the continuous deployment approach.
+While this approach helps minimize the number of users affected by newly
+introduced bugs, it is not foolproof. In particular, bugs introduced by new
+releases may manifest themselves only in coincidental cases or following
+prolonged operation, after the release has been deployed to the entire user
+base. Errors and failures affecting majority of the user-base therefore occurs
+even to these applications. Such outages might cause significant financial
+losses and frustration among users, and it is therefore critical to avoid them.
+
+An example of such disruption is the recent Verizon
+outage~\cite{verizon-outage2014} of the billing and activation system,
+affecting large number of users which were unable to log into their accounts.
+After the incident, Verizon issued the following statement:
+\begin{quotation}
+The Verizon Wireless billing system was fully restored early today, shortly
+after midnight. The issue affecting some customer access to account information
+was an unintended consequence of a software update performed by the company on
+its billing system two days ago.
+\end{quotation}
+The outage, which according to reports lasted for 48 hours, was so impactful
+that it generated a lot of negative reactions from frustrated customers
+including its own \#verizonfail and \#verizonoutage Twitter hashtags.  This as
+well as other similar incidents (\eg Blogger~\cite{blogger-incident2011} or
+Facebook~\cite{facebook-incident2010}) show the possible consequences of failed
+software updates.
+
+The problems caused by failed software updates are also not restricted to
+server applications or services. \vim\footnote{\url{http://www.vim.org/}},
+arguably one of the most popular text editors, distributed with the popular
+Ubuntu Linux distribution has been also affected by failed software update in
+the past.  In version 7.1.127, while trying to fix a memory leak, \vim
+developers introduced a double \textstt{free} bug that caused \vim to crash
+whenever the user tried to use a path completion feature.  This bug made its
+way into Ubuntu 8.04, affecting a large number of
+users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
+
+To tackle the software update problem, we propose \emph{multi-version
+execution}, a novel technique
+%, which fits within the overall theme of $N$-version programming~\cite{nvp77,chen1995},
+designed to improve the software update process to increase software
+availability and reliability by exploiting the abundance of resources (\eg idle
+processor time) made available by the modern highly parallel platforms.
 Whenever a new system update becomes available, instead of upgrading the
-software to the newest version, we {\it run the new version in parallel with
+software to the newest version, we \emph{run the new version in parallel with
 the old}. As new versions arrive, we continue to execute them in parallel with
 the existing ones, until all available resources have been exhausted, or a
 user-specified threshold has been reached.  At that point, we can either
 discard the very oldest versions, or we can use more sophisticated replacement
 strategies.
 
-This approach can be extended to work with a large number of
-versions run in parallel and can be configured to balance conflicting
-requirements such as performance, reliability and energy consumption. The
-approach can also be applied to several different platforms, ranging from
-multi-core processors to large-scale data centers.
+We believe that multi-version execution updates is a timely solution in the
+context of today's computing platforms~\cite{multiplicity}. The last decade has
+seen the emergence of new hardware platforms, ranging from multi-core
+processors to large-scale data centers, which provide an abundance of
+computational resources and a high degree of parallelism. These platforms
+already benefit applications with a great amount of inherent concurrency.
+However, there has been relatively little progress in exploiting this abundance
+of resources to improve software reliability and availability, especially in
+the context of software updates.
+
+Typical data centers are designed for peak load to ensure service-level
+agreements are met. Servers are rarely completely idle but they do not operate
+near their maximum utilization; most of the time, they operate at between 10\%
+and 50\% of their maximum utilization levels. However, even an energy-efficient
+server consumes half its full power when doing virtually no work---and for
+normal servers, this ratio is much worse~\cite{barroso2007}.  Therefore,
+instead of dynamically switch off unused servers which does not prove to be
+effective, we aim to use the abundance of these resources (\ie processing
+power) to increase software availability and reliability.
+
+%In recent years,
+%we have witnessed the emergence of new technology---ranging from multicore
+%processors to large-scale data centers---which provide an abundance of
+%computational resources and a high degree of parallelism.  Furthermore, these
+%resources are often left idle, in which state they consume (read waste) a large
+%fraction of their full-utilization energy levels.  For example, recent
+%studies~\cite{barroso2007} have shown that servers in a data center usually
+%operate at between 10\% and 50\% of their maximum utilization; however, even an
+%energy efficient server consumes half its full power when doing virtually no
+%work---and for regular servers, this ratio is much worse.
+
+Our approach aims to improve the software update process by taking advantage of
+idle resources---such as idle cores on a CPU and idle servers in a data
+center---to run multiple versions of an application in parallel, with the goal
+of improving the overall reliability and security of the software being
+upgraded.  Our current focus is on multi-core processors, but we believe this
+solution could be adapted to work on other parallel platforms as well.
+Furthermore, this update mechanism could be extended to work with a large
+number of versions running in parallel and configured to balance conflicting
+requirements such as performance, reliability and energy consumption.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %We aim to tackle this problem using a simple but effective approach based on
 %application-level virtualization.  Whenever a new program update becomes

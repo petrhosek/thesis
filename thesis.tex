@@ -54,12 +54,15 @@
    morecomment=[l];%
    }[keywords,comments,strings]
 
+\usepackage{siunitx}
+\sisetup{per-mode=symbol}
+\DeclareSIUnit[number-unit-product=\,]{\loc}{LOC}
+
 \usepackage{color}
 \usepackage{xspace}
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{cite}
-\usepackage{siunitx}
 \usepackage[normalem]{ulem}
 \usepackage{multirow}
 \usepackage{flushend}
@@ -120,7 +123,7 @@
 
 \newcommand{\ie}{i.e.\ }
 \newcommand{\eg}{e.g.\ }
-\newcommand{\etal}{et al.}
+\newcommand{\etal}{et al.\ }
 \newcommand{\vs}{vs.\ }
 \newcommand{\etc}{etc.\ }
 \newcommand{\resp}{\emph{resp.}\ }
@@ -169,6 +172,7 @@
 \newcommand{\false}{\stt{false}\xspace}
 
 \newcommand{\nx}[0]{\textsc{Varan}\xspace}
+\newcommand{\vx}[0]{\textsc{Vx}\xspace}
 \newcommand{\varan}[0]{\textsc{Varan}\xspace}
 \newcommand{\nxlib}[0]{\textsc{VaranLib}\xspace}
 
@@ -185,6 +189,7 @@
 \newcommand{\httpd}[0]{\textit{Apache httpd}\xspace}
 \newcommand{\beanstalkd}[0]{\textit{Beanstalkd}\xspace}
 \newcommand{\lighttpd}[0]{\textit{lighttpd}\xspace}
+\newcommand{\lighttpdtwo}[0]{\textit{lighttpd~2.0}\xspace}
 \newcommand{\memcached}[0]{\textit{Memcached}\xspace}
 \newcommand{\nginx}[0]{\textit{Nginx}\xspace}
 \newcommand{\redis}[0]{\textit{Redis}\xspace}
@@ -264,7 +269,8 @@ parallel platforms, such as GPGPUs and cloud environments.
 \addcontentsline{toc}{chapter}{References}
 {
   \bibliographystyle{alpha}
-  \bibliography{bibliography/bibliography}
+  \bibliography{bibliography/cadar,bibliography/cadar-crossrefs,bibliography/cadar-macros}
+  %\bibliography{bibliography/bibliography}
 }
 
 \appendix

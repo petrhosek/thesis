@@ -17,7 +17,7 @@ set style line 5 lt 1 lc rgb "#FFFFFF"
 
 set boxwidth 0.7 relative
 
-plot 'patchcoverage.dat' u 2 t "" ls 5, \
+plot 'patchcoverage.dat' u 2 t "0%" ls 5, \
                       '' u 3 t "(0%,     25%]" ls 1, \
                       '' u 4 t "(25%,   50%]" ls 2, \
                       '' u 5 t "(50%,   75%]" ls 3, \
