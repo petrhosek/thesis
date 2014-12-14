@@ -66,6 +66,8 @@ analysed.}
 \\
 \git         & C         & \gitSize       & C/shell   & \gitTsize         % & \gitTestTime 
 \\
+\lighttpd    & C         & \lighttpdSize  & Perl    & \lighttpdTsize    % & \lighttpdtwoTestTime 
+\\
 \lighttpdtwo    & C         & \lighttpdtwoSize  & Python    & \lighttpdtwoTsize    % & \lighttpdtwoTestTime 
 \\
 \memcached   & C         & \memcachedSize & C/Perl    & \memcachedTsize   % & \memcachedTestTime 
@@ -196,6 +198,7 @@ provides meaningful answers.
 \beanstalkd  &  \beanstalkdOK & \beanstalkdTransientTestErrs & \beanstalkdTransientTestTimeouts & \beanstalkdTransientCompErrs  &  {\beanstalkdTimespan}mo \\
 \binutils    &  \binutilsOK   & \binutilsTransientTestErrs  & \binutilsTransientTestTimeouts  & \binutilsTransientCompErrs  &  {\binutilsTimespan}mo \\
 \git         &  \gitOK        & \gitTransientTestErrs       & \gitTransientTestTimeouts       & \gitTransientCompErrs       &  {\gitTimespan}mo  \\
+\lighttpd    &  \lighttpdOK   & \lighttpdTransientTestErrs  & \lighttpdTransientTestTimeouts  & \lighttpdTransientCompErrs  &  {\lighttpdTimespan}mo  \\
 \lighttpdtwo    &  \lighttpdtwoOK   & \lighttpdtwoTransientTestErrs  & \lighttpdtwoTransientTestTimeouts  & \lighttpdtwoTransientCompErrs  &  {\lighttpdtwoTimespan}mo  \\
 \memcached   &  \memcachedOK  & \memcachedTransientTestErrs & \memcachedTransientTestTimeouts & \memcachedTransientCompErrs &  {\memcachedTimespan}mo \\
 \redis       &  \redisOK      & \redisTransientTestErrs     & \redisTransientTestTimeouts     & \redisTransientCompErrs     &  {\redisTimespan}mo     \\
@@ -285,7 +288,7 @@ code.
 The total number of ELOC added or modified varies
 between \redisPatchTotal for \redis and \lighttpdtwoPatchTotal
 for \lighttpdtwo, while the end-to-end difference in ELOC varies
-between \memcachedDeltaSize for \memcached and \lighttpdtwoDeltaSize
+between \beanstalkdDeltaSize for \beanstalkd and \lighttpdtwoDeltaSize
 for \lighttpdtwo.
 
 \begin{figure}[t]
@@ -381,14 +384,13 @@ patches from the time span analysed that modify neither executable
 program code nor tests (\textit{Other}).
 
 The first observation is that a substantial amount of time is spent in
-maintenance activities that do not involve code nor tests.  For
-example, during the period analysed, in addition to the 250 target
-patches, there were around 120 additional such patches
-in \binutils, \memcached and \zeromq, and
-\gitNoTestNoExecutableRevs in \git. Note that some of these
-patches may modify code that is excluded during preprocessing on our
-machine, but most cases involved changes to build scripts,
-documentation, and other similar software artefacts.
+maintenance activities that do not involve code nor tests.  For example, during
+the period analysed, in addition to the 250 target patches, there were around
+120 additional such patches in \binutils, \memcached and \zeromq,
+\beanstalkdNoTestNoExecutableRevs in \beanstalkd and \gitNoTestNoExecutableRevs
+in \git. Note that some of these patches may modify code that is excluded
+during preprocessing on our machine, but most cases involved changes to build
+scripts, documentation, and other similar software artefacts.
 
 From the 250 patches selected for each application, the majority only
 modify code, with a relatively small number of patches
@@ -447,7 +449,7 @@ only \rediseFileMedian for all benchmarks with the exception
 of \zeromq, for which it is \zeromqeFileMedian. The fraction of
 patches that modify a single file is, in increasing
 order, \zeromqOneeFilePatches for \zeromq, \gitOneeFilePatches
-for \git, \lighttpdtwoOneeFilePatches
+for \git, \beanstalkdOneeFilePatches in \beanstalkd, \lighttpdtwoOneeFilePatches
 for \lighttpdtwo, \memcachedOneeFilePatches
 for \memcached, \redisOneeFilePatches for \redis,
 and \binutilsOneeFilePatches for \binutils.
@@ -479,6 +481,7 @@ modify executable code is considered.}
 \beanstalkd  & \beanstalkdPatchMedian  & \beanstalkdeHunkThreeMedian  & \beanstalkdeFileMedian  \\
 \binutils    & \binutilsPatchMedian  & \binutilseHunkThreeMedian  & \binutilseFileMedian  \\
 \git         & \gitPatchMedian       & \giteHunkThreeMedian       & \giteFileMedian       \\
+\lighttpd    & \lighttpdPatchMedian  & \lighttpdeHunkThreeMedian  & \lighttpdeFileMedian  \\
 \lighttpdtwo    & \lighttpdtwoPatchMedian  & \lighttpdtwoeHunkThreeMedian  & \lighttpdtwoeFileMedian  \\
 \memcached   & \memcachedPatchMedian & \memcachedeHunkThreeMedian & \memcachedeFileMedian \\
 \redis       & \redisPatchMedian     & \rediseHunkThreeMedian     & \rediseFileMedian     \\
@@ -502,6 +505,7 @@ which are nondeterministically executed in a revision.}
 \beanstalkd  &  \beanstalkdRevsTestsMixedResults  & \beanstalkdNonDetMax  & \beanstalkdNonDetMedian   & \beanstalkdNonDetAverage \\
 \binutils    &  \binutilsRevsTestsMixedResults  & \binutilsNonDetMax  & \binutilsNonDetMedian   & \binutilsNonDetAverage \\
 \git         &  \gitRevsTestsMixedResults       & \gitNonDetMax       & \gitNonDetMedian        & \gitNonDetAverage \\
+\lighttpd    &  \lighttpdRevsTestsMixedResults  & \lighttpdNonDetMax  & \lighttpdNonDetMedian   & \lighttpdNonDetAverage \\
 \lighttpdtwo    &  \lighttpdtwoRevsTestsMixedResults  & \lighttpdtwoNonDetMax  & \lighttpdtwoNonDetMedian   & \lighttpdtwoNonDetAverage \\
 \memcached   &  \memcachedRevsTestsMixedResults & \memcachedNonDetMax & \memcachedNonDetMedian  & \memcachedNonDetAverage \\
 \redis       &  \redisRevsTestsMixedResults     & \redisNonDetMax     & \redisNonDetMedian      & \redisNonDetAverage \\
@@ -615,8 +619,8 @@ $0.3\%$ of the total codebase.} Therefore, the results aim to count a
 line as covered if the test suite {\em may} execute it.  The blue
 (upper) lines in Figure~\ref{fig:coverage} plot the overall line
 coverage for all benchmarks.  It can be seen that coverage level
-varies significantly, with \binutils at one end achieving
-only \binutilsCoverageAverage coverage on average, and \git at the
+varies significantly, with \beanstalkd at one end achieving
+only \beanstalkdCoverageAverage coverage on average, and \git at the
 other achieving
 \gitCoverageAverage, while in-between \lighttpdtwo achieves
 \lighttpdtwoCoverageAverage, \redis~\redisCoverageAverage,
@@ -632,11 +636,12 @@ the analysed period. On the other hand, the coverage of
 considered, with \lighttpdtwo increasing from only
 \lighttpdtwoInitialCoverage to 49.37\% (ignoring the last two
 versions for which the regression suite fails), and \zeromq increasing
-from \zeromqInitialCoverage to \zeromqFinalCoverage. An interesting
-observation is that coverage evolution is not strongly correlated
-to the co-evolution of executable and test code (RQ1). Even when
-testing is a phased activity, coverage remains constant because the
-already existing tests execute part of the newly added code.
+from \zeromqInitialCoverage to \zeromqFinalCoverage. \beanstalkd is the only
+application whose coverage decrases over time, from \beanstalkdInitialCoverage
+to \beanstalkdFinalCoverage. An interesting observation is that coverage
+evolution is not strongly correlated to the co-evolution of executable and test
+code (RQ1). Even when testing is a phased activity, coverage remains constant
+because the already existing tests execute part of the newly added code.
 
 % \binutils: \binutilsInitialCoverage to \binutilsFinalCoverage \\
 % \git: \gitInitialCoverage to \gitFinalCoverage \\
@@ -727,7 +732,7 @@ four categories depending on their coverage.
 As it can be observed, the patch coverage distribution is
 bi-modal across applications: the majority of the patches
 in \git, \memcached and \zeromq achieve over 75\% coverage, while the
-majority of the patches in \binutils, \lighttpdtwo and \redis achieve
+majority of the patches in \beanstalkd, \binutils, \lighttpdtwo and \redis achieve
 under 25\%.  One interesting aspect is that for all applications,
 there are relatively few patches with coverage in the middle ranges:
 most of them are either poorly ($\le$25\%) or thoroughly (\textgreater75\%)
@@ -745,6 +750,7 @@ covered.
 \beanstalkd & \beanstalkdOverallPatchCovEntriesZero & \beanstalkdOverallPatchCovZero & \beanstalkdOverallPatchCovEntriesTen & \beanstalkdOverallPatchCovTen & \beanstalkdOverallPatchCovEntriesHundred & \beanstalkdOverallPatchCovHundred \\
 \binutils & \binutilsOverallPatchCovEntriesZero & \binutilsOverallPatchCovZero & \binutilsOverallPatchCovEntriesTen & \binutilsOverallPatchCovTen & \binutilsOverallPatchCovEntriesHundred & \binutilsOverallPatchCovHundred \\
 \git & \gitOverallPatchCovEntriesZero & \gitOverallPatchCovZero & \gitOverallPatchCovEntriesTen & \gitOverallPatchCovTen & \gitOverallPatchCovEntriesHundred & \gitOverallPatchCovHundred \\
+\lighttpd & \lighttpdOverallPatchCovEntriesZero & \lighttpdOverallPatchCovZero & \lighttpdOverallPatchCovEntriesTen & \lighttpdOverallPatchCovTen & \lighttpdOverallPatchCovEntriesHundred & \lighttpdOverallPatchCovHundred \\
 \lighttpdtwo & \lighttpdtwoOverallPatchCovEntriesZero & \lighttpdtwoOverallPatchCovZero & \lighttpdtwoOverallPatchCovEntriesTen & \lighttpdtwoOverallPatchCovTen & \lighttpdtwoOverallPatchCovEntriesHundred & \lighttpdtwoOverallPatchCovHundred \\
 \memcached & \memcachedOverallPatchCovEntriesZero & \memcachedOverallPatchCovZero & \memcachedOverallPatchCovEntriesTen & \memcachedOverallPatchCovTen & \memcachedOverallPatchCovEntriesHundred & \memcachedOverallPatchCovHundred \\
 \redis & \redisOverallPatchCovEntriesZero & \redisOverallPatchCovZero & \redisOverallPatchCovEntriesTen & \redisOverallPatchCovTen & \redisOverallPatchCovEntriesHundred & \redisOverallPatchCovHundred \\
@@ -765,7 +771,7 @@ coverage of patches with $\le$10 ELOC is higher than for those with
 
 Finally, the first column in Table~\ref{tbl:latent} shows the overall
 patch coverage, \ie the percentage of covered ELOC across all
-patches.  For \binutils, \git and \memcached, it is within five
+patches.  For \beanstalkd, \binutils, \git and \memcached, it is within five
 percentage points from the overall program coverage, while for the
 other benchmarks it is substantially lower---for example, the average
 overall program coverage in \redis is \redisCoverageAverage, while the
@@ -810,6 +816,7 @@ discussed in Section~\ref{sec:design}.
 \beanstalkd    & \beanstalkdOverallPatchCoverage  & \beanstalkdLatentOne  & \beanstalkdLatentFive  &  \beanstalkdLatentTen \\
 \binutils    & \binutilsOverallPatchCoverage  & \binutilsLatentOne  & \binutilsLatentFive  &  \binutilsLatentTen \\
 \git         & \gitOverallPatchCoverage       & \gitLatentOne       & \gitLatentFive       &  \gitLatentTen \\
+\lighttpd    & \lighttpdOverallPatchCoverage  & \lighttpdLatentOne  & \lighttpdLatentFive  &  \lighttpdLatentTen \\
 \lighttpdtwo    & \lighttpdtwoOverallPatchCoverage  & \lighttpdtwoLatentOne  & \lighttpdtwoLatentFive  &  \lighttpdtwoLatentTen \\
 \memcached   & \memcachedOverallPatchCoverage & \memcachedLatentOne & \memcachedLatentFive &  \memcachedLatentTen \\
 \redis       & \redisOverallPatchCoverage     & \redisLatentOne     & \redisLatentFive     &  \redisLatentTen \\
