@@ -8,8 +8,8 @@
 \newcommand{\zeromqCompileTime}[0]{21\xspace}
 \newcommand{\zeromqTestTime}[0]{10\xspace}
 
-\newcommand{\lighttpdCompileTime}[0]{17\xspace}
-\newcommand{\lighttpdTestTime}[0]{3\xspace}
+\newcommand{\lighttpdtwoCompileTime}[0]{17\xspace}
+\newcommand{\lighttpdtwoTestTime}[0]{3\xspace}
 
 \newcommand{\memcachedCompileTime}[0]{9\xspace}
 \newcommand{\memcachedTestTime}[0]{110\xspace}
@@ -58,6 +58,7 @@
 
 %% beanstalkd@https://github.com/kr/beanstalkd.git
 \input{evolution/results/beanstalkd}
+\input{evolution/results/beanstalkd-nondet}
 
 %% binutils@git://sourceware.org/git/binutils.git
 %%  3950/381/303 all/affecting binutils not compiling/affecting binutils compiling revisions (4343fe0 - a0a1bb0), 60sec timeout
@@ -100,9 +101,9 @@
 
 %% override the latent patch coverage here so we don't have to run
 %% Petr's analysis every time the results are updated
-\renewcommand{\lighttpdLatentOne}[0]{0.9\%\xspace}
-\renewcommand{\lighttpdLatentFive}[0]{5.0\%\xspace}
-\renewcommand{\lighttpdLatentTen}[0]{6.1\%\xspace}
+\renewcommand{\lighttpdtwoLatentOne}[0]{0.9\%\xspace}
+\renewcommand{\lighttpdtwoLatentFive}[0]{5.0\%\xspace}
+\renewcommand{\lighttpdtwoLatentTen}[0]{6.1\%\xspace}
 \renewcommand{\binutilsLatentOne}[0]{0.1\%\xspace}
 \renewcommand{\binutilsLatentFive}[0]{0.3\%\xspace}
 \renewcommand{\binutilsLatentTen}[0]{0.3\%\xspace}

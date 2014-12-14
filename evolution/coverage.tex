@@ -12,11 +12,15 @@ utilities from the \stt{binutils} folder (\stt{addr2line}, \stt{ar},
 \stt{ranlib}, \stt{readelf}, \stt{size}, \stt{strings} and \stt{strip}),
 which are standard user-level programs under many UNIX distributions.
 
+\item[\beanstalkd\footnote{\url{http://kr.github.io/beanstalkd/}}] is a
+  simple and fast work queue originally designed for reducing the latency of
+  page views in high-volume web applications.
+
 \item[\git\footnote{\url{http://git-scm.com/}}] is one the
 most popular distributed version control systems used by the open-source
 developer community.
 
-\item[\lighttpd\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd2/}}]
+\item[\lighttpdtwo\footnote{\url{http://redmine.lighttpdtwo.net/projects/lighttpdtwo2/}}]
 is a lightweight web server optimized for high performance environments.
 We examined version 2, which is the latest development branch.
 
@@ -40,7 +44,7 @@ a number of organisations such as Los Alamos Labs, NASA and CERN.
 
 The \numSystems applications are representative for C/C++ open-source
 code: GNU \binutils are user-level utilities, \git is a version
-control system, \lighttpdtwo, \memcached and \redis are server
+control system, \beanstalkd, \lighttpdtwo, \memcached and \redis are server
 applications, while \zeromq is a library.  All applications include a
 regression test suite.
 
@@ -56,11 +60,13 @@ analysed.}
 \cmidrule(r){2-3}\cmidrule(l){4-5}
 \textsc{Application} & \textsc{Language} & \textsc{ELOC} & \textsc{Language} & \textsc{TLOC}          % & \bf Time         
 \\ \midrule
+\beanstalkd  & C         & \beanstalkdSize & C        & \beanstalkdTsize  % & \beanstalkdTestTime
+\\
 \binutils    & C         & \binutilsSize  & DejaGnu   & \binutilsTsize    % & \binutilsTestTime 
 \\
 \git         & C         & \gitSize       & C/shell   & \gitTsize         % & \gitTestTime 
 \\
-\lighttpdtwo    & C         & \lighttpdSize  & Python    & \lighttpdTsize    % & \lighttpdTestTime 
+\lighttpdtwo    & C         & \lighttpdtwoSize  & Python    & \lighttpdtwoTsize    % & \lighttpdtwoTestTime 
 \\
 \memcached   & C         & \memcachedSize & C/Perl    & \memcachedTsize   % & \memcachedTestTime 
 \\
@@ -84,7 +90,7 @@ line count of the test files (using \texttt{cloc}, or \texttt{wc~-l} when
 
 The code size for these applications varies from only \memcachedSize
 ELOC for \memcached to \gitSize ELOC for \git.  The test code is written in
-a variety of languages and ranges from \lighttpdTsize lines of Python
+a variety of languages and ranges from \lighttpdtwoTsize lines of Python
 code for \lighttpdtwo to \gitTsize lines of C and shell code for \git.
 The test code is 36\% larger than the application code in the case
 of \git, approximately as large as the application code for
@@ -110,7 +116,7 @@ code, tests or both because this is what our analyses look at. We decided to
 select 250 such revisions from each system because some systems had non-trivial
 dependency issues further back than this, which prevented us from properly
 compiling or running them.  We still had to install the correct dependencies
-where appropriate, \eg downgrade \stt{libev} for older versions of \lighttpd
+where appropriate, \eg downgrade \stt{libev} for older versions of \lighttpdtwo
 and \stt{libevent} for \memcached.
 
 Note that not all revisions compile, either due to development errors
@@ -187,9 +193,10 @@ provides meaningful answers.
 \cmidrule{2-4}
 \textsc{Application} & \textsc{OK} & \textsc{TF} & \textsc{TO} & \textsc{CF} & \textsc{Time}           \\
 \midrule
+\beanstalkd  &  \beanstalkdOK & \beanstalkdTransientTestErrs & \beanstalkdTransientTestTimeouts & \beanstalkdTransientCompErrs  &  {\beanstalkdTimespan}mo \\
 \binutils    &  \binutilsOK   & \binutilsTransientTestErrs  & \binutilsTransientTestTimeouts  & \binutilsTransientCompErrs  &  {\binutilsTimespan}mo \\
 \git         &  \gitOK        & \gitTransientTestErrs       & \gitTransientTestTimeouts       & \gitTransientCompErrs       &  {\gitTimespan}mo  \\
-\lighttpdtwo    &  \lighttpdOK   & \lighttpdTransientTestErrs  & \lighttpdTransientTestTimeouts  & \lighttpdTransientCompErrs  &  {\lighttpdTimespan}mo  \\
+\lighttpdtwo    &  \lighttpdtwoOK   & \lighttpdtwoTransientTestErrs  & \lighttpdtwoTransientTestTimeouts  & \lighttpdtwoTransientCompErrs  &  {\lighttpdtwoTimespan}mo  \\
 \memcached   &  \memcachedOK  & \memcachedTransientTestErrs & \memcachedTransientTestTimeouts & \memcachedTransientCompErrs &  {\memcachedTimespan}mo \\
 \redis       &  \redisOK      & \redisTransientTestErrs     & \redisTransientTestTimeouts     & \redisTransientCompErrs     &  {\redisTimespan}mo     \\
 \zeromq      &  \zeromqOK     & \zeromqTransientTestErrs    & \zeromqTransientTestTimeouts    & \zeromqTransientCompErrs    &  {\zeromqTimespan}mo    \\
@@ -213,7 +220,7 @@ Table~\ref{tbl:revisions} also shows the development time span
 considered, which ranges from only 5-6 months for \git and \redis,
 which had a fast-paced development during this period, to almost 4
 years for \memcached. The age of the projects at the first version
-that we analysed ranges from a little over 2 years for \lighttpd
+that we analysed ranges from a little over 2 years for \lighttpdtwo
 (version 2), to 11 years for \binutils.
 %6 years memcached, 4 years redis, 2yr 9mo zeromq, 8 years git
 
@@ -276,30 +283,10 @@ code.
 %% maturity, churn disappears leaving place to a smoother evolution.
 
 The total number of ELOC added or modified varies
-between \redisPatchTotal for \redis and \lighttpdPatchTotal
+between \redisPatchTotal for \redis and \lighttpdtwoPatchTotal
 for \lighttpdtwo, while the end-to-end difference in ELOC varies
-between \memcachedDeltaSize for \memcached and \lighttpdDeltaSize
+between \memcachedDeltaSize for \memcached and \lighttpdtwoDeltaSize
 for \lighttpdtwo.
-
-
-%\begin{table*}[t]
-%\caption{Patch executable lines and hunks from executable files. Only patches which add/modify executable code are considered when computing statistical indicators.}
-%\begin{center}
-%\begin{tabular}{|l|r|r|r|r|r|r|r|r|}
-%\cline{2-5}\cline{6-9}
-%\multicolumn{1}{c}{}          &       \multicolumn{4}{|c|}{\bf Lines}                 &            \multicolumn{4}{c|}{\bf Hunks}             \\ \hline
-%\bf App      & \bf Total            & \bf Median            & \bf Average            & \bf Stdev  &  \bf Total & \bf Median & \bf Average & \bf Stdev\\ \hline
-%\binutils    & \binutilsPatchTotal  & \binutilsPatchMedian  & \binutilsPatchAverage  &  \binutilsPatchStdev  & \binutilseHunkThreeTotal  & \binutilseHunkThreeMedian  & \binutilseHunkThreeAverage  & \binutilseHunkThreeStdev  \\ \hline
-%\git         & \gitPatchTotal       & \gitPatchMedian       & \gitPatchAverage       &  \gitPatchStdev       & \giteHunkThreeTotal       & \giteHunkThreeMedian       & \giteHunkThreeAverage       & \giteHunkThreeStdev \\ \hline
-%\lighttpdtwo    & \lighttpdPatchTotal  & \lighttpdPatchMedian  & \lighttpdPatchAverage  &  \lighttpdPatchStdev  & \lighttpdeHunkThreeTotal  & \lighttpdeHunkThreeMedian  & \lighttpdeHunkThreeAverage  & \lighttpdeHunkThreeStdev \\ \hline
-%\memcached   & \memcachedPatchTotal & \memcachedPatchMedian & \memcachedPatchAverage &  \memcachedPatchStdev & \memcachedeHunkThreeTotal & \memcachedeHunkThreeMedian & \memcachedeHunkThreeAverage & \memcachedeHunkThreeStdev \\ \hline
-%\redis       & \redisPatchTotal     & \redisPatchMedian     & \redisPatchAverage     &  \redisPatchStdev     & \rediseHunkThreeTotal     & \rediseHunkThreeMedian     & \rediseHunkThreeAverage     & \rediseHunkThreeStdev \\ \hline
-%\zeromq      & \zeromqPatchTotal    & \zeromqPatchMedian    & \zeromqPatchAverage    &  \zeromqPatchStdev    & \zeromqeHunkThreeTotal    & \zeromqeHunkThreeMedian    & \zeromqeHunkThreeAverage    & \zeromqeHunkThreeStdev \\ \hline
-%\end{tabular}
-%\end{center}
-%\label{tbl:exec-patch}
-%\end{table*}
-%
 
 \begin{figure}[t]
 \centering
@@ -366,7 +353,7 @@ feature addition, and better testing.
 %%\bf App      & \bf C $\land$ $\lnot$T         & \bf C $\land$ T                  & \bf $\lnot$C $\land$ T  & \bf $\lnot$C $\land$ $\lnot$T        \\ \hline
 %%\binutils    & \binutilsOnlyExecutableRevs    &  \binutilsTestAndExecutableRevs  & \binutilsOnlyTestRevs   & \binutilsNoTestNoExecutableRevs      \\ \hline
 %%\git         & \gitOnlyExecutableRevs         &  \gitTestAndExecutableRevs       & \gitOnlyTestRevs        & \gitNoTestNoExecutableRevs      \\ \hline
-%%\lighttpdtwo    & \lighttpdOnlyExecutableRevs    &  \lighttpdTestAndExecutableRevs  & \lighttpdOnlyTestRevs   & \lighttpdNoTestNoExecutableRevs      \\ \hline
+%%\lighttpdtwo    & \lighttpdtwoOnlyExecutableRevs    &  \lighttpdtwoTestAndExecutableRevs  & \lighttpdtwoOnlyTestRevs   & \lighttpdtwoNoTestNoExecutableRevs      \\ \hline
 %%\memcached   & \memcachedOnlyExecutableRevs   &  \memcachedTestAndExecutableRevs & \memcachedOnlyTestRevs  & \memcachedNoTestNoExecutableRevs     \\ \hline
 %%\redis       & \redisOnlyExecutableRevs       &  \redisTestAndExecutableRevs     & \redisOnlyTestRevs      & \redisNoTestNoExecutableRevs         \\ \hline
 %%\zeromq      & \zeromqOnlyExecutableRevs      &  \zeromqTestAndExecutableRevs    & \zeromqOnlyTestRevs     & \zeromqNoTestNoExecutableRevs        \\ \hline
@@ -460,7 +447,7 @@ only \rediseFileMedian for all benchmarks with the exception
 of \zeromq, for which it is \zeromqeFileMedian. The fraction of
 patches that modify a single file is, in increasing
 order, \zeromqOneeFilePatches for \zeromq, \gitOneeFilePatches
-for \git, \lighttpdOneeFilePatches
+for \git, \lighttpdtwoOneeFilePatches
 for \lighttpdtwo, \memcachedOneeFilePatches
 for \memcached, \redisOneeFilePatches for \redis,
 and \binutilsOneeFilePatches for \binutils.
@@ -468,7 +455,7 @@ and \binutilsOneeFilePatches for \binutils.
 
 %% \binutils: \binutilsOneELOCPatches, \binutilsOneeHunkPatches, \binutilsOneeFilePatches \\
 %% \git: \gitOneELOCPatches, \gitOneeHunkPatches, \gitOneeFilePatches \\
-%% \lighttpd\: \lighttpdOneELOCPatches, \lighttpdOneeHunkPatches, \lighttpdOneeFilePatches \\
+%% \lighttpdtwo\: \lighttpdtwoOneELOCPatches, \lighttpdtwoOneeHunkPatches, \lighttpdtwoOneeFilePatches \\
 %% \memcached: \memcachedOneELOCPatches, \memcachedOneeHunkPatches, \memcachedOneeFilePatches \\
 %% \redis: \redisOneELOCPatches, \redisOneeHunkPatches, \redisOneeFilePatches \\
 %% \zeromq: \zeromqOneELOCPatches, \zeromqOneeHunkPatches, \zeromqOneeFilePatches \\
@@ -489,9 +476,10 @@ modify executable code is considered.}
 \toprule
 \textsc{Application} & \textsc{Lines} & \textsc{Hunks} & \textsc{Files}            \\
 \midrule
+\beanstalkd  & \beanstalkdPatchMedian  & \beanstalkdeHunkThreeMedian  & \beanstalkdeFileMedian  \\
 \binutils    & \binutilsPatchMedian  & \binutilseHunkThreeMedian  & \binutilseFileMedian  \\
 \git         & \gitPatchMedian       & \giteHunkThreeMedian       & \giteFileMedian       \\
-\lighttpdtwo    & \lighttpdPatchMedian  & \lighttpdeHunkThreeMedian  & \lighttpdeFileMedian  \\
+\lighttpdtwo    & \lighttpdtwoPatchMedian  & \lighttpdtwoeHunkThreeMedian  & \lighttpdtwoeFileMedian  \\
 \memcached   & \memcachedPatchMedian & \memcachedeHunkThreeMedian & \memcachedeFileMedian \\
 \redis       & \redisPatchMedian     & \rediseHunkThreeMedian     & \rediseFileMedian     \\
 \zeromq      & \zeromqPatchMedian    & \zeromqeHunkThreeMedian    & \zeromqeFileMedian    \\
@@ -511,9 +499,10 @@ which are nondeterministically executed in a revision.}
 \cmidrule{3-5}
 \textsc{Application} & \multicolumn{1}{c}{\sc Result}  & \textsc{Max} & \textsc{Median} & \textsc{Average} \\
 \midrule
+\beanstalkd  &  \beanstalkdRevsTestsMixedResults  & \beanstalkdNonDetMax  & \beanstalkdNonDetMedian   & \beanstalkdNonDetAverage \\
 \binutils    &  \binutilsRevsTestsMixedResults  & \binutilsNonDetMax  & \binutilsNonDetMedian   & \binutilsNonDetAverage \\
 \git         &  \gitRevsTestsMixedResults       & \gitNonDetMax       & \gitNonDetMedian        & \gitNonDetAverage \\
-\lighttpdtwo    &  \lighttpdRevsTestsMixedResults  & \lighttpdNonDetMax  & \lighttpdNonDetMedian   & \lighttpdNonDetAverage \\
+\lighttpdtwo    &  \lighttpdtwoRevsTestsMixedResults  & \lighttpdtwoNonDetMax  & \lighttpdtwoNonDetMedian   & \lighttpdtwoNonDetAverage \\
 \memcached   &  \memcachedRevsTestsMixedResults & \memcachedNonDetMax & \memcachedNonDetMedian  & \memcachedNonDetAverage \\
 \redis       &  \redisRevsTestsMixedResults     & \redisNonDetMax     & \redisNonDetMedian      & \redisNonDetAverage \\
 \zeromq      &  \zeromqRevsTestsMixedResults    & \zeromqNonDetMax    & \zeromqNonDetMedian     & \zeromqNonDetAverage \\
@@ -630,7 +619,7 @@ varies significantly, with \binutils at one end achieving
 only \binutilsCoverageAverage coverage on average, and \git at the
 other achieving
 \gitCoverageAverage, while in-between \lighttpdtwo achieves
-\lighttpdCoverageAverage, \redis~\redisCoverageAverage,
+\lighttpdtwoCoverageAverage, \redis~\redisCoverageAverage,
 \zeromq~\zeromqCoverageAverage, and
 \memcached~\memcachedCoverageAverage.
 
@@ -641,7 +630,7 @@ with their coverage changing with less than 2 percentage points within
 the analysed period. On the other hand, the coverage of
 \lighttpdtwo and \zeromq increase significantly during the time span
 considered, with \lighttpdtwo increasing from only
-\lighttpdInitialCoverage to 49.37\% (ignoring the last two
+\lighttpdtwoInitialCoverage to 49.37\% (ignoring the last two
 versions for which the regression suite fails), and \zeromq increasing
 from \zeromqInitialCoverage to \zeromqFinalCoverage. An interesting
 observation is that coverage evolution is not strongly correlated
@@ -651,7 +640,7 @@ already existing tests execute part of the newly added code.
 
 % \binutils: \binutilsInitialCoverage to \binutilsFinalCoverage \\
 % \git: \gitInitialCoverage to \gitFinalCoverage \\
-% \lighttpd: \lighttpdInitialCoverage to \lighttpdFinalCoverage \\
+% \lighttpdtwo: \lighttpdtwoInitialCoverage to \lighttpdtwoFinalCoverage \\
 % \memcached: \memcachedInitialCoverage to \memcachedFinalCoverage \\
 % \redis: \redisInitialCoverage to \redisFinalCoverage \\
 % \zeromq: \zeromqInitialCoverage to \zeromqFinalCoverage \\
@@ -695,7 +684,7 @@ Finally, we have looked at the impact on coverage of revisions that
 only add or modify tests (\textit{Test only} in
 Figure~\ref{fig:patch-types}).  An interesting observation is that
 many of these revisions bring no improvements to coverage. For
-example, in \lighttpdtwo only 26 out of \lighttpdOnlyTestRevs such
+example, in \lighttpdtwo only 26 out of \lighttpdtwoOnlyTestRevs such
 revisions improve coverage. The other 26 either do not affect coverage
 (18) or decrease it (8).  The revisions which do not affect coverage
 can be a sign of test driven development, \ie the tests are added
@@ -753,9 +742,10 @@ covered.
 \cmidrule(r){2-3} \cmidrule{4-5} \cmidrule(l){6-7}
 \textsc{Application} & NP & C & NP & C & NP & C  \\
 \midrule
+\beanstalkd & \beanstalkdOverallPatchCovEntriesZero & \beanstalkdOverallPatchCovZero & \beanstalkdOverallPatchCovEntriesTen & \beanstalkdOverallPatchCovTen & \beanstalkdOverallPatchCovEntriesHundred & \beanstalkdOverallPatchCovHundred \\
 \binutils & \binutilsOverallPatchCovEntriesZero & \binutilsOverallPatchCovZero & \binutilsOverallPatchCovEntriesTen & \binutilsOverallPatchCovTen & \binutilsOverallPatchCovEntriesHundred & \binutilsOverallPatchCovHundred \\
 \git & \gitOverallPatchCovEntriesZero & \gitOverallPatchCovZero & \gitOverallPatchCovEntriesTen & \gitOverallPatchCovTen & \gitOverallPatchCovEntriesHundred & \gitOverallPatchCovHundred \\
-\lighttpdtwo & \lighttpdOverallPatchCovEntriesZero & \lighttpdOverallPatchCovZero & \lighttpdOverallPatchCovEntriesTen & \lighttpdOverallPatchCovTen & \lighttpdOverallPatchCovEntriesHundred & \lighttpdOverallPatchCovHundred \\
+\lighttpdtwo & \lighttpdtwoOverallPatchCovEntriesZero & \lighttpdtwoOverallPatchCovZero & \lighttpdtwoOverallPatchCovEntriesTen & \lighttpdtwoOverallPatchCovTen & \lighttpdtwoOverallPatchCovEntriesHundred & \lighttpdtwoOverallPatchCovHundred \\
 \memcached & \memcachedOverallPatchCovEntriesZero & \memcachedOverallPatchCovZero & \memcachedOverallPatchCovEntriesTen & \memcachedOverallPatchCovTen & \memcachedOverallPatchCovEntriesHundred & \memcachedOverallPatchCovHundred \\
 \redis & \redisOverallPatchCovEntriesZero & \redisOverallPatchCovZero & \redisOverallPatchCovEntriesTen & \redisOverallPatchCovTen & \redisOverallPatchCovEntriesHundred & \redisOverallPatchCovHundred \\
 \zeromq & \zeromqOverallPatchCovEntriesZero & \zeromqOverallPatchCovZero & \zeromqOverallPatchCovEntriesTen & \zeromqOverallPatchCovTen & \zeromqOverallPatchCovEntriesHundred & \zeromqOverallPatchCovHundred \\
@@ -785,7 +775,7 @@ overall patch coverage is only \redisOverallPatchCoverage.
 %% \noindent
 %% \binutils: \binutilsCoverageAverage vs \binutilsOverallPatchCoverage \\
 %% \git: \gitCoverageAverage vs \gitOverallPatchCoverage \\
-%% \lighttpd: \lighttpdCoverageAverage vs \lighttpdOverallPatchCoverage\\
+%% \lighttpdtwo: \lighttpdtwoCoverageAverage vs \lighttpdtwoOverallPatchCoverage\\
 %% \redis: \redisCoverageAverage vs \redisOverallPatchCoverage\\
 %% \zeromq: \zeromqCoverageAverage vs \zeromqOverallPatchCoverage\\
 %% \memcached: \memcachedCoverageAverage vs \memcachedOverallPatchCoverage \\
@@ -817,9 +807,10 @@ discussed in Section~\ref{sec:design}.
 \toprule
 \textsc{Application} & \textsc{Overall} & \textsc{+1} & \textsc{+5} & \textsc{+10}  \\
 \midrule
+\beanstalkd    & \beanstalkdOverallPatchCoverage  & \beanstalkdLatentOne  & \beanstalkdLatentFive  &  \beanstalkdLatentTen \\
 \binutils    & \binutilsOverallPatchCoverage  & \binutilsLatentOne  & \binutilsLatentFive  &  \binutilsLatentTen \\
 \git         & \gitOverallPatchCoverage       & \gitLatentOne       & \gitLatentFive       &  \gitLatentTen \\
-\lighttpdtwo    & \lighttpdOverallPatchCoverage  & \lighttpdLatentOne  & \lighttpdLatentFive  &  \lighttpdLatentTen \\
+\lighttpdtwo    & \lighttpdtwoOverallPatchCoverage  & \lighttpdtwoLatentOne  & \lighttpdtwoLatentFive  &  \lighttpdtwoLatentTen \\
 \memcached   & \memcachedOverallPatchCoverage & \memcachedLatentOne & \memcachedLatentFive &  \memcachedLatentTen \\
 \redis       & \redisOverallPatchCoverage     & \redisLatentOne     & \redisLatentFive     &  \redisLatentTen \\
 \zeromq      & \zeromqOverallPatchCoverage    & \zeromqLatentOne    & \zeromqLatentFive    &  \zeromqLatentTen \\
