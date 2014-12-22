@@ -48,24 +48,6 @@
 \RequirePackage{listings}
 
 %
-% PDF
-%
-\RequirePackage{ifpdf}
-\ifpdf
-  \RequirePackage{hyperref}
-  \hypersetup{
-    unicode=true,
-    bookmarksopen=true,
-    bookmarksnumbered=true,
-    linktoc=page,
-    colorlinks=true,
-    linkcolor=pantone186,
-    citecolor=pantone334,
-    urlcolor=pantone527
-  }
-\fi
-
-%
 % Colors
 %
 \PassOptionsToPackage{dvipsnames}{xcolor}
@@ -91,65 +73,92 @@
 \definecolor{iccswRed}{rgb}{0.7,0.05,0}
 \definecolor{iccswBlue}{rgb}{0.0,0.05,0.7}
 
+\RequirePackage{ifluatex}
+
 %
 % Fonts
 %
 \RequirePackage{microtype} % character protruding and other micro-typography stuff
-\microtypesetup{activate={true,nocompatibility},final,kerning=true,spacing=true,expansion=false}
+\ifluatex
+  \microtypesetup{activate={true,nocompatibility},final,expansion=false,tracking=false}
+\else
+  \microtypesetup{activate={true,nocompatibility},final,kerning=true,spacing=true,expansion=false}
+\fi
 \microtypecontext{spacing=nonfrench}
 
 % Consider using Bitstream Charter and Bitstream Vera Sans
 
-\RequirePackage{ifxetex}
-\ifxetex
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+
+\ifluatex
   \RequirePackage{polyglossia}
-  \setdefaultlanguage[variant=british]{english}
+  \setdefaultlanguage{english}
+  %\setdefaultlanguage[variant=british]{english}
+  \RequirePackage{csquotes}
   \RequirePackage{fontspec}
-  \defaultfontfeatures{Mapping=tex-text}
-  \RequirePackage{xunicode}
+  \defaultfontfeatures{Ligatures=TeX, Scale=MatchLowercase}
   \RequirePackage{unicode-math}
 \else
-  \RequirePackage{graphicx}
   \RequirePackage[british]{babel}
   \RequirePackage[T1]{fontenc}
   %\RequirePackage{lmodern}
   \RequirePackage[utf8]{inputenc}
 \fi
 
-\iftoggle{@eulermath}%
-{%
-  \PassOptionsToPackage{minionint,mathlf,onlytext}{MinionPro}%
-  \RequirePackage{MinionPro}
-}{%
-  \PassOptionsToPackage{minionint,mathlf}{MinionPro}%
-  \RequirePackage{MinionPro}
-}%
-%\DeclareRobustCommand{\spacedallcaps}[1]{\textls[160]{\MakeTextUppercase{#1}}}%
-%\DeclareRobustCommand{\spacedlowsmallcaps}[1]{\textls[80]{\scshape\MakeTextLowercase{#1}}}%
-\DeclareRobustCommand{\spacedallcaps}[1]{\textssc{\MakeTextUppercase{#1}}}%
-\DeclareRobustCommand{\spacedlowsmallcaps}[1]{\textssc{\MakeTextLowercase{#1}}}%
+\ifluatex
+  \newfontfeature{Microtype}{protrusion=default;expansion=default;}
+  \setmainfont[Microtype, Renderer=Basic, Numbers=OldStyle]{Minion Pro}
+  \setsansfont[Microtype, Numbers=OldStyle]{Myriad Pro}
+  %\setmainfont[Renderer=Basic, SmallCapsFeatures={LetterSpace=6}, Numbers={Proportional,OldStyle}]{Minion Pro}
+  %\setsansfont[LetterSpace=3, Numbers={Proportional,OldStyle}]{Myriad Pro}
+  \setmonofont{Inconsolata}
+  \setmathfont{Asana Math}
+  %\setmathfont[range=\mathup]{Minion Pro}
+  %\setmathfont[range=\mathbfup]{Minion Pro Bold}
+  %\setmathfont[range=\mathbfit]{Minion Pro Bold Italic}
+  %\setmathfont[range=\mathit]{Minion Pro Italic}
+  \newfontface{\chapterNumber}[Scale=5]{Minion Pro Bold}
+\else
+  \RequirePackage{MyriadPro}
+  \iftoggle{@eulermath}%
+  {%
+    \PassOptionsToPackage{minionint,mathlf,onlytext}{MinionPro}%
+    \RequirePackage{MinionPro}
+  }{%
+    \PassOptionsToPackage{minionint,mathlf}{MinionPro}%
+    \RequirePackage{MinionPro}
+  }%
+  \PassOptionsToPackage{scaled=0.85}{beramono}
+  \RequirePackage{beramono}
 
-\RequirePackage{MyriadPro}
+  \iftoggle{@eulermath}%
+  {\PassOptionsToPackage{euler-digits}{eulervm}%
+  \RequirePackage{eulervm}} % Euler math fonts
+  {\relax}
 
-\PassOptionsToPackage{scaled=0.85}{beramono}
-\RequirePackage{beramono}
+  \iftoggle{@eulerchapternumbers}% font for the chapter numbers
+  {\newfont{\chapterNumber}{eurb10 scaled 7000}}%
+  {\newfont{\chapterNumber}{pplr9d scaled 7000}}          
+  % Euler eurb10 / Palatino OSF pplr9d / Palatino SC pplrc9d
+  % Latin Modern cork-lmr10 / Minion MinionPro-Regular-osf-t1
+  % (MinionPro-SemiboldCapt-osf-t1 MinionPro-SemiboldDisp-osf-t1)
+\fi
 
-\iftoggle{@eulermath}%
-{\PassOptionsToPackage{euler-digits}{eulervm}%
-\RequirePackage{eulervm}} % Euler math fonts
-{\relax}
-
-\iftoggle{@eulerchapternumbers}% font for the chapter numbers
-{\newfont{\chapterNumber}{eurb10 scaled 7000}}%
-{\newfont{\chapterNumber}{pplr9d scaled 7000}}          
-% Euler eurb10 / Palatino OSF pplr9d / Palatino SC pplrc9d
-% Latin Modern cork-lmr10 / Minion MinionPro-Regular-osf-t1
-% (MinionPro-SemiboldCapt-osf-t1 MinionPro-SemiboldDisp-osf-t1)
+\ifluatex
+  \DeclareRobustCommand{\spacedallcaps}[1]{\textls[160]{\MakeTextUppercase{#1}}}%
+  \DeclareRobustCommand{\spacedlowsmallcaps}[1]{\textls[80]{\scshape\MakeTextLowercase{#1}}}%
+\else
+  \DeclareRobustCommand{\spacedallcaps}[1]{\textssc{\MakeTextUppercase{#1}}}%
+  \DeclareRobustCommand{\spacedlowsmallcaps}[1]{\textssc{\MakeTextLowercase{#1}}}%
+\fi
 
 \RequirePackage{setspace}
 \RequirePackage{titling}
 
+%
 % Custom
+%
 \clubpenalty = 10000
 \widowpenalty = 10000 
 \displaywidowpenalty = 10000 % formulas
@@ -456,5 +465,23 @@
     \addtocontents{lot}{\deactivateaddvspace}%
     \addtocontents{lol}{\deactivateaddvspace}%
 }%
+
+%
+% PDF
+%
+\RequirePackage{ifpdf}
+\ifpdf
+%  \RequirePackage{hyperref}
+%  \hypersetup{
+%    unicode=true,
+%    bookmarksopen=true,
+%    bookmarksnumbered=true,
+%    linktoc=page,
+%    colorlinks=true,
+%    linkcolor=pantone186,
+%    citecolor=pantone334,
+%    urlcolor=pantone527
+%  }
+\fi
 
 \endinput

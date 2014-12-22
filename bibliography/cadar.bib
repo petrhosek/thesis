@@ -5,6 +5,19 @@
 
 %--------------------------- Publication List -------------------------%
 
+@InProceedings{varan:asplos15,
+  crossref = {asplos15},
+  author = {Petr Hosek and Cristian Cadar},
+  title = {{Varan the Unbelievable}: An efficient {N}-version execution framework},
+}
+
+@InProceedings{covrig:issta14,
+  crossref = {issta14},
+  author = {Paul Dan Marinescu and Petr Hosek and Cristian Cadar},
+  title = {Covrig: A Framework for the Analysis of Code, Test, an Coverage Evolution in Real Software},
+  OPTpages = {93--104},
+}
+
 @InProceedings{klee-multisolver:cav13,
     crossref = {cav13},
     author = {Hristina Palikareva and Cristian Cadar},
@@ -315,6 +328,13 @@ David Dill and Dawson Engler",
    month = jan,
    location = Charleston,
 }
+
+@InProceedings{lookup-tables,
+  crossref={iwmse11},
+  author = {Chris Wilcox and Michelle Strout and James Bieman},
+  title = {Mesa: Automatic Generation of Lookup Table Optimizations},
+}
+
 
 @InProceedings{beyer-counterex,
    crossref = {icse04},
@@ -1532,6 +1552,12 @@ Programs},
     title = {Staged deployment in {Mirage}, an integrated software upgrade testing and distribution system},
 }
 
+@InProceedings{chen1995,
+    crossref = {ftcs78},
+    author = {Chen, Liming and Avizienis, Algirdas},
+    title = {N-version programming: A Fault-tolerance approach to reliability of software operation},
+}
+
 @InProceedings{cox2006,
     crossref = {usenix-sec06},
     author = {Cox, Benjamin and Evans, David and Filipi, Adrian and Rowanhill, Jonathan and Hu, Wei and Davidson, Jack and Knight, John and Nguyen-Tuong, Anh and Hiser, Jason},
@@ -1936,7 +1962,7 @@ Programs},
 
 @InProceedings{k42,
     crossref = {usenix-atc05},
-    author = {Andrew Baumann and Gernot Heiser and Dilma Da Silva and Orran Krieger and Robert W. Wisniewski and Jeremy Kerr},
+     author = {Andrew Baumann and Gernot Heiser and Dilma Da Silva and Orran Krieger and Robert W. Wisniewski and Jeremy Kerr},
     title = {Providing dynamic update in an operating system},
 }
 
@@ -2506,16 +2532,89 @@ reversals},
   title = {An experimental evaluation on reliability features of N-version programming},
 }
 
-@InProceedings{nvp77,
-  crossref = {compsac77},
-  author = {Algirdasi A. Avi\v{z}ienis and Liming Chen},
-  title = {On the implementation of {$N$}-version programming for software fault tolerance during execution},
+@inproceedings{hotswup:pina13,
+  crossref  = {hotswup13},
+  author    = {Lu{\'{\i}}s Pina and Michael Hicks},
+  title     = {Rubah: Efficient, General-purpose Dynamic Software Updating for {Java}},
 }
 
-@InProceedings{chen1995,
-    crossref = {ftcs78},
-    author = {Chen, Liming and Avi\v{z}ienis, Algirdas A.},
-    title = {{$N$}-version programming: A Fault-tolerance approach to reliability of software operation},
+@inproceedings{hotswup:marques13,
+  crossref  = {hotswup13},
+  author    = {Eduardo R. B. Marques},
+  title     = {Fine-grained Patches for {Java} Software Upgrades},
+}
+
+@inproceedings{hotswup:payer13,
+  crossref  = {hotswup13},
+  author    = {Mathias Payer and Boris Bluntschli and Thomas R. Gross},
+  title     = {{DynSec}: On-the-fly Code Rewriting and Repair},
+}
+
+@inproceedings{hotswup:holmbacka13,
+  crossref  = {hotswup13},
+  author    = {Simon Holmbacka and Wictor Lund and S{\'{e}}bastien Lafond and Johan Lilius},
+  title     = {Lightweight Framework for Runtime Updating of {C}-Based Software in Embedded Systems},
+}
+
+@inproceedings{hotswup:martinez13,
+  crossref  = {hotswup13},
+  author    = {Sebastien Martinez and Fabien Dagnat and J{\'{e}}r{\'{e}}my Buisson},
+  title     = {Prototyping {DSU} Techniques Using {Python}},
+}
+
+@inproceedings{jvolve,
+  crossref = {pldi09},
+  author = {Subramanian, Suriya and Hicks, Michael and McKinley, Kathryn S.},
+  title = {Dynamic Software Updates: A {VM}-centric Approach},
+}
+
+@inproceedings{jdrums,
+  crossref = {jtres00},
+  author = {Tobias Ritzau and Jesper Andersson},
+  title = {Dynamic deployment of {Java} applications},
+}
+
+@inproceedings{dvm,
+  crossref = {pppj10},
+  author = {Thomas W\"{u}rthinger and Christian Wimmer and Lukas Stadler},
+  title = {Dynamic Code Evolution for {Java}},
+}
+
+@InProceedings{true:sp12,
+  crossref = {ieee-sp12},
+  author = {Mathias Payer and Tobias Hartmann and Thomas R. Gross},
+  title = {Safe Loading -- A Foundation for Secure Execution of Untrusted Programs},
+}
+
+@InProceedings{libdetox:vee11,
+  crossref = {vee11},
+  author = {Mathias Payer and Thomas R. Gross},
+  title = {Fine-Grained User-Space Security Through Virtualization},
+}
+
+@InProceedings{sosie:issta14,
+  crossref = {issta14},
+  author = {Baudry, Benoit and Allier, Simon and Monperrus, Martin},
+  title = {Tailored Source Code Transformations to Synthesize Computationally Diverse Program Variants},
+  OPTpages = {149--159},
+}
+
+@InProceedings{cook:isca13,
+  crossref = {isca13},
+  author = {Cook, Henry and Moreto, Miquel and Bird, Sarah and Dao, Khanh and Patterson, David A. and Asanovic, Krste},
+  title = {A Hardware Evaluation of Cache Partitioning to Improve Utilization and Energy-efficiency While Preserving Responsiveness},
+}
+
+@InProceedings{ronsse01,
+  crossref = {iccs01},
+  author = {Ronsse, Michiel and Christiaens, Mark and Bosschere, Koenraad De},
+  title = {Cyclic Debugging Using Execution Replay},
+}
+
+@InProceedings{levrouw94,
+  crossref = {ipdps94},
+  author = {Levrouw, L.J. and Audenaert, K.M.R. and Van Campenhout, J.M.},
+  title = {A New Trace And Replay System For Shared Memory Programs Based On Lamport Clocks},
 }
 
 %------------------------------- Books -----------------------------%
@@ -2530,7 +2629,7 @@ reversals},
 @Book{liskov,
    author =       "Barbara Liskov and John Guttag",
    title =        "Program Development in Java",
-   publisher =    ADDISON,
+   publisher =    "Addison-Wesley Professional",
    year =         2001,
 }
 
@@ -2921,9 +3020,9 @@ reversals},
 }
 
 @Article{Chaining,
+  crossref = {acm-tosem},
   author = {Roger Ferguson and Bogdan Korel},
   title = {The chaining approach for software test data generation},
-  journal = ACM-SEM,
   volume = {5},
   number = {1},
   year = {1996},
@@ -3550,6 +3649,19 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
   pages = {238-247}, 
 }
 
+@Article{lamport78,
+  crossref = {cacm},
+  author = {Leslie Lamport},
+  title = {Time, clocks, and the ordering of events in a distributed system},
+  volume = {21},
+  number = {7},
+  month = jul,
+  year = {1978},
+  issn = {0001-0782},
+  pages = {558--565},
+  numpages = {8},
+}
+
 %------------------ Theses --------------------------%
 
 @MastersThesis{herder:minix,
@@ -3652,7 +3764,7 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
 @TechReport{Alloy,
   author =       {Daniel Jackson},
   title =        {Alloy: {A} Lightweight Object Modelling Notation},
-  institution =  MITLCS,
+  institution =  {MIT/LCS},
   year =         2000,
   number =       797,
   keywords =     {specification, modelling},
@@ -3687,7 +3799,7 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
 @TechReport{miller95fuzz,
     author = "Barton Miller and David Koski and Cjin Pheow Lee and Vivekananda Maganty and Ravi Murthy and Ajitkumar Natarajan and Jeff Steidl",
     title = "Fuzz Revisited: {A} Re-examination of the Reliability of {UNIX} Utilities and Services",
-    institution = UWMadison,
+    institution = {University of Wisconsin–Madison},
     year = "1995",
     url = "citeseer.ist.psu.edu/miller95fuzz.html" }
 
@@ -3758,6 +3870,35 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
   year = {1997},
 }
 
+@techreport{dustm,
+  author = {Lu\'is Pina and Joao Cachopo},
+  title = {{DuSTM} -- Dynamic Software Upgrades using Software Transactional Memory},
+  number = {32/2011},
+  institution = {INESC-ID Lisboa},
+  year = {2011},
+}
+
+@techreport{dynamicml,
+  author = {Stephen Gilmore and Dilsun K\'irl\'i and Christopher Walton},
+  title = {{Dynamic ML} without Dynamic Types},
+  year = {1997},
+}
+
+@techreport{dowd08,
+  author = {Mark Dowd},
+  title = {Application-Specific Attacks: Leveraging the ActionScript Virtual Machine},
+  year = {2008},
+  month = apr,
+  institution = {IBM Global Technology Services},
+}
+
+@TechReport{jaleel07,
+  author = {Aamer Jaleel},
+  title = {Memory Characterization of Workloads Using Instrumentation-Driven Simulation},
+  year = {2007},
+  institution = {Intel Corporation},
+}
+
 %------------- Proceedings ------------%
 
 @Proceedings{CAV2004,
@@ -3790,7 +3931,7 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
    title     = {Computer Aided Verification, 18th International Conference,
                 CAV 2006, Seattle, WA, USA, August 17-20, 2006, 
                 Proceedings},
-   booktitle = CAV06,
+   booktitle = {CAV},
    publisher = {Springer},
    series    = {Lecture Notes in Computer Science},
    volume    = {4144},
@@ -4249,7 +4390,7 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
   title = {{Blogger Incident Report}},
   year = 2011,
   month = may,
-  howpublished = {\url{http://status.blogger.com/2011/05/blogger-incident-report-by-eddie.html}},
+  url = {http://status.blogger.com/2011/05/blogger-incident-report-by-eddie.html},
 }
 
 @misc{skype-incident2011,
@@ -4257,7 +4398,7 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
   title = {{An update on today's downtime}},
   year = 2011,
   month = may,
-  howpublished = {\url{http://heartbeat.skype.com/2011/05/an_update_on_todays_downtime.html}},
+  url = {http://heartbeat.skype.com/2011/05/an_update_on_todays_downtime.html},
 }
 
 @misc{kernel-procmem,
@@ -4265,7 +4406,21 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
   title = {{[PATCH v2 0/12] enable writing to /proc/pid/mem}},
   year = 2011,
   month = mar,
-  howpublished = {\url{http://lists-archives.org/linux-kernel/27452837-enable-writing-to-proc-pid-mem.html}},
+  url = {http://lists-archives.org/linux-kernel/27452837-enable-writing-to-proc-pid-mem.html},
+}
+
+@Misc{ms:sir11h1,
+  title = {Microsoft Security Intelligence Report},
+  year = 2011,
+  month = jan # {--} # jun,
+  url = {http://download.microsoft.com/download/0/3/3/0331766E-3FC4-44E5-B1CA-2BDEB58211B8/Microsoft_Security_Intelligence_Report_volume_11_English.pdf},
+}
+
+@Misc{opera-breach13,
+  title = {Security breach stopped},
+  year = 2013,
+  month = jun,
+  howpublished = {\url{https://web.archive.org/web/20130629221339/http://my.opera.com/securitygroup/blog/2013/06/26/opera-infrastructure-attack}}
 }
 
 @misc{facebook-incident2010,

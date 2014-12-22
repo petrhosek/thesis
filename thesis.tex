@@ -11,7 +11,6 @@
 \supervisor{Dr Cristian Cadar}
 \dedication{}
 
-\usepackage{listings}
 \lstset{
   language=C,
   captionpos=b,
@@ -58,19 +57,18 @@
 \sisetup{per-mode=symbol}
 \DeclareSIUnit[number-unit-product=\,]{\loc}{LOC}
 
-\usepackage{color}
 \usepackage{xspace}
-\usepackage{graphicx}
 \usepackage{url}
-\usepackage{cite}
 \usepackage[normalem]{ulem}
 \usepackage{multirow}
-\usepackage{flushend}
 \usepackage{paralist}
 \setlength{\parskip}{0cm}
 \setlength{\parindent}{1em}
 
-\usepackage{tikz}
+\usepackage[backend=biber,style=alphabetic,mincrossrefs=10000]{biblatex}
+\addbibresource{bibliography/cadar-macros.bib}
+\addbibresource{bibliography/cadar-crossrefs.bib}
+\addbibresource{bibliography/cadar.bib}
 
 \newcommand*\circl[1]{%
   \begin{tikzpicture}[baseline=(C.base)]
@@ -80,7 +78,7 @@
 \newcommand{\boldtext}[1]{\vspace{0.05in}\noindent\textbf{#1}}
 \newcommand{\textstt}[1]{{\small \texttt{#1}}\xspace}
 %\newcommand{\textssc}[1]{{\small \textsc{#1}}\xspace}
-\renewcommand{\textssc}[1]{\textls[80]{\scshape\MakeTextLowercase{#1}}}
+\newcommand{\textssc}[1]{\textls[80]{\scshape\MakeTextLowercase{#1}}}
 
 \newcommand{\mx}[0]{\textsc{Mx}\xspace}
 \newcommand{\mxe}[0]{\textsc{MxE}\xspace}
@@ -202,6 +200,19 @@
 \newcommand{\scribe}[0]{\textit{Scribe}\xspace}
 \newcommand{\strata}[0]{\textit{Strata}\xspace}
 \newcommand{\tachyon}[0]{\textit{Tachyon}\xspace}
+
+\usepackage{hyperref}
+\hypersetup{
+  unicode=true,
+  bookmarksopen=true,
+  bookmarksnumbered=true,
+  linktoc=page,
+  colorlinks=true,
+  linkcolor=pantone186,
+  citecolor=pantone334,
+  urlcolor=pantone527
+}
+
 %%%
 
 \input{evolution/rqs}
@@ -223,6 +234,15 @@
 
 \pdfbookmark[0]{Colophon}{colophon}
 \section*{Colophon}
+
+This document was typeset using Lua\LaTeX, using a custom style based on
+\textsf{classicthesis}\footnote{\url{https://code.google.com/p/classicthesis/}}.
+The bibliography was processed by
+Biblatex\footnote{\url{http://www.ctan.org/pkg/biblatex}} and
+Biber\footnote{\url{http://biblatex-biber.sourceforge.net/}}.
+
+The default text font is Minion Pro, while the sans-serif text is typeset in
+\textsf{Myriad Pro}; monospaced text uses \texttt{Bitstream Vera Mono}.
 
 \preface
 \begin{abstract}
@@ -268,8 +288,9 @@ parallel platforms, such as GPGPUs and cloud environments.
 \input{conclusion/conclusion}
 \addcontentsline{toc}{chapter}{References}
 {
-  \bibliographystyle{alpha}
-  \bibliography{bibliography/cadar,bibliography/cadar-crossrefs,bibliography/cadar-macros}
+  \printbibliography
+  %\bibliographystyle{alpha}
+  %\bibliography{bibliography/cadar,bibliography/cadar-crossrefs,bibliography/cadar-macros}
   %\bibliography{bibliography/bibliography}
 }
 
