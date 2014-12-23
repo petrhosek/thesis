@@ -1,4 +1,4 @@
-set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,7.0cm
+set term pdfcairo enhanced color solid font 'Helvetica,14' size 5.0,3.0
 set output 'spec2000.pdf'
 
 set style data histogram
@@ -11,13 +11,15 @@ set tics out
 #set boxwidth 0.9 relative
 #set style fill solid 1.0 noborder
 
-set xtics 1000 nomirror rotate by -45 scale 0
+set xtics 1000 nomirror rotate by -60 scale 0
 set ytics nomirror
 set grid y
 
+set bmargin 5.0
+
 set yrange [0.0:7.0]
 
-set key rmargin center autotitle columnheader reverse samplen 1 title "N"
+set key outside center top horizontal autotitle columnheader reverse samplen 1 title ""
 
 set ylabel "Runtime Overhead (Normalized)"
 

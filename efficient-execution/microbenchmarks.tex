@@ -1,50 +1,50 @@
 \subsection{Microbenchmarks}
 \label{sec:microbenchmarks}
 
-To measure the overhead introduced by \nx while processing individual
+To measure the overhead introduced by \varan while processing individual
 system calls, we designed a series of experiments that compare a
-system call intercepted and executed by \nx against the same system
+system call intercepted and executed by \varan against the same system
 call executed natively. We used five different system calls:
 
 \begin{enumerate}
 
-%\item \stt{close} is representative of an inexpensive system call.
-%  We invoke it with argument \stt{-1}, which returns immediately
+%\item \lstinline`close` is representative of an inexpensive system call.
+%  We invoke it with argument \lstinline`-1`, which returns immediately
 %  with an error representing a NOP system call.
 
-\item \stt{close(-1)} is representative of an inexpensive system call,
+\item \lstinline`close(-1)` is representative of an inexpensive system call,
   which returns immediately.
 
-%\item \stt{write} is representative of system calls which involve
+%\item \lstinline`write` is representative of system calls which involve
 %  expensive I/O, but whose result can be sent entirely as a single
 %  event in the ring buffer.  We invoke the system call to write a
-%  512-byte buffer to \stt{/dev/null}.
+%  512-byte buffer to \lstinline`/dev/null`.
 
-\item\stt{write(1 /* /dev/null */, "...", 512)} is representative of system call which involve
-  expensive I/O, but whose result can be sent entirely as a single event in the
-  ring buffer.
+\item \lstinline`write(DEV_NULL, "...", 512)` is representative of system
+  calls which involve expensive I/O, but whose result can be sent
+  entirely as a single event in the ring buffer.
 
-%\item \stt{read} is representative of system calls which involve
+%\item \lstinline`read` is representative of system calls which involve
 %  expensive I/O, and whose result cannot be fully included in the
 %  associated event in the ring buffer.  Instead, it has to be copied
 %  via additional shared memory (\S\ref{sec:ring}). We invoke the
-%  system call to read a 512-byte buffer from \stt{/dev/zero}.
+%  system call to read a 512-byte buffer from \lstinline`/dev/zero`.
 
-\item \stt{read(0 /* /dev/null */, "...", 512)} is representative of system calls which
+\item \lstinline`read(DEV_NULL, "...", 512)` is representative of system calls which
   involve expensive I/O, and whose result cannot be fully included in the
   associated event in the ring buffer.  Instead, it has to be copied via
   additional shared memory (\S\ref{sec:ring}).
 
-%\item \stt{open} is representative of system calls that require
+%\item \lstinline`open` is representative of system calls that require
 %  transferring file descriptors (\S\ref{sec:leader-repl}).  We invoke
-%  it with \stt{/dev/null} and \stt{O\_RDONLY} as arguments.
+%  it with \lstinline`/dev/null` and \lstinline`O\_RDONLY` as arguments.
 
-\item \stt{open("/dev/null", O\_RDONLY)} is representative of system calls that
+\item \lstinline`open("/dev/null", O_RDONLY)` is representative of system calls that
   require transferring file descriptors (\S\ref{sec:leader-repl}).
 
-\item \stt{time(NULL)} is a virtual system call implemented via the
+\item \lstinline`time(NULL)` is a virtual system call implemented via the
   \textit{vDSO} segment (\S\ref{sec:vsyscall}). It internally calls
-  \stt{\_\_vdso\_time} (since glibc 2.15).  We could not measure
+  \lstinline`__vdso_time` (since glibc 2.15).  We could not measure
   the overhead of using the \textit{vsyscall} page, because it is
   deprecated on our system (and all recent versions of Linux), with
   all \textit{vsyscalls} now redirected to their \textit{syscall}
@@ -52,71 +52,73 @@ call executed natively. We used five different system calls:
 
 \end{enumerate}
 
-%% The \stt{open} demonstrates the cost of the file descriptor transfer; we have
-%% used the \stt{/dev/null} file with \stt{O\_RDONLY} flag. \stt{read} and
-%% \stt{write} use the I/O performance overhead, by reading and writing 512B
-%% buffer from \stt{/dev/zero} and to \stt{/dev/null} respectively. The \stt{read}
+%% The \lstinline`open` demonstrates the cost of the file descriptor transfer; we have
+%% used the \lstinline`/dev/null` file with \lstinline`O\_RDONLY` flag. \lstinline`read` and
+%% \lstinline`write` use the I/O performance overhead, by reading and writing 512B
+%% buffer from \lstinline`/dev/zero` and to \lstinline`/dev/null` respectively. The \lstinline`read`
 %% is clearly more expensive system call, as it needs to transfer the content of
 %% the buffer read using the shared memory (\S\ref{sec:streaming}). The
-%% \stt{close} system call is a representative of all other cases.
+%% \lstinline`close` system call is a representative of all other cases.
 
 We execute each system call one million times and compute the average
 of all execution times.  Time measurements were done using the time
-stamp counter (\ie the \stt{RDTSC} instruction). Each set of
+stamp counter (\ie the \lstinline`RDTSC` instruction). Each set of
 measurements was preceded by a warm-up stage in which we executed the
-system call $10,000$ times. % to warm up the caches.
+system call \num{10000} times. % to warm up the caches.
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=\columnwidth]{efficient-execution/graphs/micro.pdf}
+  \includegraphics[width=\textwidth]{efficient-execution/graphs/micro}
   \caption{System call microbenchmarks.}
   \label{fig:micro_syscall}
 \end{figure}
 
 %\begin{figure}[!t]
 %  \centering
-%  \includegraphics[width=\columnwidth]{efficient-execution/graphs/micro_syscall.pdf}
+%  \includegraphics[width=\columnwidth]{results/micro_syscall}
 %  \caption{System call microbenchmarks.}
 %  \label{fig:micro_syscall}
 %\end{figure}
 
-Figure~\ref{fig:micro_syscall} shows the results.  The first set of bars
-labeled \textit{native} shows the execution time without \nx.  The second set
-of bars labeled \textit{intercept} shows the execution time with interception
-measuring the cost of binary rewriting: for taking these measurements, the
-intercepted system call is immediately executed, without any additional
-processing.  As it can be seen, the interception cost is small, at under
-\maxInterceptOvh in all cases. The overhead of intercepting the virtual system
-calls is high in relative terms, but low in absolute ones: \vdsoIntercept vs
-\vdsoNative for native execution in case of \stt{time}.
+Figure~\ref{fig:micro_syscall} shows the results.  The first set of
+bars labeled \textit{native} shows the execution time without \varan.
+The second set of bars labeled \textit{intercept} shows the execution
+time with interception, measuring the cost of binary rewriting: for
+these experiments, the intercepted system call is immediately
+executed, without any additional processing.  As it can be seen, the
+interception cost is small, at under \maxInterceptOvh in all
+cases. The overhead of intercepting the virtual system calls is high
+in relative terms, but low in absolute ones: \vdsoIntercept vs
+\vdsoNative for native execution in case of \lstinline`time`.
 
-The set of bars labeled \textit{leader} shows the execution time of each
-system call being interecepted, executed and recorded by the leader.
-That is, it is the sum of the \textit{intercept} cost and the
-cost of recording the system call.  For \stt{close} and \stt{write},
-the overhead is only \closeLeaderOvh and \writeLeaderOvh respectively on top of
-the native execution, because the arguments and results of these system calls
-can be recorded in a single event.  For \stt{read}, this is more expensive, at
-139\%, because transferring the result also involves accessing additional
-shared memory.  Finally, the cost for \stt{open} is the highest, since it also
-involves the slower transfer of the returned file descriptor via a UNIX domain
-socket.
+The set of bars labeled \textit{leader} shows the execution time for
+each system call to be intercepted, executed and recorded by the
+leader.  That is, it is the sum of the \textit{intercept} cost and the
+cost of recording the system call.  For \lstinline`close` and \lstinline`write`,
+the overhead is only \closeLeaderOvh and \writeLeaderOvh respectively
+on top of the native execution, because the arguments and results of
+these system calls can be recorded in a single event.  For \lstinline`read`,
+this is more expensive, at \SI{139}{\percent}, because transferring the result also
+involves accessing additional shared memory.  Finally, the cost for
+\lstinline`open` is the highest, since it also involves the slower transfer
+of the returned file descriptor via a UNIX domain socket.
 
-Finally, the set of bars labeled \textit{follower} shows the execution time
-incurred by the follower which has to intercept each system call and read its
-results from the ring buffer and (if necessary) shared memory.  As expected, the
-costs for \stt{close} and \stt{write} are low (and significantly lower
-than executing the system call), because the entire result fits into a
-single event on the ring buffer. The costs for \stt{read} and
-\stt{open} are again higher, because they involve additional shared
-memory and transferring a file descriptor, respectively, but they are
-still lower than the costs incurred by the leader.
+Finally, the set of bars labelled \textit{follower} shows the execution
+time of the follower, which has to intercept each system call and read
+its results from the ring buffer and (if necessary) shared memory.  As
+expected, the costs for \lstinline`close` and \lstinline`write` are low (and
+significantly lower than executing the system call), because the
+entire result fits into a single event on the ring buffer. The costs
+for \lstinline`read` and \lstinline`open` are higher, because they involve
+additional shared memory and transferring a file descriptor,
+respectively, but they are still lower than the costs incurred by the
+leader.
 
 
 %\boldtext{vDSO calls.}  We similarly measured the overhead of
 %performing a virtual system call via the \textit{vDSO} segment
-%(\S\ref{sec:vsyscall}).  The system call used was \stt{time},
-%which internally calls \stt{\_\_vdso\_time} (since \stt{glibc
+%(\S\ref{sec:vsyscall}).  The system call used was \lstinline`time`,
+%which internally calls \lstinline`\_\_vdso\_time` (since \stt{glibc
 %  2.15}).  We could not measure the overhead of using the
 %\textit{vsyscall} page, because it is deprecated on our system (and
 %all recent versions of Linux), with all \textit{vsyscalls} now
@@ -124,14 +126,14 @@ still lower than the costs incurred by the leader.
 
 %\begin{figure}[!t]
 %  \centering
-%  \includegraphics[width=\columnwidth]{efficient-execution/graphs/micro_vsyscall.pdf}
+%  \includegraphics[width=\columnwidth]{results/micro_vsyscall}
 %  \caption{vsyscall and vDSO microbenchmarks.}
 %  \label{fig:micro_vsyscall}
 %\end{figure}
 
 %Figure~\ref{fig:micro_syscall} shows the results, using the same set
 %of bars as in Figure~\ref{fig:micro_syscall}.  We have opted this time
-%to show absolute numbers, and to include the data for \stt{close(-1)}
+%to show absolute numbers, and to include the data for \lstinline`close(-1)`
 %from Figure~\ref{fig:micro_syscall} for comparison.  The overhead of
 %intercepting the system call is high in relative terms, but low in
 %absolute ones: \vdsoIntercept vs \vdsoNative for native execution.

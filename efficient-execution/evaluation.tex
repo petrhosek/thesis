@@ -1,18 +1,18 @@
 \section{Performance evaluation}
 \label{sec:evaluation}
 
-One of the main contributions of \nx is significantly lower
-performance overhead compared to the state-of-the-art NVX systems.
-Therefore, we have conducted an extensive performance evaluation,
-using microbenchmarks (\S\ref{sec:microbenchmarks}), high-performance
-C10k servers (\S\ref{sec:c10k}) and servers used to evaluate prior NVX
-systems (\S\ref{sec:comparison}).
+One of the main contributions of \varan is a significantly lower
+performance overhead compared to existing state-of-the-art NVX
+systems.  Therefore, we have conducted an extensive performance
+evaluation, using microbenchmarks (\S\ref{sec:microbenchmarks}),
+high-performance C10k servers (\S\ref{sec:c10k}) and servers used to
+evaluate prior NVX systems (\S\ref{sec:comparison}).
 
 The microbenchmarks were run on a four-core/eight-thread machine with
 a 3.50~GHz Intel Xeon~E3-1280 CPU and 16~GB RAM running 64-bit Ubuntu
 14.04 LTS, while the servers were run on a pair of such machines, one
-running the server under \nx and the other the client.  The machines
-are located in the same rack, connected by a 1~Gb Ethernet.
+running the server under \varan and the other the client.  The machines
+are located in the same rack, connected by a 1~Gb Ethernet link.
 
 \input{efficient-execution/microbenchmarks}
 \input{efficient-execution/c10k}

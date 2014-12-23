@@ -53,7 +53,7 @@
    morecomment=[l];%
    }[keywords,comments,strings]
 
-\usepackage{siunitx}
+\usepackage[binary-units,group-separator={,}]{siunitx}
 \sisetup{per-mode=symbol}
 \DeclareSIUnit[number-unit-product=\,]{\loc}{LOC}
 
@@ -119,11 +119,11 @@
 \begin{enumerate}\setlength{\topsep}{0pt}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}
 {\end{enumerate}}
 
-\newcommand{\ie}{i.e.\ }
-\newcommand{\eg}{e.g.\ }
-\newcommand{\etal}{et al.\ }
-\newcommand{\vs}{vs.\ }
-\newcommand{\etc}{etc.\ }
+\newcommand{\ie}{\emph{i.e.}\ }
+\newcommand{\eg}{\emph{e.g.},\ }
+\newcommand{\etal}{\emph{et al.}\ }
+\newcommand{\vs}{\emph{vs.}\ }
+\newcommand{\etc}{\emph{etc.}\ }
 \newcommand{\resp}{\emph{resp.}\ }
 
 \newcommand{\sref}[1]{\S\ref{#1}}
@@ -195,6 +195,7 @@
 \newcommand{\speczerozero}[0]{\textit{SPEC CPU2000}\xspace}
 \newcommand{\speczerosix}[0]{\textit{SPEC CPU2006}\xspace}
 \newcommand{\thttpd}[0]{\textit{thttpd}\xspace}
+\newcommand{\gdb}[0]{\textit{GDB}\xspace}
 
 \newcommand{\orchestra}[0]{\textit{Orchestra}\xspace}
 \newcommand{\scribe}[0]{\textit{Scribe}\xspace}

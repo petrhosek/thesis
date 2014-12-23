@@ -3,31 +3,31 @@
 
 % Microbenchmarks
 
-\newcommand{\maxInterceptOvh}{$15\%$\xspace}
+\newcommand{\maxInterceptOvh}{\SI{15}{\percent}\xspace}
 
-\newcommand{\closeLeaderOvh}{$36\%$\xspace}
-\newcommand{\closeFollowerOvh}{$20\%$\xspace}
+\newcommand{\closeLeaderOvh}{\SI{36}{\percent}\xspace}
+\newcommand{\closeFollowerOvh}{\SI{20}{\percent}\xspace}
 
-\newcommand{\writeLeaderOvh}{$39\%$\xspace}
-\newcommand{\writeFollowerOvh}{$20\%$\xspace}
+\newcommand{\writeLeaderOvh}{\SI{39}{\percent}\xspace}
+\newcommand{\writeFollowerOvh}{\SI{20}{\percent}\xspace}
 
-\newcommand{\readLeaderOvh}{$121\%$\xspace}
-\newcommand{\readFollowerOvh}{$32\%$\xspace}
+\newcommand{\readLeaderOvh}{\SI{121}{\percent}\xspace}
+\newcommand{\readFollowerOvh}{\SI{32}{\percent}\xspace}
 
 \newcommand{\ptracesyscalloverhead}{$36.50\times$\xspace} % 46203
 
-\newcommand{\vdsoNative}{$49$ ticks\xspace} 
-\newcommand{\vdsoIntercept}{$122$ ticks\xspace} 
-\newcommand{\vdsoLeader}{$429$ ticks\xspace} 
-\newcommand{\vdsoFollower}{$189$ ticks\xspace} 
+\newcommand{\vdsoNative}{\num{49} ticks\xspace} 
+\newcommand{\vdsoIntercept}{\num{122} ticks\xspace} 
+\newcommand{\vdsoLeader}{\num{429} ticks\xspace} 
+\newcommand{\vdsoFollower}{\num{189} ticks\xspace} 
 
 
 % Macrobenchmarks
 
-\newcommand{\nservers}{four\xspace}
+\newcommand{\nservers}{five\xspace}
 
-\newcommand{\nginxIntercept}{$3\%$\xspace}
-\newcommand{\beanstalkdIntercept}{$11\%$\xspace}
+\newcommand{\nginxIntercept}{\SI{3}{\percent}\xspace}
+\newcommand{\beanstalkdIntercept}{\SI{11}{\percent}\xspace}
 
 \newcommand{\beanstalkdOneFollower}{$1.52\times$\xspace}
 \newcommand{\lighttpdOneFollower}{$1.12\times$\xspace}
@@ -44,11 +44,11 @@
 \newcommand{\nginxSevenFollowers}{$1.67\times$\xspace}
 \newcommand{\redisSevenFollowers}{$1.27\times$\xspace}
 
-\newcommand{\speczerozeroOneFollower}{$11.3\%$\xspace}
-\newcommand{\speczerosixOneFollower}{$14.2\%$\xspace}
+\newcommand{\speczerozeroOneFollower}{\SI{11.3}{\percent}\xspace}
+\newcommand{\speczerosixOneFollower}{\SI{14.2}{\percent}\xspace}
 
 \newcommand{\httpdWebBenchOneFollower}{$XXX$\xspace}
-\newcommand{\httpdAbOneFollower}{$2.4\%$\xspace}
+\newcommand{\httpdAbOneFollower}{\SI{2.4}{\percent}\xspace}
 
 \newcommand{\lighttpdHttploadOneFollower}{$1.01\times$\xspace}
 \newcommand{\lighttpdAbOneFollower}{$1.00\times$\xspace}
@@ -57,32 +57,35 @@
 
 % Comparison
 
-\newcommand{\strataHttpd}{$48\%$\xspace}
-\newcommand{\strataHttpdRelative}{$XXX\%$\xspace}
-\newcommand{\orchestraHttpd}{$50\%$\xspace}
-\newcommand{\orchestraHttpdRelative}{$XXX\%$\xspace}
-\newcommand{\orchestraSpec}{$17\%$\xspace}
-\newcommand{\orchestraSpecRelative}{$XXX\%$\xspace}
+\newcommand{\strataHttpd}{\SI{48}{\percent}\xspace}
+\newcommand{\strataHttpdRelative}{\SI{XXX}{\percent}\xspace}
+\newcommand{\orchestraHttpd}{\SI{50}{\percent}\xspace}
+\newcommand{\orchestraHttpdRelative}{\SI{XXX}{\percent}\xspace}
+\newcommand{\orchestraSpec}{\SI{17}{\percent}\xspace}
+\newcommand{\orchestraSpecRelative}{\SI{XXX}{\percent}\xspace}
 \newcommand{\tachyonLighttpd}{$3.72\times$\xspace}
-\newcommand{\tachyonLighttpdrelative}{$XXX\%$\xspace}
+\newcommand{\tachyonLighttpdrelative}{\SI{XXX}{\percent}\xspace}
 \newcommand{\tachyonThttpd}{$1.17\times$\xspace}
-\newcommand{\tachyonThttpdRelative}{$XXX\%$\xspace}
+\newcommand{\tachyonThttpdRelative}{\SI{XXX}{\percent}\xspace}
 \newcommand{\mxLighttpd}{$3.49\times$\xspace}
-\newcommand{\mxLighttpdRelative}{$XXX\%$\xspace}
+\newcommand{\mxLighttpdRelative}{\SI{XXX}{\percent}\xspace}
 \newcommand{\mxRedis}{$16.72\times$\xspace}
-\newcommand{\mxRedisRelative}{$XXX\%$\xspace}
-\newcommand{\mxSpec}{$17.9\%$\xspace}
-\newcommand{\mxSpecRelative}{$XXX\%$\xspace}
+\newcommand{\mxRedisRelative}{\SI{XXX}{\percent}\xspace}
+\newcommand{\mxSpec}{\SI{17.9}{\percent}\xspace}
+\newcommand{\mxSpecRelative}{\SI{XXX}{\percent}\xspace}
 
 % Scenarios
 
-\newcommand{\redisnormallatency}{\num{42.36}\si{\micro\second}\xspace}
-\newcommand{\redisfailoverlatency}{\num{122.62}\si{\micro\second}\xspace}
+\newcommand{\redisnormallatency}{\SI{42.36}{\micro\second}\xspace}
+\newcommand{\redisfailoverlatency}{\SI{122.62}{\micro\second}\xspace}
 
-\newcommand{\redisRROvhNx}{$14\%$\xspace}
-\newcommand{\redisRROvhScribe}{$53\%$\xspace}
+\newcommand{\lighttpdnormallatency}{\SI{5}{\milli\second}\xspace}
+\newcommand{\lighttpdfailoverlatency}{\SI{5}{\milli\second}\xspace}
 
-\newcommand{\redisNoSanitizationMedianLength}{$2$\xspace}
-\newcommand{\redisSanitizationMedianLength}{$6$\xspace}
-\newcommand{\redisNoSanitizationAverageLength}{$3$\xspace}
-\newcommand{\redisSanitizationAverageLength}{$24$\xspace}
+\newcommand{\redisRROvhNx}{\SI{14}{\percent}\xspace}
+\newcommand{\redisRROvhScribe}{\SI{53}{\percent}\xspace}
+
+\newcommand{\redisNoSanitizationMedianLength}{\num{2}\xspace}
+\newcommand{\redisSanitizationMedianLength}{\num{6}\xspace}
+\newcommand{\redisNoSanitizationAverageLength}{\num{3}\xspace}
+\newcommand{\redisSanitizationAverageLength}{\num{24}\xspace}
