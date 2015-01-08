@@ -45,21 +45,27 @@ is better to invest resources into a single reliable implementation rather than
 three different implementations which will be run in parallel.
 
 The issue of cost related to development of multiple independent versions has
-been partially addressed by multi-variant program execution, which can be seen
-as an evolution of $N$-version programming. Rather developing different versions
+been partially addressed by the multi-variant program execution, which can be seen
+as an evolution of $N$-version programming. Rather than developing different versions
 of the same application manually, these are generated from a single version
-using different techniques such as \ldots.
+using different techniques such as special source code
+annotations~\cite{onlinevalidation,trachsel10}, code transformations based on
+the modification of the abstract syntax tree~\cite{schulte14,sosie:issta14},
+custom compilers producing different binary layout for different
+variants~\cite{orchestra09,unibus:nspw10}. %, or even specialized runtime
+%environments which customize different aspects of application runtime
+%state~\cite{diehard06,tightlip}.
 
 Rather than executing $N$ different versions of the same program, we could also
 run different programs where one program acts as a specification and other
 implementations are checked against the specification at runtime.  This is the
-basic idea behind runtime monitoring and checking \todo{citation?}. In runtime
-monitoring and checking, one program is the implementation while another is the
-specification. The implementation is checked against the specification at
-runtime, which is easier than proving the equivalence statically (or formally).
-Furthemore, the specification can be less efficient and thus simple. The example
-shown by Lui Sha in~\cite{lui01} uses Bubblesort as a runtime specification for
-Quicksort.
+basic idea behind runtime monitoring and checking~\cite{kim:mac,java-mac01}. In
+runtime monitoring and checking, one program is the implementation while
+another is the specification. The implementation is checked against the
+specification at runtime, which is easier than proving the equivalence
+statically (or formally).  Furthemore, the specification can be less efficient
+and thus simple. The example shown by Lui Sha in~\cite{lui01} uses Bubblesort
+as a runtime specification for Quicksort.
 
 %However, Hatton~\cite{hatton97} argued that even dependent $N$-version
 %programming provides significant reliability improvement and it is therefore
@@ -68,340 +74,234 @@ Quicksort.
 
 \section{N-version \vs multi-version execution}
 
+% Recent years have seen a growing interest in using diversity as a way to
+% increase the reliability and security of software systems.  One form of
+% software diversity that has attracted significant interest from the research
+% community is the idea of running multiple diversified versions of a program in
+% parallel in order to survive bugs and detect security attacks.  In essence,
+% diversity can offer probabilistic guarantees that at least one variant survives
+% a bug, or that a security attack will be flagged by divergent behaviour across
+% variants.
+
+% On the reliability side, which forms the main focus of this thesis, these
+% diversified versions are either automatically-generated variants, multiple
+% versions of the same application, or different programs implementing the same
+% interface.  For example, one may run in parallel multiple variants that employ
+% complementary thread schedules to survive concurrency
+% errors~\cite{compl-schedules11}, multiple versions of the same software to
+% survive update bugs~\cite{mx}, or multiple web browsers to benefit from the
+% fact that many errors do not affect all browser
+% implementations~\cite{cocktail}.  In this thesis, we show that running multiple
+% versions in parallel can be used in other reliability scenarios, such as
+% running expensive error detectors (``sanitizers'') during deployment.
+
+% On the security side, these diversified variants are constructed in such a way
+% as to reduce the probability of an attack succeeding in all of
+% them~\cite{cox2006,orchestra09,diehard06,tightlip,capizzi08,devries10,cocktail,trachsel10}.
+% For example, one may generate versions with a different arrangement of memory
+% blocks in the address space~\cite{diehard06}, or with stacks growing in
+% opposite directions~\cite{orchestra09}, to prevent attacks whose success
+% depends on the memory layout.
+
 While $N$-version execution and multi-version execution techniques have many
-similarities, there are several key differences.
+similarities, there are several key differences. First and foremost, in
+$N$-version execution the different version are developed by different teams
+while multi-version execution uses the consequent revisions, which are product
+of natural software evolution. Second, the goal of $N$-version execution is
+increasing the reliability of software by running independently developed,
+functionally equivalent software variants. While multi-version execution can be
+applied in many different scenarios, including $N$-version execution, the
+technique was designed to in the context of software updates. Furthermore, as
+shown in this thesis (\S\ref{chap:applications}), running multiple versions in
+parallel can be used in other reliability scenarios, such as running expensive
+error detectors (``sanitizers'') during deployment or implementation of
+security honeypots.
 
-First and foremost, in $N$-version execution the different version are developed
-by different teams while multi-version execution uses the consequent revisions,
-which are product of natural software evolution.
+% There are two key differences between our proposed approach and
+% previous work in this space.  First, we do not rely on automatically
+% generated variants, but instead propose to use existing software
+% versions as a mechanism for improving software updates.  This also
+% means that as opposed to previous solutions, the versions running in
+% parallel are not semantically equivalent---this eliminates the
+% challenge of generating diversified variants and creates opportunities
+% in terms of recovery from failures, but also introduces additional
+% challenges in terms of synchronising the execution of the different
+% versions.  Second, while previous work has focused on detecting
+% divergences, our key concern is to \textit{survive} them,
+% in order to increase the reliability, availability, and security 
+% of the overall application.
 
-\section{Two applications of multi-version execution}
+% Running different versions of an application in parallel has been used
+% to test and validate software patches.  Tachyon~\cite{tachyon12} is an
+% online patch testing system in which the old and the new version of an
+% application are run concurrently; 
+% when a divergence is detected, the options are to either halt the
+% program, or to create a manual rewrite rule specifying how to handle
+% the divergence.  Delta execution~\cite{onlinevalidation} similarly
+% uses two different versions of a single application, splitting the
+% execution at points where the two versions differ, and comparing their
+% results to test the patch for errors and validate its
+% functionality.  
+% By comparison, the focus of this proposal is on ``managing'' such
+% divergences at runtime in order to keep the application running, and
+% therefore runtime deployment and crash recovery play a central role in
+% our approach.
 
-While multi-version execution can be applied in many different scenarios, as
-further shown in Chapter~\ref{chap:applications}, the technique was designed to
-in the context of software updates.  
+% Research on surviving software failures has received a lot of
+% attention in the
+% past~\cite{rx,compl-schedules11,fo,exec-trans06,vigilante,clearview,microreboots},
+% and our proposed approach can benefit from the techniques developed in
+% this context.  Compared to this prior work, the main novelty lies in
+% combining multiple software versions to survive failures.
 
-\subsection{Fail recovery for updated software}
-\subsection{Parallel execution of software versions}
-%\input{nversion-updates/prototype}
-
-\section{Safe software updates}
+\input{multi-version/scenarios}
 
 \section{Parallel software execution}
 
-\section{Scenarios}
-\label{multi-version:scenarios}
+The bottom line for all the scenarios presented hereinbefore is that for
+significant amount of time, \ie about one year in case of \lighttpd and six
+months in case of \redis, users affected by buggy patches essentially had
+to decide between%
+\begin{inparaenum}[(1)]
+\item incorporating other security and bug fixes added to the code, but being
+  vulnerable to these crash bug, and
+\item giving up on these security and bug fixes and using an old version of
+  \lighttpd or \redis, which are not vulnerable to these newly introduced bugs.
+\end{inparaenum}
+Note that this is particularly true for the period between the time when the
+bug was introduced and the time it was diagnosed (\ie eleven months in case of
+\lighttpd, six months in case of \redis), since during this period most users
+would not know how to change the server's configuration to avoid the crash.
 
-In this section we motivate our approach using existing scenarios involving the
-\chrome browser and the \vim editor, as well as the \lighttpd and \vsftpd
-servers.  These correspond to two categories of applications that could benefit
-from our multi-version software update approach: desktop applications such as
-web browsers and office tools for which reliability is a key concern; and
-network servers, with stringent security and dependability requirements.
+Our approach aims to provide users with a third choice; when a new version
+arrives, instead of replacing the old version, we will run both. The goal
+of our approach is to run multiple versions of an application in parallel, and
+synchronize their executions so that%
+\begin{inparaenum}[(1)]
+\item users are given the illusion that they interact with a single version of
+  the application,
+\item the multi-version application is at least as reliable and secure as any
+  of the individual versions in isolation, and
+\item the synchronization mechanism incurs a reasonable performance overhead.
+\end{inparaenum}
 
-%% We also believe, that the proposed approach might facilitate and
-%% improve the
-%% \emph{continuous deployment} technique. While this technique has been
-%% frequently proposed and advocated in the software engineering community
-%% because it encourages experimentation, innovation, and rapid
-%% iteration~\cite{johnson2009,harmess2009,linden2009}, its use is still limited
-%% since updates may introduce new bugs and security vulnerabilities.  We believe
-%% that our approach provides all the benefits of continuous deployment without
-%% compromising software reliability.
+As shown in Figure~\ref{fig:mx-platform}, our solution requires a form of
+virtualization framework that would coordinate the execution of multiple
+application versions, and mediate their interaction with the external
+environment. Various such frameworks have been designed in the past in the
+context of running multiple automatically generated variants of a given
+application in parallel~\cite{diehard06,cox2006,orchestra09}, and many of the
+techniques proposed in prior work can be reused in our context.  To be
+practical, this coordination mechanism has to incur a reasonable overhead on
+top of native execution and ensure that the overall system is able to scale up
+and down the number of software versions run in parallel in order to balance
+conflicting requirements such as performance, reliability, security and energy
+consumption.
 
-%\subsection{Google Chrome Web Browser}
-%\label{sub:chrome}
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{multi-version/figures/platform}
+    \caption{A platform running conventional and multi-version
+      applications side by side.}
+    \label{fig:mx-platform}
+  \end{center}
+\end{figure}
 
-\gchrome\footnote{\url{http://www.google.com/chrome}} is one of the most widely
-used web browsers.  Even though \chrome releases are tested extensively before
-deployment, they sometimes introduce new bugs that affect the stability of the
-browser.  A concrete example is version $6.0.466.0$, which introduced a bug
-that caused \chrome to crash when trying to load certain web pages over
-SSL.\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49197}}
-One might argue that in this case the user should downgrade to an older version
-and wait until the bug is fixed. However, versions immediately preceding
-$6.0.466.0$ suffer from a different
-bug,\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49721}}
-which was introduced in version $6.0.438.0$ and which crashes Chrome during
-certain sequences of repeated back and forward navigation.
+One particular challenge for our approach is to detect any divergences between
+different software versions, resolve them in such a way as to increase the
+overall reliability of the application, and finally synchronize again the
+different versions after their executions reconverge to the same behavior.  Of
+course, we also need to handle the case in which the executions of different
+versions fail to reconverge to the same behavior after sufficient time.
 
-\vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
-text editors.  In version $7.1.127$, while trying to fix a memory leak,
-\vim developers introduced a double \textstt{free} bug that caused \vim to
-crash whenever the user tried to use a path completion feature.  This bug made
-its way into \textit{Ubuntu} $8.04$, affecting a large number of
-users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
-%% This bug remained undetected until version $7.1.138$, which has been
-%% distributed with Ubuntu $8.04$ one of the most popular Linux
-%% distributions.  The bug was caused by a
+Selecting the ``correct'' behavior of an application when different versions
+disagree is of course not possible in the general case without having access to
+a high-level specification.  However, one could%
+\begin{inparaenum}[(1)]
+\item focus on universal
+correctness properties, such as the absence of crashes, and
+\item use various
+heuristics such as majority voting and favoring the latest application
+versions.
+\end{inparaenum}
+Our approach is to resolve a divergence by always using the behavior of the
+version that has not crashed, and favoring the behavior of the latest version
+in all other cases. In this way, we ensure that the overall application has
+strictly fewer crashes than any of the individual versions, while still using
+the new security and bug fixes implemented in the latest version.
 
-\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular web-server used
-by several high-traffic websites such as YouTube, Wikipedia, and Meebo. Despite
-its popularity, faulty updates are still a common occurrence in \lighttpd.
-%, as evident from its bug tracking database. 
-As one example, a patch introduced in April
-2009\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
-(correctly) fixed the way HTTP ETags are computed.
-%% The patch was a one-line change, which discarded the terminating zero
-%% when computing a hash.
-Unfortunately, this fix broke the support for compression, which relied on the
-previous way in which ETags were computed and resulted in a segmentation fault
-whenever a client requested HTTP compression.  This issue was only diagnosed
-and reported in March
-2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed at the
-end of April
-2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
-more than one year after it was introduced, leaving the server vulnerable to
-possible attacks in between.
+% Note that one key aspect on which our approach relies is
+% \textit{having the different versions be alive at all times}.  This ensures
+% that applications can survive crashes that occur at different points
+% in different versions, but adds the extra challenge of restarting
+% crashed versions.
 
-\vsftpd\footnote{\url{https://security.appspot.com/vsftpd.html}} is a fast and 
-secure FTP server for UNIX systems.  Version $2.2.0$ added several new
-features such as network isolation, but unfortunately also introduced
-a
-bug\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vsftpd/+bug/462749}}
-which triggered a segmentation fault whenever a client used the
-passive FTP mode.  This bug made \vsftpd practically unusable since
-the passive mode is being frequently used by clients behind firewalls.
-Despite being reported several times, this bug was only fixed in
-version $2.2.1$, released more than two months after the bug was
-introduced.
-%% This is even more surprising given that the bug was triggered by a
-%% missing data structure allocation in the newly introduced
-%% configuration processing and the patch for this bug consists of a
-%% single line.
+%% Once divergences are detected, we need to decide what output should be
+%% selected as the output of the multi-version system in order to improve
+%% overall reliability.  Many different strategies can be used, but the
+%% common goal is to ensure that the multi-version system will have
+%% strictly fewer errors than any of the individual versions.
 
+% Finally, our approach needs a deployment strategy to decide what versions are
+% run in parallel when the number of available resources (\eg, idle CPU cores) is
+% limited.  We envision several options---such as keeping the last $N$ released
+% versions (where $N$ is the number of available resources), or keeping several
+% very old stable versions---but the exact strategy should be decided on a
+% case-by-case basis. % using existing empirical data.
 
-All the scenarios presented above describe software updates which,
-while trying to add new features or bug fixes, also introduced new
-bugs that caused the code to crash under certain conditions.
-Improving the reliability of such updates is the main goal of our
-proposed approach: running both the old and the new version in
-parallel after an update can enable applications to survive more
-errors, without giving up the new features introduced by the update.
+In this thesis, we present two different designs for building such monitors;
+one, called \varan, aimed at running large number of versions side-by-side with
+low overhead, and second, called \mx, focused on surviving crashes caused by
+bugs introduced in software updates.
 
-%\section{N-version Updates}
-%\input{background/nversion-updates}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\section{Safe Software Updates}
-%\input{background/safe-updates}
+Our approach aims to provide users with a third choice; when a new version
+arrives, instead of replacing the old version, we run both versions in
+parallel. In our example, consider that we are using \mx to run a
+version of \lighttpd from March 2009.  When the buggy April 2010 version
+is released, \mx runs it in parallel with the old one.  As the two
+versions execute:
 
-%\section{Efficient Execution}
-%\input{background/efficient-execution}
+\begin{itemize}
+\item As long as the two versions have the same external behaviour (\eg they
+  write the same values into the same files, or send the same data over the
+  network), they are run side-by-side and \mx ensures that they act as one to
+  the outside world;
 
-%\subsection{Execution of Multiple Versions}
+\item When one of the versions crashes (\eg the new version executes the buggy
+  patch), \mx will patch the crashing version at runtime using the behaviour of
+  the non-crashing version.  In this way, \mx can successfully survive crash
+  bugs in both the old and the new version, increasing the reliability and
+  availability of the overall application;
 
-%The idea of concurrently running multiple versions (or a \emph{multi-version
-%execution}) of the same application was first explored in the context of
-%$N$-version programming, a software development methodology introduced in the
-%seventies in which multiple teams of programmers develop functionally
-%equivalent versions of the same program in order to minimize the risk of having
-%the same bugs in all versions~\cite{chen1995}. Furthermore, the use of an
-%execution environment responsible for running the $N$-version programs and
-%choosing one of the outputs was proposed.
-  
-%This idea has been followed up in~\cite{cox2006}, which proposes the use of
-%automatically generated {\it diversified variants} of the same program to
-%increase application security. Through the use of multiple variants with
-%potentially disjoint exploit sets, the proposed approach makes it difficult to
-%exploit a large class of security vulnerabilities such as buffer overflow, as
-%attackers would need to simultaneously compromise all variants.
+\item When a non-crashing divergence is detected, \mx will discard one of the
+  versions (by default the old one, but other heuristics can be used).  The
+  other version can be later restarted at a convenient synchronisation point
+  (\eg at the beginning of the dispatch loop of a network server).
+\end{itemize}
 
-%The idea has been implemented in \cite{orchestra09}, which uses a modified
-%compiler to produce two versions of the same application with stacks growing in
-%opposite directions, together with an execution environment that monitors both
-%variants at runtime, checking for any discrepancies in system calls made by the
-%variants that would indicate a successful security attack on one of the
-%replicas. This work has been further improved in \cite{orchestra11} with new
-%method for signal delivery accompanied with detailed analysis of the benchmark
-%characteristics. However, their approach is still limited to two versions
-%running in lockstep with only difference being the opposite growing stack.
-%Most importantly, whenever divergence between the two versions is detected,
-%they are immediately stopped.
+To enable these scenarios, a monitor process coordinates the parallel execution
+of these variants\footnote{The terms \textit{version} and \textit{variant} are
+used interchangeably.} and synchronises their execution, making them appear as
+a single application to any outside entities.  While synchronisation can be
+performed at different levels, the most common approach is to do it at the
+level of system calls, for two main reasons: first, many existing
+diversification transformations, such as address-space layout
+randomisation~\cite{diehard06} and instruction-set
+randomisation~\cite{instr-set-rand03} do not change the sequence of system
+calls (the program's \textit{external behaviour}), and the ordering is often
+preserved even across different software versions.  Second, system
+calls are the main way in which the application communicates with the outside
+environment, and therefore
+%% the ultimate target of attackers.  Finally, as the main
+%% communication mechanism between applications and the environment,
+%% system calls
+must be virtualised in order to enable the multiple versions to act as
+one to the outside world.
 
-%The multi-version execution idea has been also used for different purposes ---
-%Berger et al. describe a similar approach that uses address space layout
-%randomization to generate multiple replicas that are executed
-%concurrently~\cite{diehard06}. This approach is combined with randomization
-%and replication to provide memory error tolerance. The goal of their work is to
-%increase reliability by tolerating memory errors in exchange for space costs
-%and execution time.
-
-%Solution described in~\cite{shye2009} runs multiple instances of the same
-%version of a single application aiming to overcome transient failures by
-%monitoring and comparing their execution on the level of kernel system calls.
-%However, this solution does not aim to overcome such failures.
-
-%Running different versions of an application in parallel has also been used to
-%test and validate software patches.  In~\cite{onlinevalidation}, two different
-%versions of a single application are run in parallel, splitting the execution
-%at points where the two versions differ, and comparing their results to test
-%the patch for errors and validate its functionality. Whenever one of the two
-%versions crashes, a bug is reported. This approach is limited only to a
-%specific categories of patches such as refactoring or changes to rarely used
-%paths (\eg error handlers). Moreover, this approach is only targeted towards
-%on-line validation, not as a generally usable runtime environment.
-
-%Trachsel et al.  use a similar approach to increase performance, where program
-%variants are obtained by using different (compiler) optimizations and
-%algorithms~\cite{trachsel10}.  The goal is to increase the overall system
-%performance by always selecting the variant which finishes its execution first.
-%Thereby, no synchronization across variants is needed.
-
-%\subsection{Multi-version Environment and Update Management}
-
-%Closely related to the execution of multiple versions is the management of
-%multiple versions, environment and software updates, such as deciding when to
-%upgrade, applying updates, \etc
-
-%Solution, which in some sense resembles the multi-version execution idea, has
-%been proposed by Michael Franz in~\cite{franz2010} --- instead of executing
-%multiple versions in parallel, he proposes to distribute unique version of
-%every program to every user. Such versions should be created automatically by
-%a ``multicompiler'' and distributed to users through ``App Store''. This would
-%increase security as it would be much more difficult to generate attack
-%vectors by reverse engineering of security patches for these diversified
-%versions.
-
-%To make such a solution work in practice, the way to manage large number of
-%different versions and the overall update process is needed. This idea has
-%been explored in~\cite{crameri:updates}. This framework integrates upgrade
-%deployment, user-machine testing and problem reporting into the overall
-%upgrade process.  The framework itself clusters users' machines according to
-%their environment, tests the upgrades using cluster representatives and allows
-%deployment of complex upgrades.
-
-%Beattie et al. showed in~\cite{beattie2002} that the timing of security patch
-%applying can be of critical importance. Patching too early could result in
-%breaking the system by applying broken patch, patching too late could on the
-%other hand lead to risk of penetration by an attacker exploiting a well known
-%security issue. Using the cost functions of corruption and penetration, based
-%upon real world empirical data, they have shown that 10 and 30 days after the
-%patch's release date are the optimal times to apply the patch to minimize the
-%risk of defective patch. Such delay still opens a lot of opportunities for
-%potential attackers.
-
-%We believe that our approach can decrease this time virtually to zero
-%eliminating the possibility of penetration while retaining the reliability of
-%the original version.
-
-%\begin{structure*}
-%\item MonDe: Safe Updating through Monitored Deployment of New Component Versions
-%\item Towards A Self-Managing Software Patching Process Using Balck-Box Persistent Manifests
-%\item Predicting Problems Caused by Component Upgrades
-%\item The Cracker Patch Choice: An Analysis of Post Hoc Security Techniques
-%\item Yesterday, my program worked. Today, it does not. Why?
-%\end{structure*}
-
-%\subsection{Application Sandboxing and Software Fault Isolation}
-
-%Multi-version execution requires some form of application sandboxing and
-%software fault isolation. The goal is to isolate the running application from
-%underlying system and especially, to prevent software failures from affecting
-%the rest of the system including other applications.
-
-%The use of software-based fault isolation for executing untrusted code has
-%been described already in~\cite{wahbe1993} for the RISC machines with simple
-%instruction set. On the other hand, the first effective implementation of
-%software fault isolation for the CISC architecture has been shown much later
-%in~\cite{mccamant2006}.
-
-%% Control flow integrity?
-
-%Douceur et. al shown in~\cite{douceur08} how to use sandboxing to enable
-%leveraging of existing libraries and programs on the web. To achieve that,
-%they used application-level virtualization; their implementation use system
-%call mediation together with their own platform abstraction layer to run each
-%library or program in so-called \emph{picoprocesses} which can be seen as
-%stripped down virtual machine. The biggest downside of this approach is the
-%need for code modifications which significantly reduces usability of this
-%approach.
-
-%Similar idea has been implemented by Yee et al. in~\cite{nacl} as an
-%extension to Google Chrome web browser providing sandbox for untrusted native
-%x86 code.  This can be used to develop web applications with performance of
-%native applications. Their implementation consists of two parts --- inner
-%sandbox which uses lightweight static analysis do detect security defects and
-%outer sandbox which mediates system calls. The implementation has been further
-%improved in~\cite{sehr2010} with support for ARM and x86-64 architectures and
-%recently has been extended in~\cite{ansel2011} by adding support for
-%Just-In-Time (JIT) compilation sandboxing. Again, the disadvantage here is the
-%need for modifications of existing code and the use of modified GNU compiler
-%toolchain to generate compliant binaries.
-
-%\subsection{Virtualization and Fault-tolerant Computing}
-
-%\begin{structure*}
-  %\item Multiscale not Multicore: Efficient Heterogeneous Cloud Computing
-  %\item Opportunistic Computing: A New Paradigm for Scalable Realism on Many-Cores
-  %\item The Utility Coprocessor: Massively Parallel Computation from the Coffee Shop
-%\end{structure*}
-
-%Hardware-level virtualization has already been widely adopted in the industry
-%for a variety of purposes.  Companies such as VMware or Microsoft provide a
-%wide range of virtualization products, while several high-quality open-source
-%solutions such as Xen~\cite{xen} also exist.
-  
-%Operating system-level virtualization is a method which allows to virtualize
-%the operating system kernel into multiple isolated partitions (\ie user-space
-%instances).  This type of virtualization is provided for different operating
-%systems by products such as FreeBSD Jails~\cite{jails}, Linux
-%VServer~\cite{vserver} or Solaris Containers~\cite{containers}. Even though
-%these solutions are not as widely deployed as those for hardware-level
-%virtualization, they are readily available, have lower overhead, and can be
-%employed in many real-world scenarios.
-  
-%We aim to use \emph{application-level virtualization}, which is a lightweight
-%variant of operating system-level virtualization, in which applications run in
-%independent execution environments.  Even though this area has not been very
-%intensively studied, many of its concepts, such as sandboxing, are becoming
-%more and more common, especially in the cloud environment.   Some of these
-%features are provided by the products such as VMware ThinApp~\cite{thinapp} or
-%Microsoft App-V~\cite{appv}.
-
-%Related research utilizing the concepts of application-level virtualization
-%has been described in~\cite{yu2006} proposing lightweight virtual machine
-%monitor for virtualization of Windows applications. The authors used namespace
-%virtualization, implemented at system call level, to achieve isolation of
-%resources between individual applications as well host operating system. This
-%work has been followed up in~\cite{yu2008} showing three complete application
-%benefiting from the approach presented in the original paper.
-
-%More heavyweight, but also more powerful approach was taken by Dike et al.
-%in~\cite{dike2001}. Using system call virtualization (via \texttt{ptrace}
-%interface) and device abstraction, they managed to port Linux kernel to
-%userspace. The resulting implementation runs a Linux virtual machine in a set
-%of processes on a Linux host allowing various applications ranging from kernel
-%development to application sandboxing and virtualization. Now, this
-%implementation has become an optional module of Linux kernel.
-
-%Virtualization approach is also often used in environments with strong
-%reliability requirements, especially in the domain of cluster computing. We
-%believe that our approach could be used also in these environments. Shown by
-%Schroeder et al.  in~\cite{schroeder2007}, around 20\% of all failures at Los
-%Alamos National Laboratory are caused by software failures making them a
-%second largest contributor after hardware failures. While today's high
-%performance computing systems relies mostly on checkpoint-restart schemes to
-%achieve fault tolerance, such as the one proposed in~\cite{srinivasan2004}
-%further used in~\cite{qin2005}. This approach is often not sufficient, mainly
-%due to large decrease in the effective application utilization. Our approach,
-%based on multi-version execution inspired by application-level virtualization
-%idea, might present a viable alternative to these approaches.
-
-%\begin{structure}
-%\item Control-flow integrity
-  %\begin{structure*}
-  %\item Control-Flow Integrity
-  %\item XFI: Software Guards for System Address Spaces
-  %\end{structure*}
-%\item Implementation related
-  %\begin{structure*}
-  %\item Rapid File System Development Using ptrace
-  %\item Detours: Binary Interception of Win32 Functions
-  %\end{structure*}
-%\item Checkpointing and execution rollback
-  %\begin{structure*}
-  %\item Flashback: A Lightweight Extension for Rollback and Deterministic Replay for Software Debugging
-  %\item Rx: Treating Bugs As Allergies
-  %\item Making Applications Mobile Under Linux
-  %\end{structure*}
-%\end{structure}
+There are many challenges in impleementing such monitor. \todo{List a couple of them...}
+\begin{structure}
+\item Trade-off between performance, security, flexibility, ease-of-debugging.
+\item Access to source code, instrumentation vs running on binaries.
+\end{structure}

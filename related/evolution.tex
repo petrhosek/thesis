@@ -1,0 +1,89 @@
+\section{Software Evolution}
+\label{related:evolution}
+
+Despite the significant role that coverage information plays in
+software testing, there are relatively few empirical studies on this
+topic.  We discuss some representative studies below.
+
+Early work on this topic was done by Elbaum \etal~\cite{cov-evol:icsm01}, who
+have analysed how the overall program coverage changes when software evolves,
+using a controlled experiment involving the \textsf{space} program, and seven
+versions of the Bash shell.  One of the key findings of this study was that
+even small changes in the code can lead to large differences in program
+coverage, relative to a given test suite.  This is a different finding from
+previous work, such as that by Rosenblum and Weyuker~\cite{cov_regr97}, which
+has found that coverage remains stable over time for the KornShell benchmark.
+In this paper, we have looked at a related question, of whether overall
+coverage remains stable over time, taking into consideration the changes to the
+evolving test suite as well.
+
+Zaidman et al.~\cite{coevol:emse11} have examined the co-evolution of
+code and tests on two open-source and one industrial Java
+applications.  The study looks at the evolution of program coverage
+over time, but only computes coverage for the major and minor releases
+of each system, providing around ten data points for each system.  By
+looking at the co-evolution of code and tests, the analysis can infer
+the development style employed by each project: one key finding is
+that code and tests co-evolve either \textit{synchronously}, as when
+agile methods are used; or \textit{phased}, with periods of intense
+coding followed by periods of intense testing.  For our
+benchmarks, we have observed both development styles.
+
+There is a rich literature on predicting software bugs by mining
+software repositories~\cite{bug-feature:icse13,genealogies:issre13};
+however, prior work has focused almost exclusively on static metrics,
+while in this work we propose using dynamic metrics such as patch
+coverage to aid the task.
+
+Our ongoing effort is to develop \covrig into a flexible platform for
+mining static and dynamic metrics from software repositories.  In
+terms of similar infrastructure efforts, SIR~\cite{sir:2005} is a
+well-known repository for software testing research, which offers a
+variety of programs written in several different languages, together
+with test suites, bug data, and scripts.  SIR also provides multiple
+versions for the same application, but typically less than a dozen.
+Furthermore, SIR does not include any support for running versions in
+isolation.  Ideally, the mechanisms provided by \covrig would be
+integrated with the rich data in SIR to enable more types of analyses
+at the intersection of software testing and evolution.
+
+
+While SIR contains mostly artificially-generated faults,
+iBUGS~\cite{ibugs} provides a semi-automated approach for extracting
+benchmarks with real bugs from project histories, using an approach
+based on commit messages and regression tests. iBUGS' idea of using
+the regression tests as a semi-automatic bug confirmation mechanism
+could be borrowed by \covrig whenever fixes are accompanied by tests,
+reducing the manual effort needed to apply it to new projects.
+
+% While SIR is restricted to a fixed set of bugs, iBUGS~\cite{ibugs}
+% provides a semi-automated approach for extracting benchmarks with real
+% bugs from a project's history. iBUGS identifies the tests provided
+% with a bug fix, executes them against the revision before the fix, and
+% if the test fails, applies bug localization tools to extract the
+% information necessary for reproducing the failure. We could improve
+% the precision of our bug analysis and reduce the manual effort needed
+% when applying \covrig to new projects by integrating the iBUGS approach
+% into our tool.
+
+%% Relatively few versions have been examined...
+
+%% A recent trend in software testing and verification research is to
+%% focus on analysing program changes.  In this empirical paper, we try
+%% to provide...  This form of longitudinal analysis...
+
+%% A large fraction of the cost of maintaining software is associated with
+%% detecting and fixing errors introduced by recent patches.  It is well-known
+%% that patches are prone to introduce failures~\cite{yin11,buggy-fixes:icse10}.
+
+%% Recent work attempts to address this problem through various
+%% approaches.  Automatic testing and verification techniques that focus
+%% on patch code~\cite{katch,fse13-diff-assertions,interaction-changes13}
+%% allow developers to check the quality of changes before shipping them
+%% to customers.  Online validation~\cite{onlinevalidation} allows
+%% checking the behaviour of a patch against real workloads before
+%% deciding to place the new version in production. Finally, detecting
+%% and masking faults at runtime~\cite{mx,tachyon12} allows users to take
+%% the best of both the new and the old version.
+
+%\cite{release-patterns:icsm07}

@@ -5,7 +5,7 @@ This section discusses some of the implications of \varan's design,
 including its main limitations, many of which are inherent to all
 existing NVX systems.
 
-\boldtext{CPU utilisation and memory consumption.} The performance
+\paragraph{CPU utilisation and memory consumption.} The performance
 evaluation reported in Section~\ref{sec:evaluation} considers the
 overhead in terms of throughput or clock time.  However, an NVX
 framework introduces a CPU utilisation overhead linear in the number
@@ -25,7 +25,7 @@ degradations in performance for memory-hungry applications, as
 illustrated in Section~\ref{sec:comparison}.
 
 
-\boldtext{Memory-based communication.} As prior NVX
+\paragraph{Memory-based communication.} As prior NVX
 systems, %~\cite{orchestra09,tachyon12,mx}, 
 \varan does not support memory-based communication.  More exactly,
 \varan only allows files to be mapped into memory as read-only---if
@@ -37,7 +37,7 @@ intercepted by interposing upon the system call interface, and as such
 is invisible to NVX systems operating at the system call level.
 
 
-\boldtext{Synchronisation.} While \varan supports multi-threaded and
+\paragraph{Synchronisation.} While \varan supports multi-threaded and
 multi-process applications (\S\ref{sec:threading}), there is a
 potential issue with synchronization primitives implemented entirely
 in user space, as these primitives will be invisible to \varan. While
@@ -47,7 +47,7 @@ synchronization primitives combine atomics with system calls (\ie
 futex). We have not observed any related problems in our concurrent
 benchmarks (\S\ref{sec:c10k},\S\ref{sec:comparison}).
 
-\boldtext{Security.} Although our focus with \varan has been on
+\paragraph{Security.} Although our focus with \varan has been on
 improving software reliability (\S\ref{sec:applications}), \varan
 could be also used to implement existing NVX security
 defences~\cite{cox2006,orchestra09}.  However, there are two

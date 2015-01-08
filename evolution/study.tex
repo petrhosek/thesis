@@ -1,0 +1,251 @@
+\section{Study Setup}
+\label{sec:study-setup}
+
+We used the \covrig infrastructure to understand the evolution of
+\numSystems popular open-source applications written in C/C++, over a
+combined period of \numYears years. The six evaluated applications are:
+
+\begin{enumerate}
+
+\item[\gnu~\binutils\footnote{\url{http://www.gnu.org/software/binutils/}}]
+is a set of utilities for inspecting and modifying object files,
+libraries and binary programs.  We selected for analysis the twelve
+utilities from the \stt{binutils} folder (\stt{addr2line}, \stt{ar},
+\stt{cxxfilt}, \stt{elfedit}, \stt{nm}, \stt{objcopy}, \stt{objdump},
+\stt{ranlib}, \stt{readelf}, \stt{size}, \stt{strings} and \stt{strip}),
+which are standard user-level programs under many UNIX distributions.
+
+\item[\beanstalkd\footnote{\url{http://kr.github.io/beanstalkd/}}]
+is a simple and fast work queue originally designed for reducing the latency of
+page views in high-volume web applications.
+
+\item[\git\footnote{\url{http://git-scm.com/}}]
+is one the most popular distributed version control systems used by the
+open-source developer community.
+
+\item[\lighttpd\footnote{\url{http://www.lighttpd.net/}}]
+is a lightweight web server optimized for high performance environments.
+
+\item[\lighttpdtwo\footnote{\url{http://redmine.lighttpdtwo.net/projects/lighttpdtwo2/}}]
+is the new major version of the \lighttpd web server developed entirely from
+scratch by the same team of developers.
+
+\item[\memcached\footnote{\url{http://memcached.org/}}]
+is a general-purpose distributed memory caching system used by several popular
+sites such as Craigslist, Digg and Twitter.
+
+\item[\redis\footnote{\url{http://redis.io/}}]
+is a popular key-value data store used by many well-known services such as
+Twitter, GitHub and StackOverflow.
+
+\item[\zeromq\footnote{\url{http://zeromq.org/}}]
+is a high-performance asynchronous messaging middleware library used by a
+number of organisations such as Los Alamos Labs, NASA and CERN.
+
+%\item {\bf GNU diffutils} is a collection of four widely-used
+%programs: \stt{diff}, \stt{sdiff}, \stt{diff3} and \stt{cmp}, part of
+%many popular UNIX distributions.
+
+\end{enumerate}
+
+The \numSystems applications are representative for C/C++ open-source
+code: GNU \binutils are user-level utilities, \git is a version
+control system, \beanstalkd, \lighttpdtwo, \memcached and \redis are server
+applications, while \zeromq is a library.  All applications include a
+regression test suite.
+
+\begin{table}[t]
+\caption{Summary of applications used in our study.
+\textit{ELOC} represents the number of executable lines of code and
+\textit{TLOC} the number of lines in test files in the last revision
+analysed.}
+\begin{center}
+\begin{tabular}{llrlr}
+\toprule
+\multicolumn{1}{c}{}     & \multicolumn{2}{c}{\sc Code}& \multicolumn{2}{c}{\sc Tests} \\
+\cmidrule(r){2-3}\cmidrule(l){4-5}
+\textsc{Application} & \textsc{Language} & \textsc{ELOC} & \textsc{Language} & \textsc{TLOC}          % & \bf Time         
+\\ \midrule
+\beanstalkd  & C         & \beanstalkdSize & C        & \beanstalkdTsize  % & \beanstalkdTestTime
+\\
+\binutils    & C         & \binutilsSize  & DejaGnu   & \binutilsTsize    % & \binutilsTestTime 
+\\
+\git         & C         & \gitSize       & C/shell   & \gitTsize         % & \gitTestTime 
+\\
+\lighttpd    & C         & \lighttpdSize  & Perl    & \lighttpdTsize    % & \lighttpdtwoTestTime 
+\\
+\lighttpdtwo    & C         & \lighttpdtwoSize  & Python    & \lighttpdtwoTsize    % & \lighttpdtwoTestTime 
+\\
+\memcached   & C         & \memcachedSize & C/Perl    & \memcachedTsize   % & \memcachedTestTime 
+\\
+\redis       & C         & \redisSize     & Tcl       & \redisTsize       % & \redisTestTime    
+\\
+\zeromq      & C++       & \zeromqSize    & C++       & \zeromqTsize      % & \zeromqTestTime   
+\\ \bottomrule
+\end{tabular}
+\end{center}
+\label{tbl:systems}
+\end{table}
+
+\paragraph{Basic characteristics} Table~\ref{tbl:systems} shows some basic
+characteristics of these systems: the language in which the code and tests are
+written, the number of executable lines of code (ELOC) and the number of lines
+of test code (TLOC) in the last revision analysed. To accurately measure the
+number of ELOC, we leveraged the information stored by the compiler in
+\texttt{gcov} graph files, while to measure the number of TLOC we did a simple
+line count of the test files (using \texttt{cloc}, or \texttt{wc~-l} when
+\texttt{cloc} cannot detect the file types).
+
+The code size for these applications varies from only \memcachedSize
+ELOC for \memcached to \gitSize ELOC for \git.  The test code is written in
+a variety of languages and ranges from \lighttpdtwoTsize lines of Python
+code for \lighttpdtwo to \gitTsize lines of C and shell code for \git.
+The test code is 36\% larger than the application code in the case
+of \git, approximately as large as the application code for
+\memcached, around 40\% of the application code for \redis and \zeromq,
+and only around 10\% and 19\% of the application code for \lighttpdtwo and
+\binutils respectively.  Running the test suite on the last version 
+takes only a few seconds for \binutils, \lighttpdtwo, and \zeromq,
+\memcachedTestTime seconds for \memcached, \redisTestTime seconds for 
+\redis, and 30 minutes for \git, using a four-core Intel Xeon 
+E3-1280 machine with 16 GB of RAM.
+
+The version control system used by all these applications is \git.  Four
+of these projects---\git, \memcached, \redis, and \zeromq ---are hosted
+on the \github\footnote{\url{https://github.com/}} online project site.
+The other two---\binutils and \lighttpdtwo---use their own \git hosting.
+
+
+\paragraph{Selection of revisions} Our goal was to select a comparable number
+of revisions across applications. The methodology was to start from the current
+version at the day of our experiments, and select an equal number of previous
+revisions for all systems. We only counted revisions which modify executable
+code, tests or both because this is what our analyses look at. We decided to
+select 250 such revisions from each system because some systems had non-trivial
+dependency issues further back than this, which prevented us from properly
+compiling or running them.  We still had to install the correct dependencies
+where appropriate, \eg downgrade \stt{libev} for older versions of \lighttpdtwo
+and \stt{libevent} for \memcached.
+
+Note that not all revisions compile, either due to development errors
+%(an example of this would be someone forgetting to add a file) 
+or portability issues (\eg system header files differing across OS
+distributions).
+%% Note that we distinguish between this kind of permanent errors (which
+%% disallow us to compile all versions earlier than some revision) and
+%% more transient compilation errors that affect only some program
+%% versions.  
+Redis has the largest number of such transient compilation
+errors---\redisTransientCompErrs.  The prevailing reasons are
+missing \stt{\#include} directives, \eg \stt{unistd.h} for
+the \stt{sleep} function, and compiler warnings subsequently treated as errors.
+The missing \stt{\#include} directives most likely slipped past the
+developers because on some systems other \stt{libc} headers cause the
+missing headers to be indirectly included. The compiler warnings were
+generated because newer compiler versions, such as the one that we used,
+are more pedantic.
+Other reasons include forgotten files and even missing semicolons.
+
+We decided to fix the errors which had likely not been seen at the
+time a particular revision was created, for example by adding the
+compile flag \stt{-Wno-error} in \binutils so that warnings do not
+terminate the build process. In all situations when we could not
+compile a revision, we rolled over the changes to the next revisions
+until we found one where compilation was successful.  Revisions which
+do not successfully compile are not counted towards the 250 limit.
+
+Another important decision concerns the granularity of the revisions
+being considered.  Modern decentralised software repositories based on
+version control systems such as \git do not have a linear structure
+and the development history is a directed acyclic graph rather than a
+simple chain.  Different development styles generate different
+development histories; for example, \git, \redis and \zeromq exhibit a
+large amount of branching and merging while the other three systems
+have a mostly linear history.  Our decision was to focus on the main branch,
+and treat each merge into it as a single revision. In other words, we
+considered each feature branch a single indivisible unit.  Our
+motivation for this decision was twofold: first, development branches
+are often spawned by individual developers in order to work on a
+certain issue and are often ``private'' until they are merged into the
+main branch.  As a result, sub-revisions in such branches are often
+unusable or even non-compilable, reflecting work-in-progress.  Second,
+the main branch is generally the one tracked by most users, therefore
+analysing revisions at this level is a good match in terms of
+understanding what problems are seen in the field.  This being said,
+there are certainly development styles and/or research questions that
+would require tracking additional branches; however, we believe that
+for our benchmarks and research questions this level of granularity
+provides meaningful answers.
+
+% On a secondary note, we remark that an additional complication with
+% this approach is that version control systems do not associate a
+% branch name to each revision, so some detective work might be required
+% to follow the main development branch.  However, since
+% the projects exhibiting a branching structure are hosted on \github, an implicit central
+% integrator exists (the project owner) and we considered their history
+% to be the official one, essentially always following the first parent
+% in a merge.
+
+
+\begin{table}[t]
+\centering
+\caption{Revisions used in our study.
+  {\em OK}:~code compiles and tests complete successfully,
+  {\em TF}:~some tests fail,
+  {\em TO}:~tests time out,
+  {\em CF}:~compilation fails,
+  {\em Time}:~the number of months analysed.}
+\begin{tabular}{lrrrrr}
+\toprule
+\multicolumn{1}{c}{}          &       \multicolumn{3}{c}{\sc OK+TF+TO=250}                 &            \multicolumn{2}{c}{}                   \\
+\cmidrule{2-4}
+\textsc{Application} & \textsc{OK} & \textsc{TF} & \textsc{TO} & \textsc{CF} & \textsc{Time}           \\
+\midrule
+\beanstalkd  &  \beanstalkdOK & \beanstalkdTransientTestErrs & \beanstalkdTransientTestTimeouts & \beanstalkdTransientCompErrs  &  {\beanstalkdTimespan}mo \\
+\binutils    &  \binutilsOK   & \binutilsTransientTestErrs  & \binutilsTransientTestTimeouts  & \binutilsTransientCompErrs  &  {\binutilsTimespan}mo \\
+\git         &  \gitOK        & \gitTransientTestErrs       & \gitTransientTestTimeouts       & \gitTransientCompErrs       &  {\gitTimespan}mo  \\
+\lighttpd    &  \lighttpdOK   & \lighttpdTransientTestErrs  & \lighttpdTransientTestTimeouts  & \lighttpdTransientCompErrs  &  {\lighttpdTimespan}mo  \\
+\lighttpdtwo    &  \lighttpdtwoOK   & \lighttpdtwoTransientTestErrs  & \lighttpdtwoTransientTestTimeouts  & \lighttpdtwoTransientCompErrs  &  {\lighttpdtwoTimespan}mo  \\
+\memcached   &  \memcachedOK  & \memcachedTransientTestErrs & \memcachedTransientTestTimeouts & \memcachedTransientCompErrs &  {\memcachedTimespan}mo \\
+\redis       &  \redisOK      & \redisTransientTestErrs     & \redisTransientTestTimeouts     & \redisTransientCompErrs     &  {\redisTimespan}mo     \\
+\zeromq      &  \zeromqOK     & \zeromqTransientTestErrs    & \zeromqTransientTestTimeouts    & \zeromqTransientCompErrs    &  {\zeromqTimespan}mo    \\
+\bottomrule
+\end{tabular}
+\label{tbl:revisions}
+\end{table}
+
+
+Table~\ref{tbl:revisions} summarises the revisions that we selected:
+they are grouped into those that compile and pass all the tests
+(\textit{OK}), compile but fail some tests (\textit{TF}),
+and compile but time out while running the test suite
+(\textit{TO}).
+The time limit that we enforced was empirically selected for
+each system such that it is large enough to allow a correct revision
+to complete all tests. As shown in the table, timeouts were a rare
+occurrence, with at most one occurrence per application.
+
+Table~\ref{tbl:revisions} also shows the development time span
+considered, which ranges from only 5-6 months for \git and \redis,
+which had a fast-paced development during this period, to almost 4
+years for \memcached. The age of the projects at the first version
+that we analysed ranges from a little over 2 years for \lighttpdtwo
+(version 2), to 11 years for \binutils.
+%6 years memcached, 4 years redis, 2yr 9mo zeromq, 8 years git
+
+\paragraph{Setup} All the programs analysed were compiled to record coverage
+information. In addition, we disabled compiler optimisations, which generally
+interact poorly with coverage measurements. For this we used existing build
+targets and configuration options if available, otherwise we configured the
+application with the flags \lstinline`CFLAGS='-O0 -coverage'` and
+\lstinline`LDFLAGS=-coverage`. All code from the system headers, \ie
+\stt{/usr/include/} was excluded from the results.
+
+Each revision was run in a virtualised environment based on 64-bit version of
+Ubuntu 12.10 (12.04.3 for \git) running inside an \lxc container.  To take
+advantage of the inherent parallelism of this approach, the containers were
+spawned in one of 28 long-running \xen VMs, each with a 4~Ghz CPU, 6~GB of RAM,
+and 20~GB of storage, running a 64-bit version of Ubuntu 12.04.3.
+
+The following sections present the main findings of our analysis.  They first
+reiterate and then examine in detail our target research questions (RQs).

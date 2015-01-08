@@ -1,57 +1,58 @@
 \chapter{Efficient Multi-version Execution}
+\label{chap:efficient-execution}
 
-Recent years have seen a growing interest in using diversity as a way
-to increase the reliability and security of software systems.  One
-form of software diversity that has attracted significant interest
-from the research community is the idea of running multiple
-diversified versions of a program in parallel in order to survive bugs
-and detect security attacks.  In essence, diversity can offer
-probabilistic guarantees that at least one variant survives a bug, or
-that a security attack will be flagged by divergent behaviour across
-variants.
+% Recent years have seen a growing interest in using diversity as a way
+% to increase the reliability and security of software systems.  One
+% form of software diversity that has attracted significant interest
+% from the research community is the idea of running multiple
+% diversified versions of a program in parallel in order to survive bugs
+% and detect security attacks.  In essence, diversity can offer
+% probabilistic guarantees that at least one variant survives a bug, or
+% that a security attack will be flagged by divergent behaviour across
+% variants.
 
-On the reliability side, which forms the main focus of this paper,
-these diversified versions are either automatically-generated
-variants, multiple versions of the same application, or different
-programs implementing the same interface.  For example, one may run in
-parallel multiple variants that employ complementary thread schedules
-to survive concurrency errors~\cite{compl-schedules11}, multiple
-versions of the same software to survive update bugs~\cite{mx}, or
-multiple web browsers to benefit from the fact that many errors do not
-affect all browser implementations~\cite{cocktail}.  In this paper, we
-show that running multiple versions in parallel can be used in other
-reliability scenarios, such as running expensive error detectors
-(``sanitizers'') during deployment.
+% On the reliability side, which forms the main focus of this paper,
+% these diversified versions are either automatically-generated
+% variants, multiple versions of the same application, or different
+% programs implementing the same interface.  For example, one may run in
+% parallel multiple variants that employ complementary thread schedules
+% to survive concurrency errors~\cite{compl-schedules11}, multiple
+% versions of the same software to survive update bugs~\cite{mx}, or
+% multiple web browsers to benefit from the fact that many errors do not
+% affect all browser implementations~\cite{cocktail}.  In this paper, we
+% show that running multiple versions in parallel can be used in other
+% reliability scenarios, such as running expensive error detectors
+% (``sanitizers'') during deployment.
 
-On the security side, these diversified variants are constructed in
-such a way as to reduce the probability of an attack succeeding in all
-of
-them~\cite{cox2006,orchestra09,diehard06,tightlip,capizzi08,devries10,cocktail,trachsel10}.
-For example, one may generate versions with a different arrangement of
-memory blocks in the address space~\cite{diehard06}, or with stacks
-growing in opposite directions~\cite{orchestra09}, to prevent attacks
-whose success depends on the memory layout.
+% On the security side, these diversified variants are constructed in
+% such a way as to reduce the probability of an attack succeeding in all
+% of
+% them~\cite{cox2006,orchestra09,diehard06,tightlip,capizzi08,devries10,cocktail,trachsel10}.
+% For example, one may generate versions with a different arrangement of
+% memory blocks in the address space~\cite{diehard06}, or with stacks
+% growing in opposite directions~\cite{orchestra09}, to prevent attacks
+% whose success depends on the memory layout.
 
-To enable these scenarios, a monitor process coordinates the parallel
-execution of these variants\footnote{The terms \textit{version} and
-  \textit{variant} are used interchangeably.} and synchronises their
-execution, making them appear as a single application to any outside
-entities.  While synchronisation can be performed at different levels,
-the most common approach is to do it at the level of system calls, for
-two main reasons: first, many existing diversification
-transformations, such as the ones discussed above, 
-% address-space layout randomisation~\cite{diehard06} and
-% instruction-set randomisation~\cite{instr-set-rand03}
-do not change the sequence of system calls (the program's
-\textit{external behaviour}), and the ordering is often preserved even
-across different software versions~\cite{mx}.  Second, system calls
-are the main way in which the application communicates with the
-outside environment, and therefore
-%% the ultimate target of attackers.  Finally, as the main
-%% communication mechanism between applications and the environment,
-%% system calls
-must be virtualised in order to enable the multiple versions to act as
-one to the outside world.
+% To enable these scenarios, a monitor process coordinates the parallel
+% execution of these variants\footnote{The terms \textit{version} and
+%   \textit{variant} are used interchangeably.} and synchronises their
+% execution, making them appear as a single application to any outside
+% entities.  While synchronisation can be performed at different levels,
+% the most common approach is to do it at the level of system calls, for
+% two main reasons: first, many existing diversification
+% transformations, such as the ones discussed above, 
+% % address-space layout randomisation~\cite{diehard06} and
+% % instruction-set randomisation~\cite{instr-set-rand03}
+% do not change the sequence of system calls (the program's
+% \textit{external behaviour}), and the ordering is often preserved even
+% across different software versions~\cite{mx}.  Second, system calls
+% are the main way in which the application communicates with the
+% outside environment, and therefore
+% %% the ultimate target of attackers.  Finally, as the main
+% %% communication mechanism between applications and the environment,
+% %% system calls
+% must be virtualised in order to enable the multiple versions to act as
+% one to the outside world.
 
 The main challenge in implementing an NVX monitor at the system call
 level is the trade-off between performance, security, flexibility and
@@ -84,19 +85,8 @@ overhead for CPU-bound applications, scale well with the number of
 versions, and provide a flexible mechanism for handling small
 divergences in the system call sequences issued across versions.
 
-%\todo{Explicit list of contributions?}
-
-%The rest of this paper is structured as follows.
-%Section~\ref{sec:overview} gives a high-level overview of our
-%approach, while Section~\ref{sec:prototype} presents our prototype
-%implementation in detail.  Then, Section~\ref{sec:evaluation}
-%evaluates our prototype on a set of micro- and macro-benchmarks,
-%Section~\ref{sec:applications} shows the applicability to different
-%application scenarios, and Section~\ref{sec:discussion} discusses the
-%main implications of our design.  Finally, Section~\ref{sec:related}
-%presents related work and Section~\ref{sec:conclusion} concludes.
-
 \input{efficient-execution/overview}
 \input{efficient-execution/prototype}
 \input{efficient-execution/evaluation}
+\input{efficient-execution/applications}
 \input{efficient-execution/discussion}

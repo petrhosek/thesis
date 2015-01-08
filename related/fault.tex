@@ -1,0 +1,70 @@
+\section{Fault tolerance}
+
+\mx's main focus is on surviving errors. Prior work in this area has employed
+several techniques to accomplish this
+goal~\cite{rx,compl-schedules11,fo,exec-trans06,vigilante,clearview,microreboots,shepherding:pldi14}.
+
+Rx~\cite{rx} helps applications recover from software failures by
+rolling back the program to a recent checkpoint upon a software
+failure, and then re-executing it in a modified environment.  \mx
+similarly rolls back execution to a recent checkpoint, but instead of
+modifying the environment, it uses the code of a different version to
+survive the bug.  The two approaches are complementary, and could be
+easily combined to support a larger number of errors and application
+types.
+
+Failure-oblivious computing~\cite{fo} helps software survive memory
+errors by simply discarding invalid writes and fabricating values to
+return for invalid reads, enabling applications to continue their
+normal execution path. Similar to failure-oblivious computing,
+execution transactions~\cite{exec-trans06} help survive software bugs
+by terminating the function in which the bug has occurred and
+continuing to execute the code immediately following the
+corresponding function call.  Our approach shares some of the
+philosophy of these two techniques, as we cannot always guarantee that
+the crashing version will correctly execute through the divergence
+when using the other version's code.
+% (see \S\ref{sec:rem}).  
+However, by using a previously correct piece of code to execute
+through the crash and regularly checking for divergences in the
+external behaviour, our approach provides stronger guarantees than
+those obtained by fabricating read values or terminating the function
+in which the bug occurred.
+
+Recovery shepherding~\cite{shepherding:pldi14} allows applications to survive
+certain types of errors by attaching to the process when the error occurs,
+repairing the execution, tracking the effects of the repair and detaching from
+the process after all the effects disappear. RCV, a system implementing the
+technique, enables applications to survive divide-by-zero and null-dereference
+errors by discarding the invalid writes and fabricating the default value for
+invalid reads same as failure-oblivious computing~\cite{fo}.
+
+Jolt~\cite{jolt} and Bolt~\cite{bolt} allow programs to escape from infinite
+and long-running loops which normally render the application unresponsive. Both
+these systems detect whether the application is making any progression as the
+opposite would indicate long-running or possibly infinite loop. When such loop
+is detected, these systems deploy multiple strategies to escape the loop and
+continue execution.  While Jolt uses a specialized compiler, Bolt same as \mx,
+operates on off-the-shelf binaries. The technique for detecting and escaping
+loops is orthogonal to \mx's recovery mechanism and could be easily integrated
+into \rem to expand its recovery capabilities.
+
+Research on automatic generation of filters based on vulnerability
+%~\cite{song:oakland06,vigilante,bouncer,shieldgen} 
+signatures~\cite{song:oakland06,vigilante} 
+or on patch
+%~\cite{clearview,demsky:repair,candea:dimmunix}
+generation in deployed systems~\cite{clearview}
+also target applications with high-availability requirements, and the
+generated patches work by installing lightweight input filters or by changing
+the values of memory locations at runtime.
+
+Recovery-oriented computing~\cite{roc} advocates the re-engineering of software
+systems to allow applications to recover from errors. Within this paradigm,
+microrebooting~\cite{microreboots} proposes building systems out of
+individually recoverable components, which can be rebooted to survive bugs,
+without disturbing the rest of the application. Acceptability-oriented
+Computing~\cite{aoc:oopsla03} argues that instead of attempting to build
+error-free systems, designers should define properties the execution must
+satisfy to be acceptable by the users, and then build a system as a set of
+layered components which enforce these properties.

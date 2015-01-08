@@ -1,5 +1,6 @@
 \newcounter{coverage}
 \newtheorem{question}[coverage]{RQ}
+\let\savedquestion\question % unicode-math#271 workaround
 
 \newcommand{\rqone}{Do executable and test code evolve in sync?}
 \newcommand{\rqtwo}{How many patches touch only code, only tests, none, or both?}

@@ -25,19 +25,20 @@ was calculated as a median of the remaining five measurements.
 
 \begin{table}
 \begin{center}
+\caption{Server applications used in the evaluation.}
 \begin{tabular}{lrl}
-  \hline
-  \textbf{Application} & \textbf{Size} & \textbf{Threading} \\
-  \hline
+  \toprule
+  \textsc{Application} & \textsc{Size} & \textsc{Threading} \\
+  \midrule
   Beanstalkd & 6365 & single-threaded \\
   Lighttpd & 38,590 & single-threaded\\
   Lighttpd 2.0 & 47,873 & multi-threaded\\
   Memcached & 9779 &  multi-threaded\\
   Nginx & 101,852 & multi-process\\
   Redis & 34,625 & multi-threaded\\
+  \bottomrule
 \end{tabular}
 \end{center}
-\caption{Server applications used in the evaluation.}
 \label{tbl:apps}
 \end{table}
 
@@ -74,7 +75,7 @@ was calculated as a median of the remaining five measurements.
 We give a short overview of each benchmark and the way in which we
 measure performance (namely throughput) in our experiments:
 
-\boldtext{\beanstalkd}\footnote{\url{http://kr.github.io/beanstalkd/}}
+\paragraph{\beanstalkd}\footnote{\url{http://kr.github.io/beanstalkd/}}
 is a simple and fast work queue, used by a number of websites to
 distribute jobs among workers. We used revision \lstinline`157d88b` from the
 official \git repository, the latest revision at the time of
@@ -90,10 +91,10 @@ using \SI{256}{\byte} of data per operation.
 %We measured the performance of serving a \SI{4}{\kilo\byte} page using
 %\lstinline`wrk`, which was run for \SI{10}{\second} with \num{10} clients.
 
-\boldtext{\lighttpdtwo}\footnote{\url{https://github.com/lighttpd/lighttpd2}}
+\paragraph{\lighttpdtwo}\footnote{\url{https://github.com/lighttpd/lighttpd2}}
 is a lightweight web server optimized for high performance environments,
 reimplemented entirely from the scratch in the version 2.0.  We used the
-revision \lstinline`93d04a3` from the official \textit{Git} repository, the
+revision \lstinline`93d04a3` from the official \git repository, the
 latest revision at the time of writing. We measured the performance of serving
 a \SI{4}{\kilo\byte} page using
 \lstinline`wrk`,\footnote{\url{https://github.com/wg/wrk}}, which was run for
@@ -105,7 +106,7 @@ a \SI{4}{\kilo\byte} page using
 %% using \num{10} concurrent clients running in \num{2} threads.
 %The results can be seen in Figure~\ref{fig:macro_lighttpd}.
 
-\boldtext{\memcached}\footnote{\url{http://memcached.org/}} 
+\paragraph{\memcached}\footnote{\url{http://memcached.org/}} 
 is a high-performance, distributed memory object caching system, used by
 many high-profile websites to alleviate database load. We used the
 revision 1.4.17, latest at the time of writing. To measure the performance
@@ -118,7 +119,7 @@ part of the \emph{libMemcached} library. We used the default workload,
 %% tool for \memcached, which is a part of
 %% \lstinline`libmemcached`.\footnote{\url{http://libmemcached.org/}}
 
-\boldtext{\textit{Nginx}}\footnote{\url{http://nginx.org/}}
+\paragraph{\nginx}\footnote{\url{http://nginx.org/}}
 is a highly popular reverse proxy server often used as an HTTP web
 server, load balancer or cache. We used version 1.5.12, the
 latest at the time of writing.  We measured
@@ -129,7 +130,7 @@ performance using the same workload as for \lighttpdtwo.
 %% \lstinline`wrk`,\footnote{\url{https://github.com/wg/wrk}} which was run for
 %% \SI{10}{\second} with \num{10} clients.
 
-\boldtext{\redis}\footnote{\url{http://redis.io/}}
+\paragraph{\redis}\footnote{\url{http://redis.io/}}
 is a high-performance in-memory, key-value data store, used by many
 well-known services. % such as Twitter, GitHub and StackOverflow.
 % Pinterest, Snapchat, Craigslist, Digg, Flickr 

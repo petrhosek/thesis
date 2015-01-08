@@ -1,0 +1,264 @@
+\section{Applications}
+\label{sec:applications}
+
+Same for other NVX systems, the primary application of \varan is the
+\emph{transparent failover}, \ie the ability to transparently switch over to
+the non-crashing version in the event of failure without any disruption in the
+service. Furthemore, as an execution runtime targeted towards multi-version
+execution applications, \varan also supports running multiple different
+software versions in parallel.  We discuss both of these scenarios in detail
+below.
+
+\subsection{Transparent Failover}
+\label{sec:failover}
+
+NVX systems introduce a variety of opportunities for increasing
+software reliability and availability via transparent failover.  For
+instance, one can run in parallel multiple variants of an application with
+different memory layouts, different software revisions or different
+implementations of a given interface to survive bugs that occur 
+only in some of them.   
+
+\varan makes it easy to implement transparent failover.  When one of the
+versions crashes, the \lstinline`SIGSEGV` signal handler installed in each
+version notifies the coordinator, which decides what restart strategy
+to use.  When one of the followers crashes, the coordinator unsubscribes it
+from the list of currently-running followers, and discards it without
+affecting other followers.  When the leader crashes, it designates one
+of the followers as the new leader (currently the one with the
+smallest internal ID), and notifies it to switch its system call table
+(\S\ref{sec:rewriting}) to that of the leader, and to restart the last
+system call while discarding the old (crashing) leader.
+
+To demonstrate support for transparent failover, we reproduced a
+\redis
+bug\footnote{\url{https://code.google.com/p/redis/issues/detail?id=344}}
+described in Section~\ref{multi-version:scenarios}.  We ran in
+parallel eight consecutive revisions of \redis from the range
+\lstinline`9a22de8` to \lstinline`7fb16ba`, where the last revision
+introduced a bug which crashes the server by causing a segmentation
+fault. We then set up a client to send an \lstinline`HMGET` command
+that triggers the bug, and measured the increase in latency for that
+command.  When the buggy version is a follower, we do not observe any
+increase in latency, as expected.  When the buggy version is a leader,
+the latency increases from \redisnormallatency to
+\redisfailoverlatency.  In both cases, we observed no extra
+degradation in throughput for the commands that follow.
+
+While \mx can recover from the crash unlike \varan, which discards the crashing
+version, \mx can only run two versions in parallel while \varan can run
+arbitrary number of versions with significantly lower performance overhead as
+shown in Section~\ref{sec:comparison}.
+
+As an additional experiment, we ran revisions \lstinline`2437` and
+\lstinline`2438` of \lighttpd (also used in the evaluation of
+\mx~\cite{mx}), the latter of which introduced a crash bug.  We then
+set up a client that triggers the bug and measured the latency for
+that request. In both cases, \ie when the buggy version was either
+the leader or the follower, there was no increase and the latency remained
+at \lighttpdnormallatency.
+%set up a client that triggers the bug and measured the increase in
+%latency for that command. As for the \redis scenario, there is no
+%increase in latency when the buggy version is a follower.  When it is
+%the leader, the latency increases from \lighttpdnormallatency to
+%\lighttpdfailoverlatency.  
+
+\subsection{Multi-version execution}
+\label{sec:mv-execution}
+
+Multiple different software versions (revisions) can be run inside an NVX
+system as long as they all issue the same sequence of system calls. This
+limitation is due to the fact that prior NVX systems run versions in lockstep
+(\S\ref{sec:rw}).
+
+Because \varan does not run the versions in lockstep and can use system call
+rewrite rules, it can often overcome this limitation. To illustrate, we used
+several \lighttpd revisions from our evolution study
+(\S\ref{sec:behavior-evolution}) which introduced new system calls and as such
+cannot be run in parallel by prior NVX systems that rely on lockstep execution.
+
+As a first experiment, we ran revision \lstinline`2435` as
+leader together with revision \lstinline`2436` as follower.  Revision
+\lstinline`2436` introduces two additional checks using the
+\lstinline`getuid` and \lstinline`getgid` system calls.  More
+precisely, revisions until and including \lstinline`2435` used
+\lstinline`geteuid()` and \lstinline`getegid()` C library functions to
+check the user account under which the server is being run, before
+issuing an \lstinline`open` system call.  This resulted in a sequence
+of \lstinline`geteuid`, \lstinline`getegid` and \lstinline`open`
+system calls.  Revision \lstinline`2436` replaced the use of the
+aformentioned functions with \lstinline`issetugid()` which changed the
+system call sequence to \lstinline`geteuid`, \lstinline`getuid`,
+\lstinline`getegid`, \lstinline`getgid`, followed by \lstinline`open`
+as before.
+
+To allow for this divergence, we used the custom BPF filter shown in
+the Listing~\ref{lst:lighttpd}.  The filter is executed by the
+follower whenever a divergence is detected.  In our experiment, this
+happens when the follower executes the newly introduced
+\lstinline`getuid` system call. The filter first loads the system call
+number executed by the leader into the implicit BPF accumulator
+(line~\ref{line:load-leader}) and checks whether the call is either
+\lstinline`getegid` (line~\ref{line:check-getegid}) or
+\lstinline`open` (line~\ref{line:check-open}).  The former will be
+true in this case, so the control will transfer to
+line~\ref{line:load-getuid}, which loads the system call number
+executed by the follower into the accumulator, checks whether it is
+\lstinline`getuid` (line~\ref{line:check-getuid}) and finally
+transfers the control to line~\ref{line:allow} returning the value
+\lstinline`SECCOMP_RET_ALLOW`, which instructs \varan to execute the
+additional system call (\ie \lstinline`getuid`) in the follower.  Any
+other combination of system calls would have killed the follower
+(line~\ref{line:kill}). After executing the \lstinline`getuid` system
+call and replaying the execution of \lstinline`getegid` (which the
+leader also executed), \varan would detect a second divergence when
+the follower tries to execute \lstinline`getgid` instead of
+\lstinline`open`. This divergence would be resolved using the same
+filter, taking the path on lines~\ref{line:check-open},
+\ref{line:load-getgid}, \ref{line:check-getgid} and \ref{line:allow}.
+
+Note this is only one possible filter for allowing this divergence; in
+particular, one could write a filter that takes into account more
+information about the context in which it should be applied, \eg by
+inspecting some system call arguments.
+
+% or more system calls preceding the divergence.
+
+
+\begin{figure}[t]
+\begin{lstlisting}[label={lst:lighttpd},language={[bpf]Assembler},caption={Example of a BPF rewriting rule}]
+ld event[0] /*@\label{line:load-leader}@*/
+jeq #108, getegid       /* __NR_getegid *//*@\label{line:check-getegid}@*/
+jeq #2, open            /* __NR_open *//*@\label{line:check-open}@*/
+jmp bad
+getegid:
+ld [0]                  /* offsetof(struct seccomp_data, nr) *//*@\label{line:load-getuid}@*/
+jeq #102, good          /* __NR_getuid *//*@\label{line:check-getuid}@*/
+open:
+ld [0]                  /* offsetof(struct seccomp_data, nr) *//*@\label{line:load-getgid}@*/
+jeq #104, good          /* __NR_getgid *//*@\label{line:check-getgid}@*/
+bad: ret #0             /* SECCOMP_RET_KILL *//*@\label{line:kill}@*/
+good: ret #0x7fff0000   /* SECCOMP_RET_ALLOW *//*@\label{line:allow}@*/
+\end{lstlisting}
+\end{figure}
+
+%% To translate the filter into bytecode, the user can use the provided
+%% \lstinline`vx_bpf` tool and pass the output directly to \varan when starting the
+%% application:
+
+%% \begin{lstlisting}[language={bash},numbers=none]
+%% vx --filter "$(vx_bpf lighttpd.filter)" \
+%%   /path/lighttpd-2435 /path/lighttpd-2436 \
+%%   -- -f lighttpd.conf
+%% \end{lstlisting}
+
+We used a similar filter to run revisions \lstinline`2523` and
+\lstinline`2524`, the latter of which introduces an additional
+\lstinline`read` system call to access the \lstinline`/dev/urandom`
+file to obtain an additional source of entropy.  We were also able to
+run revisions \lstinline`2577` and \lstinline`2578` where the
+difference consists of an additional \lstinline`fcntl` system call to
+set a \lstinline`FD_CLOEXEC` flag on one of the file descriptors.
+
+Currently, \varan's implementation can use BPF filters to allow adding
+or removing system calls in the follower.  However, this is not a
+fundamental limitation, and in the future we plan
+%to use the powerful pseudo-machine model employed by BPF filters
+to support  other types of transformations, such as replacing one
+sequence of system calls with another.
+
+%% The BPF rewrite rules can be used to handle one-to-many and many-to-one
+%% situations (\ie where a single system call has been replaced by multiple ones)
+%% as shown in Section~\ref{sec:mv-execution}, but they are not suitable for
+%% many-to-many scenarios, mainly due to limited expressive power of the language.
+%% This issue could be addressed in the future by the use of more expressive
+%% language such as eBPF.
+
+
+%We managed to ran \lighttpd revision \lstinline`2435` together with
+%the following revision \lstinline`2436`, which introduced two extra
+%checks using the system calls \lstinline`getuid` and
+%\lstinline`getgid`. We configured \varan to allow followers to skip
+%these calls, or conversely to execute them if they are not found in
+%the event stream, using the custom BPF filter shown in the
+%Listing~\ref{lst:lighttpd}.
+
+% \begin{figure}[t]
+% \begin{lstlisting}[label={lst:lighttpd},language={[bpf]Assembler},caption={Example of a BPF rewriting rule}]
+% ld #syscall
+% jneq #2, bad            /* __NR_open */
+% jneq #108, bad          /* __NR_getegid */
+% ld [0]                  /* offsetof(struct seccomp_data, nr) */
+% jeq #102, good          /* __NR_getuid */
+% jeq #104, good          /* __NR_getgid */
+% jeq #107, good          /* __NR_geteuid */
+% jeq #108, good          /* __NR_getegid */
+% bad: ret #0             /* SECCOMP_RET_KILL */
+% good: ret #0x7fff0000   /* SECCOMP_RET_ALLOW */
+% \end{lstlisting}
+% \end{figure}
+
+%% To translate the filter into bytecode, the user can use the provided
+%% \lstinline`vx_bpf` tool and pass the output directly to \varan when starting the
+%% application:
+
+%% \begin{lstlisting}[language={bash},numbers=none]
+%% vx --filter "$(vx_bpf lighttpd.filter)" \
+%%   /path/lighttpd-2435 /path/lighttpd-2436 \
+%%   -- -f lighttpd.conf
+%% \end{lstlisting}
+
+% When \varan detects the divergence in the follower, it runs the filter
+% to try to resolve the divergence. Since the provided filter matches
+% the input and returns the \lstinline`SECCOMP_RET_ALLOW` value, \varan
+% executes the additional system calls in the follower.  After these
+% calls, the execution continues as expected, with both versions issuing
+% the same system call sequence.
+
+% As a second experiment, we ran \lighttpd revision \lstinline`xxx` with
+% the following revision \lstinline`xxx+` which introduced an extra
+% \lstinline`read` call to \lstinline`/dev/[u]random`.  We wrote a BPF
+% filter similar to the one before, which allows followers to skip this
+% call, or conversely to execute it if it is not found in the event
+% stream. The filter allows the divergence to be resolved, after which
+% both versions continue to issue the same system call sequence.
+
+%% As a second experiment, we ran \lighttpd revision \lstinline`xxx` with
+
+% \lighttpd: a pair of \lstinline`geteuid()` and \lstinline`getegid()`
+% calls are replaced with a single call to \lstinline`issetugid()`.
+
+
+%To handle various instances of these classes, we introduced an approach
+%based on pattern matching. The pattern language employed by \varan is
+%similar to regular expressions, but rather than instances of strings, it
+%is used to match instances of system call traces. We have employed
+%regular language which allows us to construct a non-deterministic finite
+%automaton for each pattern using the technique introduced by Ken
+%Thompson~\cite{regexp}.
+
+%The pattern language employed by also \varan allows to match system call
+%arguments, similarly to BPF filters in mode 2 seccomp provided by Linux
+%kernel, which is necessary to match certain traces.
+
+
+
+% and restarts the last system call.  All other followers simply discard
+% the event and continue in execution.
+
+% and then notifies all versions by issuing a special
+% "reranking" event and sends new ranks to all instances over the
+% service channel. When the event is read by individual followers during
+% replay, they receive their new ranks and take the action. 
+
+
+% \todo{Memory consumption?}
+
+% \begin{structure}
+% \item Scaling w/ more versions/variants
+% \item Fail-over mechanism w/ many versions/variants
+% \item Multiple versions: \mx, staged deployment
+% \item Variants: sanitizers? some memory allocation diffs?
+% \item different compilers?  gcc vs llvm?
+% \item sanitizers?
+% \end{structure}

@@ -48,10 +48,10 @@ its billing system two days ago.
 \end{quotation}
 The outage, which according to reports lasted for 48 hours, was so impactful
 that it generated a lot of negative reactions from frustrated customers
-including its own \#verizonfail and \#verizonoutage Twitter hashtags.  This as
-well as other similar incidents (\eg Blogger~\cite{blogger-incident2011} or
-Facebook~\cite{facebook-incident2010}) show the possible consequences of failed
-software updates.
+including its own \textsf{\#verizonfail} and \textsf{\#verizonoutage} Twitter
+hashtags.  This as well as other similar incidents (\eg
+Blogger~\cite{blogger-incident2011} or Facebook~\cite{facebook-incident2010})
+show the possible consequences of failed software updates.
 
 The problems caused by failed software updates are also not restricted to
 server applications or services. \vim\footnote{\url{http://www.vim.org/}},
@@ -63,19 +63,20 @@ whenever the user tried to use a path completion feature.  This bug made its
 way into Ubuntu 8.04, affecting a large number of
 users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
 
+\section{Problem statement}
+
 To tackle the software update problem, we propose \emph{multi-version
-execution}, a novel technique
-%, which fits within the overall theme of $N$-version programming~\cite{nvp77,chen1995},
-designed to improve the software update process to increase software
-availability and reliability by exploiting the abundance of resources (\eg idle
-processor time) made available by the modern highly parallel platforms.
-Whenever a new system update becomes available, instead of upgrading the
-software to the newest version, we \emph{run the new version in parallel with
-the old}. As new versions arrive, we continue to execute them in parallel with
-the existing ones, until all available resources have been exhausted, or a
-user-specified threshold has been reached.  At that point, we can either
-discard the very oldest versions, or we can use more sophisticated replacement
-strategies.
+execution}, a novel technique, which fits within the overall theme of
+$N$-version programming~\cite{avizienis:nvp,chen1995}, designed to improve the
+software update process to increase software availability and reliability by
+exploiting the abundance of resources (\eg idle processor time) made available
+by the modern highly parallel platforms.  Whenever a new system update becomes
+available, instead of upgrading the software to the newest version, we
+\emph{run the new version in parallel with the old}. As new versions arrive, we
+continue to execute them in parallel with the existing ones, until all
+available resources have been exhausted, or a user-specified threshold has been
+reached.  At that point, we can either discard the very oldest versions, or we
+can use more sophisticated replacement strategies.
 
 We believe that multi-version execution updates is a timely solution in the
 context of today's computing platforms~\cite{multiplicity}. The last decade has
@@ -97,26 +98,25 @@ instead of dynamically switch off unused servers which does not prove to be
 effective, we aim to use the abundance of these resources (\ie processing
 power) to increase software availability and reliability.
 
-%In recent years,
-%we have witnessed the emergence of new technology---ranging from multicore
-%processors to large-scale data centers---which provide an abundance of
-%computational resources and a high degree of parallelism.  Furthermore, these
-%resources are often left idle, in which state they consume (read waste) a large
-%fraction of their full-utilization energy levels.  For example, recent
-%studies~\cite{barroso2007} have shown that servers in a data center usually
-%operate at between 10\% and 50\% of their maximum utilization; however, even an
-%energy efficient server consumes half its full power when doing virtually no
-%work---and for regular servers, this ratio is much worse.
+Our approach aims to improve the reliability of software update process by
+taking advantage of idle resources---such as idle cores on a CPU and idle
+servers in a data center---to run multiple versions of an application in
+parallel, with the goal of improving the overall reliability and security of
+the software being upgraded.  Our current focus is on multi-core processors,
+but we believe this solution could be adapted to work on other parallel
+platforms as well.  Furthermore, this update mechanism could be extended to
+work with a large number of versions running in parallel and configured to
+balance conflicting requirements such as performance, reliability and energy
+consumption.
 
-Our approach aims to improve the software update process by taking advantage of
-idle resources---such as idle cores on a CPU and idle servers in a data
-center---to run multiple versions of an application in parallel, with the goal
-of improving the overall reliability and security of the software being
-upgraded.  Our current focus is on multi-core processors, but we believe this
-solution could be adapted to work on other parallel platforms as well.
-Furthermore, this update mechanism could be extended to work with a large
-number of versions running in parallel and configured to balance conflicting
-requirements such as performance, reliability and energy consumption.  
+There are three main challenges that we need to address to make this approach
+viable. First, we need to implement mechanisms for coordinating the parallel
+execution of multiple program versions.  Second, when executions diverge, we
+need to select the output of the more reliable one, and merge them back once
+executions converge again.  Finally, we need to ensure that the overall system
+is able to scale up and down the number of program versions run in parallel in
+order to balance conflicting requirements such as performance, reliability, and
+energy consumption.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -131,16 +131,6 @@ requirements such as performance, reliability and energy consumption.
 %be extended to work with a large number of versions run in parallel, and can
 %be applied to several different platforms, ranging from multicore processors
 %to large-scale data centers.  
-
-%% There are three main challenges that we need to address to make this
-%% approach viable.  First, we need to implement mechanisms for
-%% coordinating the parallel execution of multiple program versions.
-%% Second, when executions diverge, we need to select the output of the
-%% more reliable one, and merge them back once executions converge again.
-%% Finally, we need to ensure that the overall system is able to scale up
-%% and down the number of program versions run in parallel in order to
-%% balance conflicting requirements such as performance, reliability, and
-%% energy consumption.
 
 %The rest of this paper is organized as follows. Section~\ref{sec:background}
 %discusses related work and  Section~\ref{sec:motivation} motivates our
@@ -166,9 +156,28 @@ requirements such as performance, reliability and energy consumption.
 %% differences from the existing solutions aiming to achieve similar
 %% goals.
 
-\section{Problem statement}
-
 \section{Organization}
+
+Chapter~\ref{chap:overview} gives an overview of the $N$-version and
+multi-version execution techniques and gives the background used in the rest of
+the thesis. Chapter~\ref{chap:evolution} presents a study of software
+evolution in several real-world open-source systems and acts as a motivation for many
+of the design choices made in the systems presented in this thesis.
+
+Chapter~\ref{chap:related} discusses work related to $N$-version and multi-version
+execution both in the reliability and the security context. Finally, the thesis concludes
+with Chapter~\ref{chap:conclusion}, which summarizes the contributions and
+discusses the possible future work.
+
+%The rest of this paper is structured as follows.
+%Section~\ref{sec:overview} gives a high-level overview of our
+%approach, while Section~\ref{sec:prototype} presents our prototype
+%implementation in detail.  Then, Section~\ref{sec:evaluation}
+%evaluates our prototype on a set of micro- and macro-benchmarks,
+%Section~\ref{sec:applications} shows the applicability to different
+%application scenarios, and Section~\ref{sec:discussion} discusses the
+%main implications of our design.  Finally, Section~\ref{sec:related}
+%presents related work and Section~\ref{sec:conclusion} concludes.
 
 \section{Previous work}
 

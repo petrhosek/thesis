@@ -3,13 +3,13 @@
 
 \usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=3cm]{geometry}
 
-\title{Multi-version Software Updates}
+\title{Multi-version Execution for Increasing the Reliability and Availability of Evolving Software}
 \author{Petr Hosek}
 \date{December 2014}
 \university{Imperial College London}
 \department{Department of Computing}
 \supervisor{Dr Cristian Cadar}
-\dedication{}
+\dedication{I would like to dedicate this thesis to \ldots}
 
 \lstset{
   language=C,
@@ -87,7 +87,7 @@
 \newcommand{\mxm}[0]{\textsc{Mxm}\xspace}
 \newcommand{\mv}[0]{\textsc{MV}\xspace}
 
-\newcommand{\ptrace}[0]{\stt{ptrace}\xspace}
+\newcommand{\ptrace}[0]{\textsf{ptrace}\xspace}
 \newcommand{\redisbenchmark}[0]{\textstt{redis-benchmark}}
 \newcommand{\httpload}[0]{\textstt{http\_load}}
 \newcommand{\spec}[0]{\textit{SPEC~CPU2006}\xspace}
@@ -95,10 +95,10 @@
 \newcommand{\vim}[0]{\emph{Vim}\xspace}
 \newcommand{\gchrome}[0]{\emph{Google Chrome}\xspace}
 \newcommand{\chrome}[0]{\emph{Chrome}\xspace}
+\newcommand{\gnu}[0]{\textit{GNU}\xspace}
 \newcommand{\coreutils}[0]{\emph{Coreutils}\xspace}
 
 \newcommand{\binutils}[0]{\textit{Binutils}\xspace}
-\newcommand{\gnu}[0]{\textit{GNU}\xspace}
 \newcommand{\mdsum}[0]{\textstt{md5sum}}
 \newcommand{\shasum}[0]{\textstt{sha1sum}}
 \newcommand{\mkdir}[0]{\textstt{mkdir}}
@@ -164,7 +164,7 @@
 \newcommand{\diffutils}{Diffutils\xspace}
 \newcommand{\findutils}{Findutils\xspace}
 \newcommand{\zeromq}{{\O}MQ\xspace}
-\newcommand{\git}{Git\xspace}
+\newcommand{\git}{\textit{Git}\xspace}
 
 \newcommand{\true}{\stt{true}\xspace}
 \newcommand{\false}{\stt{false}\xspace}
@@ -214,25 +214,18 @@
   urlcolor=pantone527
 }
 
-%%%
-
 \input{evolution/rqs}
 \input{evolution/results}
 \input{safe-updates/results}
 \input{efficient-execution/results}
 
-%\usepackage[T1]{fontenc}
-%\usepackage{textcomp}
-
-%\usepackage[minionint,mathlf]{MinionPro}
-%\renewcommand{\sfdefault}{Myriad-LF}
-
-%\usepackage{gnuplot-lua-tikz}
-
 \begin{document}
+\let\question\savedquestion
 
 \maketitle
 
+\null
+\vfill
 \pdfbookmark[0]{Colophon}{colophon}
 \section*{Colophon}
 
@@ -247,25 +240,50 @@ The default text font is Minion Pro, while the sans-serif text is typeset in
 
 \preface
 \begin{abstract}
-Software updates present a difficult challenge to the software
-maintenance process.  Too often, updates result in failures, and users
-face the uncomfortable choice between using an old stable version
-which misses recent features and bug fixes, and using a new version
-which improves the software in certain ways, only to introduce other
-bugs and security vulnerabilities.
+Software updates present a difficult challenge to the software maintenance
+process. Too often, updates result in failures, and users face the
+uncomfortable choice between using an old stable version which misses recent
+features and bug fixes, and using a new version which improves the software in
+certain ways, only to introduce other bugs and security vulnerabilities.
 
-In this position paper, we propose a radically new approach for
-performing software updates: whenever a new update becomes available,
-instead of upgrading the software to the new version, we instead
-run the new version in parallel with the old one.  By carefully
-coordinating their executions and selecting the behavior of the more
-reliable version when they diverge, we can preserve the stability of
-the old version without giving up the features and bug fixes added to
-the new version.
+We tackle this problem using a simple but effective multi-version execution
+based approach. Whenever a new update becomes available, instead of upgrading
+the software to the new version, we run the new version in parallel with the
+old one; by carefully coordinating their executions and selecting the behaviour
+of the more reliable version when they diverge, we create a more secure and
+dependable multi-version application.
 
-We are currently focusing on a prototype system targeting multicore
-CPUs, but we believe this approach could also be deployed on other
-parallel platforms, such as GPGPUs and cloud environments.
+With the widespread availability of multi-core processors, the multi-version
+execution might become a viable approach for increasing the reliability and
+security of software systems. The key component of such $N$-version execution
+(NVX) systems is a runtime monitor that enables the execution of multiple
+versions in parallel.
+
+Unfortunately, existing monitors impose either a large performance overhead
+and/or rely on intrusive kernel-level changes.  Moreover, none of the existing
+solutions scales well with the number of versions, since the runtime monitor
+acts as a performance bottleneck. Finally, none of the existing monitors is
+suited for executing mutliple different versions in parallel.
+
+In this thesis, we present two different designs for building such monitors;
+one, called \varan, aimed at running large number of versions side-by-side with
+low overhead, and second, called \mx, focused on surviving crashes caused by
+bugs introduced in software updates.
+
+\varan is an NVX framework that combines binary rewriting with a novel
+event-streaming architecture to significantly reduce performance overhead and
+scale well with the number of versions, without relying on intrusive kernel
+modifications. Our evaluation shows that \varan can run NVX systems based on
+popular C10k network servers with only a modest performance overhead, and can
+be effectively used to increase software reliability.% using techniques such as
+%transparent failover, live sanitisation and multi-version execution.
+
+\mx is a system targeting application updates which might introduce potential
+crash bugs. We show how \mx can be applied successfully to several real
+applications such as \coreutils, a set of user-level UNIX applications;
+\lighttpd, a popular web server used by several high-traffic websites; and
+\redis, an advanced key-value data structure server used by many well-known
+services.
 \end{abstract}
 
 \makededication
@@ -281,8 +299,8 @@ parallel platforms, such as GPGPUs and cloud environments.
 \input{multi-version/multi-version}
 \input{evolution/evolution}
 
-\input{safe-updates/safe-updates}
 \input{efficient-execution/efficient-execution}
+\input{safe-updates/safe-updates}
 
 \input{applications/applications}
 \input{related/related}
@@ -290,12 +308,8 @@ parallel platforms, such as GPGPUs and cloud environments.
 \addcontentsline{toc}{chapter}{References}
 {
   \printbibliography
-  %\bibliographystyle{alpha}
-  %\bibliography{bibliography/cadar,bibliography/cadar-crossrefs,bibliography/cadar-macros}
-  %\bibliography{bibliography/bibliography}
 }
 
 \appendix
-% include all appendices
 
 \end{document}

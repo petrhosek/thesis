@@ -1,33 +1,227 @@
-To evaluate our approach, we show that \mx can survive crash bugs in
-several real applications: \gnu \coreutils
-(\S\ref{sec:coreutils}), \redis (\S\ref{sec:redis}) and \lighttpd
-(\S\ref{sec:lighttpd}).  We then examine the question of how far apart
-can be the versions run by \mx (\S\ref{sec:bounds}), and discuss \mx's
-performance overhead (\S\ref{sec:performance}).
+\section{Reliability Evaluation}
+\label{sec:reliability-evaluation}
 
-\subsection{\coreutils}
+To evaluate our approach, we show that \mx can survive crash bugs in several
+real applications (\S\ref{sec:surviving}). We then examine the question of how
+far apart can be the versions run by \mx (\S\ref{sec:bounds}), and discuss
+\mx's performance overhead (\S\ref{sec:performance}).
+
+\subsection{Fault recovery}
+\label{sec:surviving}
+
+We have evaluated \mx using a set of bugs in three applications: \gnu
+\coreutils, \redis and \lighttpd. We discuss each application in turn below.
+
+\subsubsection{\gnu \coreutils}
 \label{sec:coreutils}
-\input{safe-updates/coreutils}
 
-%\pagebreak
-\subsection{\redis}
+\begin{table}[t]
+\begin{center}
+\caption{Utilities from \gnu \coreutils, the crash bugs used, and the 
+versions in which these bugs were introduced and fixed.  We group
+together utilities affected by the same or similar bugs.}
+\begin{tabular}{lll}
+\toprule
+\textsc{Utility} & \textsc{Bug description} & \textsc{Bug span} \\
+\midrule
+\mdsum & \multirow{2}{*}{Buffer underflow} & \multirow{2}{*}{v5.1 -- v6.11} \\
+\shasum & & \\
+\midrule
+\mkdir & \multirow{2}{*}{\textstt{NULL}-pointer dereference} & \multirow{2}{*}{v5.1 -- v6.11} \\
+\mkfifo & & \\
+\mknod & & \\
+\midrule
+\cut & Buffer overflow & v5.3 -- v8.11 \\
+\bottomrule
+\end{tabular}
+\label{tbl:cu-bugs}
+\end{center}
+\end{table}
+
+As an initial evaluation of \mx's ability to survive crashes, we have used
+applications from the \gnu \coreutils utility
+suite,\footnote{\url{http://www.gnu.org/software/coreutils/}} which provides
+the core user-level environment on most UNIX systems.  We have selected a
+number of bugs reported on the \coreutils mailing list, all of which trigger
+segmentation faults.  The bugs are described in Table~\ref{tbl:cu-bugs},
+together with the utilities affected by each bug and the versions in which they
+were introduced and fixed.
+
+The bug affecting both \mdsum and \shasum utilities introduced in 5.1 and later
+fixed in 6.11 caused a crash due to buffer underflow when checking an invalid
+BSD-style input. Another bug we have considered affected \mkdir, \mkfifo and
+\mknod utilities; this bug, which was reported in 6.10 and fixed in 6.11
+resulted in crash when diagnosing invalid context.  Finally, the bug affecting
+\cut utility, introduced in 5.3 and later fixed in 8.11, resulted in segfault
+when using large unbounded range. 
+
+For all these bugs, we configured \mx to run the version that fixed the bug
+together with the one just before.  (we could have also run the version that
+introduced the bug with the one just before, but we could not immediately tell
+where the bug was introduced, and we cannot build versions earlier than 6.10
+due to changes in GCC and GNU C library).  \mx successfully intercepted the
+crash and recovered the execution by using the strategy described in
+\sref{sec:rem}.
+
+We discuss below the bug in the \cut utility (used to remove sections from each
+line of file), triggered by the following invocation:
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt,language=bash]
+cut -c1234567890- --output-d=: foo
+\end{lstlisting}
+
+This bug is triggered by the conditional statement on line~\ref{line:cond}:
+
+\begin{lstlisting}[firstnumber=525]
+if (output_delimiter_specified /*@\label{line:cond}@*/
+    && !complement
+    && eol_range_start && !is_printable_field (rsi_candidate))
+\end{lstlisting}
+
+This code uses the lower bound of the size of the printable field
+vector; however, when calculating the size of this vector, ranges going
+to the end of line (\ie \lstinline`0-`) are not considered eventually
+resulting in invalid memory access. 
+% The bug is caused by a buffer overflow whose root cause is the
+% incorrect calculation of the size of a dynamically allocated buffer
+% used internally by \cut.
+When \mx intercepts this bug, it uses the
+last checkpoint to recover the execution of the crashing version. This
+checkpoint is taken after the \textstt{brk} system call triggered by
+the \textstt{malloc} call that allocates the buffer. 
+% in function \textstt{bindtextdomain} on line~\ref{line:bind}.
+% \begin{lstlisting}[firstnumber=767]
+% bindtextdomain (PACKAGE, LOCALEDIR); /*@\label{line:bind}@*/
+% \end{lstlisting}
+The recovered process uses the code of the other version to correctly
+calculate the size of the field vector and switches back to the original
+code during the allocation of this buffer as
+%code during the allocation of this buffer on line~\ref{line:alloc} as
+function \textstt{xzalloc} triggers \textstt{mmap64} system call, just
+before executing the conditional statement on line~\ref{line:cond},
+which originally triggered the bug.
+
+\subsubsection{\redis}
 \label{sec:redis}
-\input{safe-updates/redis}
 
-%% \subsection{Md5sum}
-%% \label{sec:mdsum}
-%% %\input{mdsum}
+Below, we describe how \mx can survive the \redis bug described in
+Section~\ref{multi-version:scenarios} while running in parallel the \redis
+revision \textstt{a71f072f} (\textit{the old version}, just before the bug was
+introduced) with revision \textstt{7fb16bac} (\textit{the new version}, just
+after the bug).  \mx first invokes \sea to perform a static analysis of the two
+binaries and construct the mappings described in \sref{sec:sea}.  Then, \mx
+invokes the \mxm monitor, which executes both versions as child processes and
+intercepts their system calls.
 
+When the new version crashes after issuing the problematic
+\textstt{HMGET} command, \mxm intercepts the \textstt{SIGSEGV} signal
+which is sent to the application by the operating system.  At
+this point, \rem starts the recovery procedure.  First, \rem sends a
+\textstt{SIGKILL} signal to the new version to terminate it.  It then
+takes the last checkpoint of the new version, which was taken at the
+point of the last invoked system call, which in this case is an
+\textstt{epoll\_ctl} system call.  Then, \rem uses the information
+provided by \sea to rewrite the stack of the new version, as detailed
+in \sref{sec:rem}.  In particular, \rem replaces the return
+addresses of all functions in the new version with the corresponding
+addresses from the old version. The stack rewriting itself however is not
+enough. The newer version can still use function pointers, which are part of
+the replica state, to invoke the original code. To prevent this situation, \rem
+inserts breakpoints at the beginning of all the functions in the code of the
+new version (to intercept indirect calls via function pointers), and then
+finally restores the original processor registers of the checkpointed process
+and restarts the execution of the (modified) new version.
 
-\subsection{\lighttpd}
+Since the checkpoint was performed right after the execution of the system
+call \textstt{epoll\_ctl}, the first thing that the code does is to
+return from the \textstt{libc} wrapper that performed this system
+call.  This in turn will return to the corresponding code in the old
+version that invoked the wrapper, since all return addresses on the
+stack have been rewritten.  From then on, the code of the old version
+is executed (but in the state of the new version), until the first
+system call is intercepted.  In our example, the old and the new
+versions perform the same system call (and with the same arguments),
+so \rem concludes that the two processes have re-converged, and thus
+restores back the code of the new version by performing the steps
+above in reverse, plus the additional step of synchronising their
+global state (see \S\ref{sec:rem}).  Finally, the control is handed
+back to the \mxm monitor, which continues to monitor the execution of
+the two versions.
+
+\subsubsection{\lighttpd}
 \label{sec:lighttpd}
-\input{safe-updates/lighttpd}
+
+To evaluate \mx on \lighttpd, we have used two different crash bugs.
+The first bug is the one described in detail in
+Section \ref{multi-version:scenarios}, related to the ETag and compression
+functionalities.  As previously discussed, the crash is triggered by a
+very small change, which decrements the upper bound of a \textstt{for}
+loop by one.  \mx successfully protects the application against this
+crash, and allows the new version to survive it by using the code of
+the old version.
+
+The other crash bug we reproduced affects the URL rewrite
+functionality.\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/issues/2140}}
+This is also caused by an incorrect bound in a \lstinline`for` loop.
+More precisely, the loop: 
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+for (k=0; k < pattern_len; k++)
+\end{lstlisting}
+
+\noindent should have been:
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+for (k=0; k@+1@ < pattern_len; k++)
+\end{lstlisting}
+
+The bug seems to have been present since the very first version
+added to the repository.  It was reported in December 2009, and
+fixed one month later.  As a result, we are running \mx using the last
+version containing the bug together with the one that fixed it.  While
+this bug does not fit within the pattern targeted by \mx (where a
+newer revision introduces the bug), from a technical perspective it is
+equally challenging.  \mx is able to successfully run the two versions
+in parallel, and help the old version survive the crash bug.
+
+%The bug \#1601 affects the HTTP redirection functionality, in particular
+%the \texttt{\%n} substitution with condition substring. This functionality has
+%been introduced in revision \texttt{510}. However, there is an incorrect
+%comparison in one of the conditions which causes segmentation fault when
+%appending matched parts to buffer if there was no matching regular expression.
+%The affected code can be seen in Listing~\ref{lst:510}.
+
+%\begin{lstlisting}[label=lst:510, caption={Original correct version of the function}]
+%cond_cache_t *cache = &con->cond_cache[dc->context_ndx];
+%if (n > cache->patterncount) {
+  %return 0;
+%}
+%\end{lstlisting}
+
+%The fix to this bug consists of a single changed line as can be seen in
+%Listing~\ref{lst:2138} and has been incorporated in revision \texttt{2138}, yet
+%this bug remained undetected for nearly three years (August 8, 2005 --- March
+%26, 2008) rendering \lighttpd webserver vulnerable to attack.
+
+%\begin{lstlisting}[label=lst:2138, caption={Refactored failing version of the function}]
+%cond_cache_t *cache = &con->cond_cache[dc->context_ndx];
+%if (n >= cache->patterncount) {
+  %return 0;
+%}
+%\end{lstlisting}
+
+Both \lighttpd bugs \#1601 and \#2140 are very simple---their fix
+consist of a single character---yet still they made \lighttpd server
+vulnerable to a potential attack. \mx can not only handle the crash,
+but also successfully recover the failing version in both cases.
 
 \subsection{Ability to run distant versions}
 \label{sec:bounds}
 
 \begin{table}
-\centering
+\begin{center}
+\caption{The maximum distance in number of revisions, and the time span
+  between the revisions that can be run by \mx for each bug.}
 \begin{tabular}{lcc}
 \toprule
 \textsc{Application Bug} & \textsc{Max distance} & \textsc{Time span} \\
@@ -38,9 +232,8 @@ performance overhead (\S\ref{sec:performance}).
 %md5sum          & \maxDistMdsum & \timeSpanMdsum \\ \hline
 \bottomrule
 \end{tabular}
-\caption{The maximum distance in number of revisions, and the time span
-  between the revisions that can be run by \mx for each bug.}
 \label{tbl:bug-bounds}
+\end{center}
 \end{table}
 
 In the previous sections, we have shown how \mx can help software
@@ -69,7 +262,7 @@ and \timeSpanRedis apart.
 
 Of course, it is difficult to draw any general conclusions from only
 this small number of data points.  Instead, we focus on understanding
-the reasons why \mx couldn't run farther apart versions for the bugs
+the reasons why \mx could not run farther apart versions for the bugs
 in \lighttpd and \redis (we ignore \coreutils, for which we can run
 very distant versions).
 %% For the \coreutils bugs, the lower bound is the earliest
@@ -134,7 +327,7 @@ system calls.
 We ran our experiments on a four-core server with 3.50~GHz Intel
 Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 
-\textbf{\spec.}
+\paragraph{\spec.}
 To measure the performance overhead of our prototype, we first used
 the standard \spec\footnote{\url{http://www.spec.org/cpu2006/}}
 benchmark suite.  Figure~\ref{fig:spec} shows the performance of \mx
@@ -155,7 +348,7 @@ though this work used SPEC~CPU2000 which has already been retired).
 %% $n$-fold slowdown, so the relatively high measure overhead is
 %% therefore unsurprising.
 
-\textbf{\coreutils.} The six \coreutils applications discussed in 
+\paragraph{\gnu~\coreutils.} The six \coreutils applications discussed in 
 \sref{sec:coreutils} are mostly used in an interactive fashion via the
 command-line interface (CLI). For such applications, a high performance
 overhead is acceptable as long as it is not perceptible to the user;
@@ -173,7 +366,7 @@ overhead).
 
 
 
-\textbf{\redis and \lighttpd.} To measure the performance overhead for \redis, 
+\paragraph{\redis and \lighttpd.} To measure the performance overhead for \redis, 
 we used
 the \redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}}
 utility, which is part of the standard \redis distribution and
@@ -251,23 +444,23 @@ recovery~\cite{flashback}.
 %external behaviour since the last checkpoint, so that it can be
 %successfully replayed during recovery (\eg as in Rx~\cite{rx}).
 
-We also examined how frequency of system calls affects the performance
-overhead of application executed on top \mx. Figure~\ref{fig:syscall} shows
-the average number of system calls during the execution of SPEC~CPU2006.
-Rather surprising result is the fact that 452.libquantum, even though having
-the largest run time overhead had the lowest average number of system calls.
-On the hand, the performance overhead of 400.perlbench, despite having the
-highest average number system, was bellow average.
-
 \begin{figure}[ht]
-\centering
+\begin{center}
 \includegraphics[angle=270,width=\textwidth]{safe-updates/graphs/syscall}
 \caption{Number of system calls made on average each second during the
 execution of SPEC~CPU2006 benchmark suite, measured using \textstt{strace}
 tool.}
 \label{fig:syscall}
+\end{center}
 \end{figure}
 
+We also examined how frequency of system calls affects the performance
+overhead of application executed on top \mx. Figure~\ref{fig:syscall} shows
+the average number of system calls during the execution of SPEC~CPU2006.
+Rather surprising result is the fact that \textsf{452.libquantum}, even though having
+the largest run time overhead had the lowest average number of system calls.
+On the hand, the performance overhead of \textsf{400.perlbench}, despite having the
+highest average number system, was bellow average. \todo{What is the conclusion here?}
 
 % For example, as we discuss in related work, our
 % monitor \mxm is very similar to the monitor used by

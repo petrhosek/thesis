@@ -1,0 +1,55 @@
+\section{Record-Replay}
+\label{sec:record_replay}
+
+Although \varan shares similarities with record-replay systems, there are
+significant differences; in particular, the log is of fixed size and
+only kept in-memory.  However, it is possible to easily extend \varan to
+provide full record-replay capabilities by implementing two artificial
+clients:
+\begin{inparaenum}[(i)]
+\item one acting as a \emph{follower} whose only goal is to write the
+  content of the ring buffer to persistent storage, and
+\item one acting as a \emph{leader}, reading the content of the log
+  from the persistent storage and publishing events into the ring
+  buffer for consumption by other clients.
+\end{inparaenum}
+
+Compared to some of the previous record-replay systems, \varan has a
+number of advantages. First, decoupling the logic responsible for
+reading/writing the log from the actual application into a separate
+process allows the application to run at nearly full speed and utilize
+the multiple cores available in modern CPUs.  Second, since \varan was
+designed to run multiple instances at the same time, we can replay
+multiple versions at once, \eg to determine which versions of the
+application from a given range are susceptible to a crash reported by
+the user.
+
+We have implemented a simple prototype of the two aforementioned
+clients on top of \varan and compared its performance against
+\scribe~\cite{scribe}, a state-of-the-art record-replay system
+implemented in the kernel.  Unfortunately, because \scribe is
+implemented in the kernel and is only maintained for an old 32-bit
+Linux kernel (2.6.35), we had to run our experiments inside a virtual
+machine (kindly provided to us by \scribe's authors, as the source tree
+was broken at the time of our experiments). 
+%% This experience clearly shows one of the main disadvantages of
+%% kernel-level frameworks---the difficulty of maintaining the code base.
+To allow for a more faithful comparison, we ran \varan inside the same
+virtual machine.
+
+We used \redis as a benchmark, running the same workload as before,
+and configured both systems to record the execution to persistent
+storage.  We recorded an overhead of \redisRROvhScribe for
+\scribe,\footnote{The overhead we measured for \scribe is higher than
+  the overhead reported in~\cite{scribe}; however, note that the original
+  work used less aggressive benchmarks such as \httpd.  The use of a
+  virtual machine also affected the result.}  compared to
+\redisRROvhNx for \varan.
+%(but remember that we ran it inside a virtual machine)
+
+% Despite being implemented in the kernel, \scribe
+% performed worse than \varan on our \redis experiments: the overhead
+% introduced by \scribe was \redisRROvhScribe, compared to only
+% \redisRROvhNx for \varan.
+
+

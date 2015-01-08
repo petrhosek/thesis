@@ -57,7 +57,7 @@ application at fixed addresses.
 
 The \emph{coordinator} code first creates the shared memory segment
 used for communication among versions, and then spawns the
-\textit{zygote} process (\circl{B}), which is responsible for starting
+\emph{zygote} process (\circl{B}), which is responsible for starting
 the individual versions. The coordinator communicates with the zygote
 via a UNIX domain socket. For each version $i$ that needs to be spawned,
 the coordinator sends a fork request to the zygote over this socket
@@ -104,7 +104,7 @@ randomisation schemes to be used by the operating system.
 % The rest of this section provides some extra details regarding the
 % role and implementation of the coordinator, monitor and zygote.
 
-\boldtext{Coordinator.}  To set up the address spaces of the versions,
+\paragraph{Coordinator.}  To set up the address spaces of the versions,
 the coordinator acts as a specialized preloader, inspired by
 \emph{rtldi}.\footnote{\url{http://www.bitwagon.com/rtldi/rtldi.html}}
 However, the coordinator does not attempt to replace the existing
@@ -118,7 +118,7 @@ intercept calls to the dynamic linker---instead, the binary rewriter
 is used to rewrite all the system calls done by the linker with jumps
 into the coordinator code.  As a result, \varan can be used in
 combination with existing \lstinline`ptrace`-based tools such as \gdb
-or \textit{strace}, which greatly simplifies debugging.
+or \emph{strace}, which greatly simplifies debugging.
 
 %% This also has an advantage of supporting arbitrary dynamic linkers,
 %% not just the one provided by GNU C library, albeit it is going to be
@@ -130,10 +130,10 @@ or \textit{strace}, which greatly simplifies debugging.
 
 
 
-\boldtext{Zygote.} The role of the zygote is to spawn new processes on
+\paragraph{Zygote.} The role of the zygote is to spawn new processes on
 request from the coordinator.  Zygote processes are already used in
-systems such as \textit{Android} and
-\textit{Chrome}~\cite{linuxzygote}---in this paper, we use the term to
+systems such as \emph{Android} and
+\emph{Chrome}~\cite{linuxzygote}---in this paper, we use the term to
 refer to the concept rather than a concrete implementation, as \varan
 provides its own clean-slate implementation.  While it would be
 technically possible for the coordinator to create the processes in
@@ -142,14 +142,14 @@ communication channels: for example, the second version spawned would
 inherit the communication channel between the first version and the
 coordinator, which would be undesirable.
 
-\boldtext{Monitor.} To ensure that \varan can be compiled as
+\paragraph{Monitor.} To ensure that \varan can be compiled as
 statically-linked position-independent code, we must avoid using any
 global variables (\ie those in the \lstinline`.data` section). One
 consequence of this is that \varan cannot use any of the existing C
-libraries such as \textit{GNU C Library}, as these are not typically
+libraries such as \emph{GNU C Library}, as these are not typically
 built to support this requirement.  Instead, \varan provides its own
 implementation of the necessary C library functions based on the
-\textit{Bionic C
+\emph{Bionic C
   library}.\footnote{\url{https://android.googlesource.com/platform/bionic}}
 To support the use of Linux system calls, \varan uses a modified
 version of the \lstinline`linux_syscall_support.h`
@@ -311,20 +311,20 @@ To our knowledge, \varan is the first NVX system which handles virtual
 system calls, using binary rewriting. 
 %In \varan, binary rewriting is also used to intercept virtual system
 %calls.
-Handling calls made via the \textit{vsyscall} page is easier, as
+Handling calls made via the \emph{vsyscall} page is easier, as
 the function symbols are always mapped to the same address.  
 %% We can therefore easily identify calls to these functions while
 %% scanning the text segment and rewrite them to calls into our system
 %% call table.
-To handle \textit{vDSO} calls, we first need to
-determine the base address of the \textit{vDSO} segment; this address
+To handle \emph{vDSO} calls, we first need to
+determine the base address of the \emph{vDSO} segment; this address
 is passed by the kernel in the ELF auxiliary vector via the
 \lstinline`AT_SYSINFO_EHDR`
 flag.\footnote{\url{https://www.gnu.org/software/libc/manual/html_node/Auxiliary-Vector.html}}
-Second, we need to examine the ELF headers of the \textit{vDSO}
+Second, we need to examine the ELF headers of the \emph{vDSO}
 segment to find all symbols.  Since these symbols are allocated at
 arbitrary addresses, statically identifying calls to these symbols as
-in the \textit{vsyscall} case would be complicated. Instead, we
+in the \emph{vsyscall} case would be complicated. Instead, we
 replace the entry point of each function with a jump to dynamically
 generated code which sets up the stack and then issues a call to the
 \varan system call entry point as in case of regular system
@@ -469,7 +469,7 @@ atomics and futexes~\cite{futex}.
 \subsubsection{Transferring file descriptors and leader replacement}
 \label{sec:leader-repl}
 
-Apart from the ring buffer, each version has a \textit{data channel},
+Apart from the ring buffer, each version has a \emph{data channel},
 implemented using UNIX domain sockets.
 % Together, the ring buffer and data channel form an \emph{event
 % stream} which is a primary communication mechanism for exchanging

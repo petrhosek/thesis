@@ -1,6 +1,6 @@
 \begin{figure}[t!]
 \centering
-\includegraphics[width=\columnwidth]{evolution/figures/pipeline}
+\includegraphics[width=0.75\textwidth]{evolution/figures/pipeline}
 \caption{\covrig infrastructure.}
 \label{fig:arch}
 \end{figure}
@@ -24,7 +24,7 @@ statistics of interest.
 %revisions do not influence each other, \eg by inadvertently leaving
 %behind lock files or not properly freeing up resources.
 
-\paragraph{Lightweight software containers} \covrig employs software
+\paragraph{Lightweight software containers.} \covrig employs software
 containers~\cite{containers:eurosys07}, an operating system-level
 virtualisation mechanism that provides the ability to run multiple
 isolated virtual Linux systems (``containers'') inside a single host
@@ -59,7 +59,7 @@ code size and coverage. The containers are remotely controlled through
 SSH using the \fabric\footnote{\url{http://fabfile.org/}} framework.
 
 
-\paragraph{Configuration file} \covrig has a modular architecture, which makes it
+\paragraph{Configuration file.} \covrig has a modular architecture, which makes it
 possible to analyse new systems with modest effort. A potential user
 of our infrastructure only needs to provide a Python
 configuration file describing the system.  A minimal file provides
@@ -95,7 +95,7 @@ stage from these primary metrics using a set of scripts.
 
 %\subsection{Bug Data} \label{ssec:bugdesign}
 
-\paragraph{Bug data} One possible application of \covrig is finding
+\paragraph{Bug data.} One possible application of \covrig is finding
 useful data about software bugs and correlating them with the static
 and dynamic metrics collected. For our study, we mined bug data from
 both software repositories and, where available, bug tracking systems.
@@ -119,7 +119,7 @@ the revisions in a repository, we believe that the automatically
 obtained bug fixes create a representative subset of the fixes in the
 repository.
 
-\paragraph{Line mapping} The ability to track how lines move and change
+\paragraph{Line mapping.} The ability to track how lines move and change
 across revisions is the cornerstone of many high-level software
 evolution analyses.  A line mapping algorithm improves over the
 traditional \diff algorithm by tracking the movement of individual
@@ -151,7 +151,7 @@ In our study, we used line mapping to determine whether patches are
 tested within the next few revisions after they were created
 (\S\ref{sec:lpcoverage}).
 
-\paragraph{Cloud deployment} To enable large-scale data collection and
+\paragraph{Cloud deployment.} To enable large-scale data collection and
 processing, we deployed \covrig to our private cloud.  We have built our
 system around a standard set of tools: Packer for building custom
 Docker-enabled machine images, Vagrant for controlling and provisioning

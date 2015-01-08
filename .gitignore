@@ -1,7 +1,11 @@
 *.aux
 *.bbl
+*.bcf
 *.blg
+*.d
 *.dvi
+*.fdb_latexmk
+*.fls
 *.lof
 *.log
 *.lol
@@ -10,4 +14,5 @@
 *.out
 *.pdf
 *.ps
+*.run.xml
 *~

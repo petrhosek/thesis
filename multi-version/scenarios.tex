@@ -1,0 +1,236 @@
+\section{Scenarios}
+\label{multi-version:scenarios}
+
+In this section we motivate our approach using existing scenarios involving the
+\chrome browser and the \vim editor, as well as the \lighttpd, \redis and \vsftpd
+servers. These correspond to two categories of applications that could benefit
+from our multi-version software update approach: desktop applications such as
+web browsers and office tools for which reliability is a key concern; and
+network servers, with stringent security and dependability requirements.
+
+\gchrome\footnote{\url{http://www.google.com/chrome}} is one of the most widely
+used web browsers.  Even though \chrome releases are tested extensively before
+deployment, they sometimes introduce new bugs that affect the stability of the
+browser.  A concrete example is version $6.0.466.0$, which introduced a bug
+that caused \chrome to crash when trying to load certain web pages over
+SSL.\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49197}}
+One might argue that in this case the user should downgrade to an older version
+and wait until the bug is fixed. However, versions immediately preceding
+$6.0.466.0$ suffer from a different
+bug,\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49721}}
+which was introduced in version $6.0.438.0$ and which crashes Chrome during
+certain sequences of repeated back and forward navigation.
+
+\vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
+text editors.  In version $7.1.127$, while trying to fix a memory leak,
+\vim developers introduced a double \textstt{free} bug that caused \vim to
+crash whenever the user tried to use a path completion feature.  This bug made
+its way into \textit{Ubuntu} $8.04$, affecting a large number of
+users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
+
+\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular web-server used
+by several high-traffic websites such as Wikipedia and Xkcd.
+Despite its popularity, crash bugs are still a common
+occurrence in \lighttpd, as evident from its bug tracking
+database.\footnote{\url{http://redmine.lighttpd.net/issues/}}
+As one example, a patch introduced in April
+2009\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
+(correctly) fixed the way HTTP ETags are computed.
+Unfortunately, this fix broke the support for compression, which relied on the
+previous way in which ETags were computed and resulted in a segmentation fault
+whenever a client requested HTTP compression.  This issue was only diagnosed
+and reported in March
+2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed at the
+end of April
+2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
+more than one year after it was introduced, leaving the server vulnerable to
+possible attacks in between.
+
+\redis is an advanced key-value data structure
+server,\footnote{\url{http://redis.io/}} often referred to as one the most
+popular NoSQL databases.  Due to its performance and low-resource requirements,
+\redis is being used by many well-known services such as GitHub.  Because the
+whole dataset is held in memory, reliability is critically important, as a
+crash could result in total data loss.  However, like any other large software
+system, \redis is subject to crash bugs. Issue
+344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
+such example.  This issue causes \redis to crash when the \textstt{HMGET}
+command is used with the wrong type. The bug was introduced in April 2010,
+diagnosed and reported only half a year later in October 2010 and then fixed
+after fifteen days.
+
+\vsftpd\footnote{\url{https://security.appspot.com/vsftpd.html}} is a fast and 
+secure FTP server for UNIX systems.  Version $2.2.0$ added several new
+features such as network isolation, but unfortunately also introduced
+a bug\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vsftpd/+bug/462749}}
+which triggered a segmentation fault whenever a client used the
+passive FTP mode.  This bug made \vsftpd practically unusable since
+the passive mode is being frequently used by clients behind firewalls.
+Despite being reported several times, this bug was only fixed in
+version $2.2.1$, released more than two months after the bug was
+introduced.
+
+All the scenarios presented above describe software updates which,
+while trying to add new features or bug fixes, also introduced new
+bugs that caused the code to crash under certain conditions.
+Improving the reliability of such updates is the main goal of our
+proposed approach: running both the old and the new version in
+parallel after an update can enable applications to survive more
+errors, without giving up the new features introduced by the update.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To motivate our approach, we present real scenarios involving \lighttpd and
+\redis, which are representatives of one type of applications which could
+benefit from our approach, namely server applications with stringent security
+and availability requirements.
+
+\subsection{\lighttpd}
+
+\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular open-source 
+web-server used (either alone or in conjunction with other web-servers)
+by several high-traffic websites such as Wikipedia and Xkcd.
+Despite its popularity, crash bugs are still a common
+occurrence in \lighttpd, as evident from its bug tracking
+database.\footnote{\url{http://redmine.lighttpd.net/issues/}}  Below
+we discuss one such bug, which our approach could successfully
+eliminate.
+
+In April 2009, a patch was
+applied\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
+to \lighttpd's code related to the HTTP ETag functionality.  An ETag
+is a unique string assigned by a web server to a specific version of a
+web resource, which can be used to quickly determine if the resource
+has changed.  The patch was a one-line change, which discarded the
+terminating zero when computing a hash representing the ETag.  More
+exactly, line 47 in \textstt{etag.c}:
+
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+for (h=0, i=0; i < etag->used; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
+\end{lstlisting}
+\noindent was changed to:
+\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+for (h=0, i=0; i < etag->used@-1@; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
+\end{lstlisting}
+
+This correctly changed the way ETags are computed, but unfortunately,
+it broke the support for compression, whose implementation depended on
+the previous computation.  More precisely, \lighttpd's support for HTTP
+compression uses caching to avoid re-compressing files which have not
+changed since the last access.  To determine whether the cached
+file is still valid, \lighttpd internally uses ETags.  Unfortunately,
+the code implementing HTTP compression did not consider the case when
+ETags are disabled.  In this case, \textstt{etags->used}
+is \textstt{0}, and when the line above is
+executed, \textstt{etag->used-1} underflows to a very large value, and
+the code crashes while accessing \textstt{etag->ptr[i]}.
+Interestingly enough, the original code was still buggy (it always
+returns zero as the hash value, and thus it would never re-compress
+the files), but it was not vulnerable to a crash.
+
+The segfault was diagnosed and reported in March
+2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed
+at the end of April
+2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
+more than one year after it was introduced.  
+%The history is depicted graphically in Figure~\ref{fig:lighttpd-history}.  
+% The bottom line is
+% that for about one year, users affected by this buggy patch
+% essentially had to decide between%
+% \begin{inparaenum}[(1)]
+% \item incorporating security and bug fixes added to the code, but being
+%   vulnerable to this crash bug, and
+% \item giving up on these security and bug fixes and using an old version of
+%   \lighttpd, which is not vulnerable to this bug.
+% \end{inparaenum}
+% Note that this is particularly true for the eleven-month period
+% between the time when the bug was introduced and the time it was
+% diagnosed, since during this period most users would not know how to
+% change the server's configuration to avoid the crash.
+
+%% The original code, which can be seen in Listing~\ref{lst:2437}, makes the
+%% \texttt{i < etag->used} comparison (line 4). Because both \texttt{i} and
+%% \texttt{etag->used} are $0$, the condition \texttt{0 < 0} does not hold and
+%% the loop body will never be executed.
+
+%% The affected code can be seen in Listing~\ref{lst:2438}. Here, the condition
+%% has been changed and comparison has now the form \texttt{i < etag->used-1}.
+%% When executing, the \texttt{etag->used} variable will underflow and condition
+%% \texttt{0 < 4294967295} will be true. Therefore, the loop body will be
+%% executed and access to \texttt{etag->ptr[0]} will result in segmentation
+%% fault.
+
+\subsection{\redis}
+
+\begin{figure*}[t]
+\begin{minipage}[b]{0.90\columnwidth}
+\begin{lstlisting}[label=lst:original, caption={Original (correct) version of the {\footnotesize \texttt{hmgetCommand}} function in \redis.}]
+robj *o = lookupKeyRead(c->db, c->argv[1]); /*@\label{line:key-found}@*/
+if (o == NULL) {
+  addReplySds(c,sdscatprintf(sdsempty(),"*%d\r\n",c->argc-2));
+  for (i = 2; i < c->argc; i++) {
+    addReply(c,shared.nullbulk);
+  }
+  return;
+} else {
+  if (o->type != REDIS_HASH) { /*@\label{line:type-found}@*/
+    addReply(c,shared.wrongtypeerr); /*@\label{line:report-error}@*/
+    return; /*@\label{line:return}@*/
+  }
+}
+addReplySds(c,sdscatprintf(sdsempty(),"*%d\r\n",c->argc-2));
+\end{lstlisting}
+\end{minipage}
+\hspace{2.2\columnsep}
+\begin{minipage}[b]{0.9\columnwidth}
+\begin{lstlisting}[label=lst:refactored, caption={Refactored (buggy) version of the {\footnotesize \texttt{hmgetCommand}} function in \redis.}]
+robj *o, *value;
+o = lookupKeyRead(c->db,c->argv[1]);
+if (o != NULL && o->type != REDIS_HASH) {
+  addReply(c,shared.wrongtypeerr); /*@\label{line:report-error2}@*/
+}
+addReplySds(c,sdscatprintf(sdsempty(),"*%d\r\n",c->argc-2));
+for (i = 2; i < c->argc; i++) {
+  if (o != NULL && (value = hashGet(o,c->argv[i])) != NULL) { /*@\label{line:hashGet}@*/
+    addReplyBulk(c,value);
+    decrRefCount(value);
+  } else {
+    addReply(c,shared.nullbulk);
+  }
+}
+\end{lstlisting}
+\end{minipage}
+\end{figure*}
+
+\redis is an advanced key-value data structure
+server,\footnote{\url{http://redis.io/}} often referred to as one the most
+popular NoSQL databases.  Due to its performance and low-resource requirements,
+\redis is being used by many well-known services such as GitHub.  Because the
+whole dataset is held in memory, reliability is critically important, as a
+crash could result in total data loss.  However, like any other large software
+system, \redis is subject to crash bugs. Issue
+344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
+such example.  This issue causes \redis to crash when the \textstt{HMGET}
+command is used with the wrong type.  The bug was introduced during a code
+refactoring applied in revision \textstt{7fb16bac}.  The original code of the
+problematic \textstt{hmgetCommand} function is shown in
+Listing~\ref{lst:original}, while the (buggy) refactored version is shown in
+Listing~\ref{lst:refactored}.
+
+In the original code, if the lookup on line~\ref{line:key-found} is successful,
+but the type is not \textstt{REDIS\_HASH} (line~\ref{line:type-found}), the
+function returns after reporting an incorrect type
+(lines~\ref{line:report-error}--\ref{line:return}). However, in the refactored
+version (Listing~\ref{lst:refactored}), the \textstt{return} statement is
+missing, and after reporting an incorrect type (line~\ref{line:report-error2}),
+the function continues execution and causes segmentation fault inside the
+\textstt{hashGet} function invoked on line~\ref{line:hashGet}. This is a
+critical bug, which may result in losing some or even all of the stored data
+in case when Append Only File (AOF) persistence log is corrupted due to issue
+620\footnote{\url{http://code.google.com/p/redis/issues/detail?id=620}}.
+
+The bug was introduced in April 2010, diagnosed and reported only
+half a year later in October 2010 and then fixed after fifteen days.
+Same as in the case of the \lighttpd bug, this means that for several months,
+any \redis instance has been susceptible to a crash and vulnerable to a
+possible attack.

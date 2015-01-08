@@ -100,8 +100,8 @@ system calls can occur between versions.
 To address these limitations, \varan uses a new approach which we call
 \emph{event streaming}.  In this decentralised architecture,
 depicted in Figure~\ref{fig:architecture}, one of the
-versions is designated as the \textit{leader}, while the others are
-\textit{followers}. During execution, the leader records all events into a
+versions is designated as the \emph{leader}, while the others are
+\emph{followers}. During execution, the leader records all events into a
 shared ring buffer, which are later read by followers to mimic the leader's
 external behaviour (\S\ref{sec:streaming}). Events consist primarily of system
 call invocations, but also of signals, process forks (\ie \lstinline`clone`
@@ -115,7 +115,7 @@ newest one as leader.  However, the leader can be easily replaced if
 necessary, \eg if it crashes (\S\ref{sec:leader-repl}).
 
 The only centralised component in this architecture is the
-\textit{coordinator}, whose main job is to prepare the versions for
+\emph{coordinator}, whose main job is to prepare the versions for
 execution and establish the necessary communication channels.  At a
 high level, the coordinator first loads the variants into memory,
 injects several special handlers and memory objects into their address
@@ -124,7 +124,7 @@ special handlers and then starts executing the variants
 (\S\ref{sec:setup}) in a decentralised manner.
 
 %% recorded by one application version are shortly replayed
-%% (\textit{streamed}) to the others, which keeps the log small, as
+%% (\emph{streamed}) to the others, which keeps the log small, as
 %% events which have been replayed by all versions can be discarded.
 %% Similarly, the NVX context allows for the log to be kept in memory,
 %% and for the replay to be done incrementally, with significant
@@ -139,7 +139,7 @@ special handlers and then starts executing the variants
 %% applications; and (2)~the long time necessary to replay the execution.
 %% Because the multiple versions are executed concurrently, events
 %% recorded by one application version are shortly replayed
-%% (\textit{streamed}) to the others, which keeps the log small, as
+%% (\emph{streamed}) to the others, which keeps the log small, as
 %% events which have been replayed by all versions can be discarded.
 %% Similarly, the NVX context allows for the log to be kept in memory,
 %% and for the replay to be done incrementally, with significant

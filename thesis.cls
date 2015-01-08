@@ -91,6 +91,8 @@
 \RequirePackage{graphicx}
 \RequirePackage{tikz}
 
+\RequirePackage{amsthm}
+
 \ifluatex
   \RequirePackage{polyglossia}
   \setdefaultlanguage{english}
@@ -105,6 +107,7 @@
   %\RequirePackage{lmodern}
   \RequirePackage[utf8]{inputenc}
 \fi
+
 
 \ifluatex
   \newfontfeature{Microtype}{protrusion=default;expansion=default;}
