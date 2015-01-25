@@ -1,8 +1,8 @@
-set term pdfcairo noenhanced color solid font 'Helvetica,14' size 5.0,4.0
+set term pdfcairo noenhanced color solid font 'Myriad Pro,12' size 17.0cm,8.5cm
 set output 'macro.pdf'
 
 set style data histogram
-set style histogram clustered gap 1.5
+set style histogram clustered gap 2.0
 set style fill solid 1.0 border rgb "#000000"
 
 set border 3

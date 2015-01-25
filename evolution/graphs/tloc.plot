@@ -1,7 +1,7 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,12.0cm
 set output "tloc.pdf"
 
-set multiplot layout 2,4
+set multiplot layout 3,3
 
 set xlabel ""
 set ylabel "TLOC"
@@ -29,6 +29,9 @@ plot 'tloc-memcached.dat' using 2 w points ls 1 notitle
 
 set title "Redis" offset 0,-0.6
 plot 'tloc-redis.dat' using 2 w points ls 1 notitle
+
+set title "Vim" offset 0,-0.6
+plot 'tloc-vim.dat' using 2 w points ls 1 notitle
 
 set title "ØMQ" offset 0,-0.6
 plot 'tloc-zeromq.dat' using 2 w points ls 1 notitle

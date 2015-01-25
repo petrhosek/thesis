@@ -1,11 +1,11 @@
 \chapter{Multi-version Execution}
 \label{chap:multi-version}
 
-An indisputable fact is that software contains bugs. These bugs cause software
-failures which can lead to anything from minor discomfort and loss of service
-to major disasters including loss of lives. Software reliability is the
-probability of failure-free operation for specified period of time in a
-specified environment.
+An indisputable and widely accepted fact is that all software contains bugs.
+These bugs cause software failures which can lead to anything from minor
+discomfort and loss of service to major disasters including loss of lives.
+Software reliability is the probability of failure-free operation for specified
+period of time in a specified environment.
 
 There are two basic approaches to increase software reliability. One is fault
 avoidance, using formal specification and verification methods, and a rigorous
@@ -72,7 +72,7 @@ as a runtime specification for Quicksort.
 %more cost-effective to develop $N$ average versions rather than one good
 %version.
 
-\section{N-version \vs multi-version execution}
+\section{Software updates}
 
 % Recent years have seen a growing interest in using diversity as a way to
 % increase the reliability and security of software systems.  One form of
@@ -103,19 +103,32 @@ as a runtime specification for Quicksort.
 % opposite directions~\cite{orchestra09}, to prevent attacks whose success
 % depends on the memory layout.
 
-While $N$-version execution and multi-version execution techniques have many
-similarities, there are several key differences. First and foremost, in
-$N$-version execution the different version are developed by different teams
-while multi-version execution uses the consequent revisions, which are product
-of natural software evolution. Second, the goal of $N$-version execution is
-increasing the reliability of software by running independently developed,
-functionally equivalent software variants. While multi-version execution can be
-applied in many different scenarios, including $N$-version execution, the
-technique was designed to in the context of software updates. Furthermore, as
-shown in this thesis (\S\ref{chap:applications}), running multiple versions in
-parallel can be used in other reliability scenarios, such as running expensive
-error detectors (``sanitizers'') during deployment or implementation of
-security honeypots.
+One particularly important class of bugs are bugs introduced by software
+updates. These bugs often affect existing functionality, degrading the
+reliability, and potentially also security, of the software. This leads to
+frustration as users are no longer able to use the functionality they have been
+able to use in the past; as a consequence, users often refuse applying updates
+to their software and rely instead on outdated versions, which may contain bugs
+and security vulnerabilities.
+
+To address this problem, we propose a variant of $N$-version execution focused
+on improving reliability and availability of updated software:
+\emph{multi-version execution}.  While $N$-version execution and multi-version
+execution techniques have many similarities, there are several key differences.
+First and foremost, in $N$-version execution the different version are
+developed by different teams while multi-version execution uses the consequent
+revisions, which are product of natural software evolution. Second, the goal of
+$N$-version execution is increasing the reliability of software by running
+independently developed, functionally equivalent software variants, whereas
+multi-version assumes that the variants are largely the same except for parts
+affected by the software update.
+
+While designed primarily in the context of software updates, the multi-version
+execution technique can be applied in many different scenarios, including
+$N$-version execution. Furthermore, as shown in this thesis, multi-version
+execution runtimes can be used in other reliability scenarios, such as running
+expensive error detectors (``sanitizers'') during deployment or implementation
+of security honeypots.
 
 % There are two key differences between our proposed approach and
 % previous work in this space.  First, we do not rely on automatically
@@ -158,10 +171,33 @@ security honeypots.
 
 \section{Parallel software execution}
 
-The bottom line for all the scenarios presented hereinbefore is that for
-significant amount of time, \ie about one year in case of \lighttpd and six
-months in case of \redis, users affected by buggy patches essentially had
-to decide between%
+% All the scenarios presented above describe software updates which, while trying
+% to fix existing bugs or refactor the code, also introduced new bugs that caused
+% the code to crash under certain conditions. Improving the reliability of such
+% updates is the main goal of our proposed approach: running both the old and the
+% new version in parallel after an update can enable applications to survive more
+% errors, without giving up the new features introduced by the update.
+
+% The bottom line for all the presented scenarios is that for significant amount
+% of time, \ie about one year in case of \lighttpd and six months in case of
+% \redis, users affected by buggy patches essentially had to decide between%
+% \begin{inparaenum}[(1)]
+% \item incorporating other security and bug fixes added to the code, but being
+%   vulnerable to these crash bug, and
+% \item giving up on these security and bug fixes and using an old version of
+%   \lighttpd or \redis, which are not vulnerable to these newly introduced bugs.
+% \end{inparaenum}
+% Note that this is particularly true for the period between the time when the
+% bug was introduced and the time it was diagnosed (\ie eleven months in case of
+% \lighttpd, six months in case of \redis), since during this period most users
+% would not know how to change the server's configuration to avoid the crash.
+
+All the scenarios presented above describe software updates which, while trying
+to fix existing bugs or refactor the code, also introduced new bugs that caused
+the code to crash under certain conditions. The bottom line for all these
+scenarios is that for significant amount of time, \ie about one year in case of
+\lighttpd and six months in case of \redis, users affected by buggy patches
+essentially had to decide between%
 \begin{inparaenum}[(1)]
 \item incorporating other security and bug fixes added to the code, but being
   vulnerable to these crash bug, and
@@ -249,59 +285,125 @@ the new security and bug fixes implemented in the latest version.
 % very old stable versions---but the exact strategy should be decided on a
 % case-by-case basis. % using existing empirical data.
 
-In this thesis, we present two different designs for building such monitors;
-one, called \varan, aimed at running large number of versions side-by-side with
-low overhead, and second, called \mx, focused on surviving crashes caused by
-bugs introduced in software updates.
+\section{Challenges}
+
+There are several different ways to implement an effective system call monitor,
+each with its own set of trade-offs. The solutions targeting binaries are
+significantly easier to use---they can be typically applied to off-the-shelf
+binaries---but compared to solutions operating at source code level, they give
+up some of the precision while typically require more engineering effort. The
+most common ways for implementing monitors operating on binaries are dynamic
+linking, \ptrace, kernel extensions and binary instrumentation, while solutions
+targeting source code typically rely on source code instrumentation.
+
+System calls are rarely performed directly by the application, which rather use
+the wrapper functions provided by the C library. By linking to a custom
+library, which provides a custom version of these functions, we could intercept
+system calls performed by the application. This could be done either statically
+at link time~\cite{plash}, or dynamically at runtime~\cite{shepherding:pldi14}
+(\eg using \lstinline`LD_PRELOAD` or \lstinline`DYLD_INSERT_LIBRARIES`
+variables). The major benefit of this approach is efficiency and relative ease
+of implementation. However, the mechanism could be easily bypassed (\eg by
+invoking system calls directly); also the C library ABI is has significantly
+larger surface compared to the system call interface, requiring more
+engineering effort.
+
+\ptrace is an interface provided by most UNIX-like operating systems, including
+Linux, providing means by which a process might observe and control another
+process. The primary use of \ptrace interface is for debugging, but the
+relative ease of use makes \ptrace a popular choice for implementing system
+system call monitors~\cite{wily-hacker,orchestra09,tachyon12}. \ptrace-based
+solutions require relatively low engineering effort, which makes them
+especially suitable for rapid prototyping~\cite{spillane07}, they are easy to
+deploy and fairly flexible. On the other hand, the use of \ptrace has numerous
+drawbacks: a significant performance overhead due to large number of context
+switches, problematic support for multi-threaded applications, and the lack of
+filtering mechanism allowing interception only of system calls of interest.
+\ptrace-based solution are also more difficult to debug as the use of \ptrace
+disallows the use of \ptrace-based debuggers such as \gdb.
+
+% The performance overhead could be partially improved by the use of
+% more efficient mechanism for copying memory from/to the monitored process, such
+% as shared memory as in case of Orchestra~\cite{orchestra09}, or cross memory
+% attach as in case of \mx (\S\ref{sec:mxm}). The lack of filtering mechanism
+% could be addressed by combining \ptrace with \textsf{seccomp/bpf} mechanism as
+% shown by \textsc{Mbox}~\cite{mbox}.
+
+An alternative to \ptrace is to implement the system call monitor
+entirely~\cite{provos2002,cox2006} or partially in kernel space~\cite{ostia}.
+While this approach has numerous advantages compared to other approaches, such
+as minimal performance overhead and direct access to the application's
+execution context and address space, there are several drawbacks.  First, this
+approach requires kernel patches and/or new new kernel modules which
+complicates the development, limits portability across different operating
+systems or even different kernel versions, and hinders maintainability. Second,
+the monitor must be run in privileged mode, which means that bugs in the
+implementation may compromise the system stability. Furthermore, it also makes
+it difficult for regular users to deploy and use such monitors.
+
+Binary rewriting technique allow transforming the executable (either statically
+or dynamically) altering its functionality; as such, it can be used to
+implement system call monitor by rewriting all system call instructions into a
+control flow transfer instructions (\eg a
+\lstinline[language={[x64]Assembler}]`jmp` instruction). Existing monitors were
+built either on top of existing binary rewriting
+systems~\cite{onlinevalidation}, or using a purpose built binary translation
+mechanism~\cite{vx32}. The advantage of binary rewriting-based monitors is
+relatively low performance overhead, especially in the case of purpose built
+rewriting mechanism. The main disadvantage is the complexity of implementation
+which requires significant development effort.
+
+In this thesis, we present two different designs for building monitors suitable
+for multi-version execution. The first one, called \varan described in
+Chapter~\ref{chap:efficient-execution}, is aimed towards running large number
+of versions side-by-side with low performance overhead, and uses selective
+binary rewriting to achieve this goal. The second one, called \mx described in
+Chapter~\ref{chap:safe-updates}, is focused on surviving crashes caused by bugs
+introduced in software updates, with the prototype implementation built using
+the \ptrace mechanism.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Our approach aims to provide users with a third choice; when a new version
-arrives, instead of replacing the old version, we run both versions in
-parallel. In our example, consider that we are using \mx to run a
-version of \lighttpd from March 2009.  When the buggy April 2010 version
-is released, \mx runs it in parallel with the old one.  As the two
-versions execute:
+% Our approach aims to provide users with a third choice; when a new version
+% arrives, instead of replacing the old version, we run both versions in
+% parallel. In our example, consider that we are using \mx to run a
+% version of \lighttpd from March 2009.  When the buggy April 2010 version
+% is released, \mx runs it in parallel with the old one.  As the two
+% versions execute:
 
-\begin{itemize}
-\item As long as the two versions have the same external behaviour (\eg they
-  write the same values into the same files, or send the same data over the
-  network), they are run side-by-side and \mx ensures that they act as one to
-  the outside world;
+% \begin{itemize}
+% \item As long as the two versions have the same external behaviour (\eg they
+%   write the same values into the same files, or send the same data over the
+%   network), they are run side-by-side and \mx ensures that they act as one to
+%   the outside world;
 
-\item When one of the versions crashes (\eg the new version executes the buggy
-  patch), \mx will patch the crashing version at runtime using the behaviour of
-  the non-crashing version.  In this way, \mx can successfully survive crash
-  bugs in both the old and the new version, increasing the reliability and
-  availability of the overall application;
+% \item When one of the versions crashes (\eg the new version executes the buggy
+%   patch), \mx will patch the crashing version at runtime using the behaviour of
+%   the non-crashing version.  In this way, \mx can successfully survive crash
+%   bugs in both the old and the new version, increasing the reliability and
+%   availability of the overall application;
 
-\item When a non-crashing divergence is detected, \mx will discard one of the
-  versions (by default the old one, but other heuristics can be used).  The
-  other version can be later restarted at a convenient synchronisation point
-  (\eg at the beginning of the dispatch loop of a network server).
-\end{itemize}
+% \item When a non-crashing divergence is detected, \mx will discard one of the
+%   versions (by default the old one, but other heuristics can be used).  The
+%   other version can be later restarted at a convenient synchronisation point
+%   (\eg at the beginning of the dispatch loop of a network server).
+% \end{itemize}
 
-To enable these scenarios, a monitor process coordinates the parallel execution
-of these variants\footnote{The terms \textit{version} and \textit{variant} are
-used interchangeably.} and synchronises their execution, making them appear as
-a single application to any outside entities.  While synchronisation can be
-performed at different levels, the most common approach is to do it at the
-level of system calls, for two main reasons: first, many existing
-diversification transformations, such as address-space layout
-randomisation~\cite{diehard06} and instruction-set
-randomisation~\cite{instr-set-rand03} do not change the sequence of system
-calls (the program's \textit{external behaviour}), and the ordering is often
-preserved even across different software versions.  Second, system
-calls are the main way in which the application communicates with the outside
-environment, and therefore
-%% the ultimate target of attackers.  Finally, as the main
-%% communication mechanism between applications and the environment,
-%% system calls
-must be virtualised in order to enable the multiple versions to act as
-one to the outside world.
-
-There are many challenges in impleementing such monitor. \todo{List a couple of them...}
-\begin{structure}
-\item Trade-off between performance, security, flexibility, ease-of-debugging.
-\item Access to source code, instrumentation vs running on binaries.
-\end{structure}
+% To enable these scenarios, a monitor process coordinates the parallel execution
+% of these variants\footnote{The terms \textit{version} and \textit{variant} are
+% used interchangeably.} and synchronises their execution, making them appear as
+% a single application to any outside entities.  While synchronisation can be
+% performed at different levels, the most common approach is to do it at the
+% level of system calls, for two main reasons: first, many existing
+% diversification transformations, such as address-space layout
+% randomisation~\cite{diehard06} and instruction-set
+% randomisation~\cite{instr-set-rand03} do not change the sequence of system
+% calls (the program's \textit{external behaviour}), and the ordering is often
+% preserved even across different software versions.  Second, system
+% calls are the main way in which the application communicates with the outside
+% environment, and therefore
+% %% the ultimate target of attackers.  Finally, as the main
+% %% communication mechanism between applications and the environment,
+% %% system calls
+% must be virtualised in order to enable the multiple versions to act as
+% one to the outside world.

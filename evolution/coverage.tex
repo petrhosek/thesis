@@ -8,9 +8,9 @@
 \label{fig:codebase-evol}
 \end{figure}
 
-\begin{question}
-  \rqone
-\end{question}
+% \begin{question}
+%   \rqone
+% \end{question}
 
 Figure~\ref{fig:codebase-evol} shows the evolution of each system in
 terms of ELOC.  As discussed above, we measured the number of ELOC in
@@ -86,9 +86,9 @@ revisions modifying both code and tests.
 
 \subsection{Main Patch Characteristics}
 
-\begin{question}
-  \rqtwo
-\end{question}
+% \begin{question}
+%   \rqtwo
+% \end{question}
 
 Each revision defines a \textit{patch}, which consists of the totality
 of changes introduced by that revision.  Software patches represent
@@ -161,9 +161,9 @@ accompanied by a test case. % exercising them.
 
 %%NB: hunks and files may appear due to more than executable code, i.e. removed code and non-executable code in code files
 
-\begin{question}
-  \rqthree
-\end{question}
+% \begin{question}
+%   \rqthree
+% \end{question}
 
 The size of a patch and the number of locations affected by it can
 provide useful guidance for longitudinal testing techniques.  The
@@ -220,9 +220,9 @@ and \binutilsOneeFilePatches for \binutils.
 \subsection{Overall Code Coverage}
 \label{sec:code-cov}
 
-\begin{question}
-  \rqfour
-\end{question}
+% \begin{question}
+%   \rqfour
+% \end{question}
 
 \begin{table}[t]
 \centering
@@ -355,9 +355,9 @@ event-based tests~\cite{imunit}.
 % coverage comparison and easier debugging. % We are also working on a new
 % % tool which allows executing multiple versions in parallel.
 
-\begin{question}
-  \rqfive
-\end{question}
+% \begin{question}
+%   \rqfive
+% \end{question}
 
 \begin{figure}[t]
 \centering
@@ -395,7 +395,7 @@ from \zeromqInitialCoverage to \zeromqFinalCoverage. \beanstalkd is the only
 application whose coverage decrases over time, from \beanstalkdInitialCoverage
 to \beanstalkdFinalCoverage. An interesting observation is that coverage
 evolution is not strongly correlated to the co-evolution of executable and test
-code (RQ1). Even when testing is a phased activity, coverage remains constant
+code. Even when testing is a phased activity, coverage remains constant
 because the already existing tests execute part of the newly added code.
 
 % \binutils: \binutilsInitialCoverage to \binutilsFinalCoverage \\
@@ -471,9 +471,9 @@ coverage lies in the respective range.}
 \label{sec:pcoverage}
 \label{sec:lpcoverage}
 
-\begin{question}
-  \rqsix
-\end{question}
+% \begin{question}
+%   \rqsix
+% \end{question}
 
 We define {\em patch coverage} as the ratio between the number of
 executed lines of code added or modified by a patch and the total
@@ -541,9 +541,9 @@ overall patch coverage is only \redisOverallPatchCoverage.
 %% \zeromq: \zeromqCoverageAverage vs \zeromqOverallPatchCoverage\\
 %% \memcached: \memcachedCoverageAverage vs \memcachedOverallPatchCoverage \\
 
-\begin{question}
-  \rqseven
-\end{question}
+% \begin{question}
+%   \rqseven
+% \end{question}
 
 In some projects, tests exercising the patch are added only after the
 code has been submitted, or the patch is only enabled (\eg by changing
@@ -609,15 +609,16 @@ coverage is small but non-negligible.
 \subsection{Bug analysis}
 \label{sec:bugs}
 
-\begin{question}
-  \rqeight
-\end{question}
+% \begin{question}
+%   \rqeight
+% \end{question}
 
-\begin{question}
-  \rqnine
-\end{question}
+% \begin{question}
+%   \rqnine
+% \end{question}
 
-To answer these RQs, we collected bug data according to the
+%To answer these RQs, we collected bug data according to the
+For this part of our study, we collected bug data according to the
 methodology presented in Section~\ref{sec:design} and we limited our
 analysis to the three systems which lend themselves to automatic
 identification of bug fixes based on commit messages:

@@ -1,7 +1,7 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,12.0cm
 set output "coverage.pdf"
 
-set multiplot layout 2,4
+set multiplot layout 3,3
 
 set ylabel "Coverage"
 set xrange [0:]
@@ -55,6 +55,12 @@ plot 'coverage-redis.dat' using 2 notitle w points ls 1, \
                        '' using 3 notitle w points ls 2, \
                        -1 t "Line cov" w points ls 3, \
                        -1 t "Branch cov" w points ls 4
+
+set title "Vim" offset 0,-0.6
+plot 'coverage-vim.dat' using 2 notitle w points ls 1, \
+                     '' using 3 notitle w points ls 2, \
+                     -1 t "Line cov" w points ls 3, \
+                     -1 t "Branch cov" w points ls 4
 
 set title "ØMQ" offset 0,-0.6
 plot 'coverage-zeromq.dat' using 2 notitle w points ls 1, \

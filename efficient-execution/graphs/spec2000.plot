@@ -1,8 +1,8 @@
-set term pdfcairo enhanced color solid font 'Helvetica,14' size 5.0,3.0
+set term pdfcairo enhanced color solid font 'Myriad Pro,14' size 17.0cm,8.5cm
 set output 'spec2000.pdf'
 
 set style data histogram
-set style histogram clustered gap 1.5
+set style histogram clustered gap 2.0
 set style fill solid 1.0 border rgb "#000000"
 
 set border 3
@@ -15,13 +15,13 @@ set xtics 1000 nomirror rotate by -60 scale 0
 set ytics nomirror
 set grid y
 
-set bmargin 5.0
+set bmargin 6.5
 
 set yrange [0.0:7.0]
 
 set key outside center top horizontal autotitle columnheader reverse samplen 1 title ""
 
-set ylabel "Runtime Overhead (Normalized)"
+set ylabel "Runtime Overhead (normalized)"
 
 plot 'spec2000.dat' using 2:xticlabels(1) linecolor rgb "#666666", \
                  '' using 3:xticlabels(1) linecolor rgb "#777777", \

@@ -1,7 +1,7 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,8.0cm
 set output "eloctloc.pdf"
 
-set multiplot layout 2,4
+set multiplot layout 3,3
 
 set ylabel "Revisions"
 set ytics mirror 50
@@ -39,6 +39,10 @@ plot 'eloctloc-memcached.dat' using 2 ls 1 t "Code" w lines, \
 set title "Redis" offset 0,-0.6
 plot 'eloctloc-redis.dat' using 2 ls 1 t "Code" w lines, \
                        '' using 3 ls 2 t "Test" w lines #axes x1y2
+
+set title "Vim" offset 0,-0.6
+plot 'eloctloc-vim.dat' using 2 ls 1 t "Code" w lines, \
+                     '' using 3 ls 2 t "Test" w lines #axes x1y2
 
 set title "ØMQ" offset 0,-0.6
 plot 'eloctloc-zeromq.dat' using 2 ls 1 t "Code" w lines, \

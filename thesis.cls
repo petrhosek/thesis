@@ -115,7 +115,7 @@
   \setsansfont[Microtype, Numbers=OldStyle]{Myriad Pro}
   %\setmainfont[Renderer=Basic, SmallCapsFeatures={LetterSpace=6}, Numbers={Proportional,OldStyle}]{Minion Pro}
   %\setsansfont[LetterSpace=3, Numbers={Proportional,OldStyle}]{Myriad Pro}
-  \setmonofont{Inconsolata}
+  \setmonofont[BoldFont={Inconsolata Bold}]{Inconsolata}
   \setmathfont{Asana Math}
   %\setmathfont[range=\mathup]{Minion Pro}
   %\setmathfont[range=\mathbfup]{Minion Pro Bold}
@@ -158,6 +158,8 @@
 
 \RequirePackage{setspace}
 \RequirePackage{titling}
+
+\RequirePackage{subcaption}
 
 %
 % Custom
@@ -286,6 +288,14 @@
 
 \newenvironment{acknowledgments}{%
 \chapter*{Acknowledgments}\thispagestyle{plain}}{\cleardoublepage}
+
+\newcommand\chapterdescriptionlabel[1]{\hspace*{\labelsep}\normalfont{#1}}
+\newenvironment{chapterdescription}{%
+   \let\descriptionlabel\chapterdescriptionlabel
+   \description
+}{%
+   \enddescription
+}
 
 %
 % Layout

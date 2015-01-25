@@ -1,3 +1,6 @@
+\section{External Behaviour Evolution}
+\label{sec:behavior-evolution}
+
 %% \begin{figure}[t]
 %%   \centering
 %%   \includegraphics[width=\columnwidth]{safe-updates/graphs/diff}
@@ -5,109 +8,154 @@
 %%   \label{fig:differences}
 %% \end{figure}
 
+Another major part of our study is the analysis of the external behaviour of
+the application. In the context of Linux applications, we define the external
+behaviour of an application as its sequence of system calls, which are the
+primary mechanism for an application to change the state of its environment.
+Note that the key insight here is that we are only concerned with
+\emph{externally observable behaviour}, and are oblivious to the way the
+external behaviour is generated.
 
-Our approach is based largely on the assumption that during software evolution,
-the changes to the external behaviour of an application are relatively small.
-In the context of Linux applications, the external behaviour of an application
-consists of its sequence of system calls, which are the primary mechanism for
-an application to change the state of its environment.  Note that the key
-insight here is that we are only concerned with \emph{externally observable
-behaviour}, and are oblivious to the way the external behaviour is generated.
+Our assumption is that the changes to the external behaviour of an application
+are relatively small. To verify this assumption, we used our infrastructure to
+trace the external behavior of two applications from our set across the
+selected range of revisions: \lighttpd and \lighttpdtwo. This choice is
+pragmatic, other applications either ran excessively long when the system call
+tracing was enabled, their traces contained lot of non-determinism which made
+the comparison imposible, or their test suite required extensive modifications
+to allow for tracing.
 
-To verify this assumption, we used the \covrig infrastructure to trace the
-external behavior of two applications across different revisions and compare
-these traces:
-
-\begin{enumerate}
-\item[\lighttpd\footnote{\url{http://www.lighttpd.net/}}] is a popular and
-  lightweight web server used by several high-traffic websites. 
-
-\item[\vim\footnote{\url{http://www.vim.org/}}] is arguably one of the most
-  popular text editors.
-\end{enumerate}
-
-\paragraph{Selection of revisions} The revision intervals for both applications
-were selected to contain the two known bugs---in particular, for \vim the bug
-introduced in the version 7.1.127 affecting the path completion feature, and for
-\lighttpd the bug introduced in the revision 2436 affecting the ETag handling. The
-version interval we used in case of \vim was 7.1--7.1.330. These versions were
-developed and released in slightly-over one year time-frame (from 12 May 2007
-to 21 June 2008). In case of \lighttpd, we used the interval spanning revisions
-2379--2635 (overlapping versions 1.4.21--1.4.24), which were developed in
-approximately ten months time frame (from 3 February to 11 October 2009).
-
-%% Figure~\ref{fig:differences} summarises these differences.  This graph
-%% shows that patches in \lighttpd are relatively small, most of them
-%% affecting less than 30 LOC.
-During this period, code patches in \lighttpd varied between
-\lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
-\lighttpdMedPatch~LOC.
+% \paragraph{Selection of revisions} The revision intervals for both applications
+% were selected to contain the two known bugs---in particular, for \vim the bug
+% introduced in the version 7.1.127 affecting the path completion feature, and for
+% \lighttpd the bug introduced in the revision 2436 affecting the ETag handling. The
+% version interval we used in case of \vim was 7.1--7.1.330. These versions were
+% developed and released in slightly-over one year time-frame (from 12 May 2007
+% to 21 June 2008). In case of \lighttpd, we used the interval spanning revisions
+% 2379--2635 (overlapping versions 1.4.21--1.4.24), which were developed in
+% approximately ten months time frame (from 3 February to 11 October 2009).
+% During this period, code patches in \lighttpd varied between
+% \lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
+% \lighttpdMedPatch~LOC.
 
 %% This suite consists of 19 tests files, each of them consisting of
 %% number of individual tests. 
 %% For the purpose of our experiment, we have selected a subset of 7 core
 %% test files excluding those targeting standalone modules.
 
-\paragraph{Setup} To compare the external behaviour of each version, we traced
-the system calls made by these versions using the
-\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}} tool.
+%\paragraph{Setup}
+The infrastructure used for system call tracing is conceptually similar to the
+one used for collecting coverage information, but there are some notable
+differences. We used \lxc containers directly rather than through \docker to
+allow the use of Linux \textstt{perf}
+tool~\footnote{\url{https://perf.wiki.kernel.org/index.php/Main_Page}}, which
+was used for recording the application's execution and obtaining the system
+call traces. These containers were controlled by an Ansible
+framework~\footnote{\url{http://www.ansible.com/}} using a custom \lxc
+connector.
 
-%while running all the tests from the \lighttpd regression suite targeting the
-%core functionality (a total of seven tests, but each test contains a large
-%number of test cases issuing HTTP requests).
-%while running tests from the Vim regression suite. This suite consists
-%of 64 tests, which aim to exercise most of the functionality provided by Vim
-%text editor. For the purpose of our experiment, we have selected a subset
-%of 60 tests excluding those targeting GUI.
+To collect the external behaviour information, we built each revision and
+recorded its execution while running the standard test suite. The use of
+\textstt{perf} has some advantages compared to other similar tools such as
+\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}}, most
+notably the performance overhead, which is significantly lower in case of
+\textstt{perf} as the tool is implemented largely in kernel while
+\textstt{strace} uses the \ptrace interface. This minimizes the potential
+side-effects of the tracing infrastructure on the test suite execution.  The
+downside is the size of the recorded data which can be considerable, especially
+for I/O intensive applications such as \redis, as the \textstt{perf} tool uses
+a custom binary format which contains large number of additional information
+compared to the simple textual output of \textstt{strace}.
 
-All tests were executed on a machine running a 64-bit version of Ubuntu 10.04.
-To build the applications, we used the existing build targets and configuration
-options. \vim versions were compiled using the commands:
-\begin{lstlisting}[language=bash,numbers=none]
-./configure --without-x --disable-gui
-\end{lstlisting}
-and
-\begin{lstlisting}[language=bash,numbers=none]
-make -j 4 CFLAGS="-O2 -D_FORTIFY_SOURCE=1 -fno-strength-reduce -Wall"
-\end{lstlisting}
-The \texttt{-D\_FORTIFY\_SOURCE=1} compiler flag was used to overcome an issue
-introduced by the GCC compiler
-optimization,\footnote{\url{https://groups.google.com/d/topic/vim_dev/HU5aZfCv4iM/discussion}}
-which caused some of the tests from the Vim regression suite to crash.
+% while running all the tests from the \lighttpd regression suite targeting the
+% core functionality (a total of seven tests, but each test contains a large
+% number of test cases issuing HTTP requests).
+% while running tests from the Vim regression suite. This suite consists
+% of 64 tests, which aim to exercise most of the functionality provided by Vim
+% text editor. For the purpose of our experiment, we have selected a subset
+% of 60 tests excluding those targeting GUI.
 
-To eliminate possible sources of non-determinism, we have disabled the
-address-space randomisation while running the tests. To further account for any
-non-deterministic behaviour, we have repeated the tracing three times for each
-test case and compared the traces across runs.
+% To build the applications, we used the existing build targets and configuration
+% options. \vim versions were compiled using the commands:
+% \begin{lstlisting}[language=bash,numbers=none]
+% ./configure --without-x --disable-gui
+% \end{lstlisting}
+% and
+% \begin{lstlisting}[language=bash,numbers=none]
+% make -j 4 CFLAGS="-O2 -D_FORTIFY_SOURCE=1 -fno-strength-reduce -Wall"
+% \end{lstlisting}
+% The \texttt{-D\_FORTIFY\_SOURCE=1} compiler flag was used to overcome an issue
+% introduced by the GCC compiler
+% optimization,\footnote{\url{https://groups.google.com/d/topic/vim_dev/HU5aZfCv4iM/discussion}}
+% which caused some of the tests from the Vim regression suite to crash.
 
-The system call traces were further normalised and post-processed.  We first
-split the original trace on a per-process basis so that the trace for each
-process was stored in an individual file.  Moreover, we used the order in which
-processes were started as a basis for the naming scheme to allow comparison of
-the traces across different runs and versions. We then normalised all
-differences caused by timing, \eg we collapsed all sequences of
-\textstt{accept+poll} system calls, which represent repeated polling
-operations.  We have also collapsed all \textstt{read+stat+read} and
-\textstt{read+open+close} sequences sometimes used to check for file existence,
-as their occurrence is often dependent on the result of previous system calls
-(\ie if one of the previous calls returned \textstt{EAGAIN} error code). This
-was necessary to eliminate any inherent non-determinism in the traces and to
-allow further comparison.
+All tests were executed in an \lxc container based on the Ubuntu 12.04
+template.  To eliminate the possible sources of non-determinism, we have
+disabled the address-space randomisation while running the tests. To account
+for the remaining non-determinism, we have repeated the tracing five times for
+each revision same as in the case of code coverage study~\ref{sec:code-cov}.
 
-Trace files were then post-processed by eliminating individual system call
-arguments and return values.  This post-processing step might reduce the
-precision of our comparison, but we performed it for two different reasons:%
+After the recording, we used the \textstt{perf} tool to extract the system call
+trace out of the raw data file. The system call traces were further normalised
+and post-processed. We first split the original trace on a per-process basis so
+that the trace for each process ended up stored in an individual file.
+Moreover, we used the order in which processes were started as a basis for the
+naming scheme to allow comparison of the traces across different runs and
+versions: the main thread of the first process would be stored in the file
+\textstt{000-00.trace}, the first thread spawned by the main thread would be
+stored in the file \textstt{000-01.trace}, the main thread of the second
+process would use the file \textstt{001-00.trace}, \etc
+
+% We then normalised all differences caused by timing, \eg we collapsed all
+% sequences of \textstt{accept+poll} system calls, which represent repeated
+% polling operations.  We have also collapsed all \textstt{read+stat+read} and
+% \textstt{read+open+close} sequences sometimes used to check for file existence,
+% as their occurrence is often dependent on the result of previous system calls
+% (\ie if one of the previous calls returned \textstt{EAGAIN} error code). This
+% was necessary to eliminate any inherent non-determinism in the traces and to
+% allow further comparison.
+
+Trace files were then post-processed by eliminating return values and arguments
+of system calls which are known to be non-deterministic, \ie memory addresses,
+process identifiers, and the timing information. This post-processing step
+might reduce the precision of our comparison, but we performed it for two
+different reasons:%
 \begin{inparaenum}[(1)]
 \item many system calls have indirect arguments, accepting address of data
   structure residing in the process address space, and these addresses may
-  differ across versions;
-\item the return value of many system calls depend on the current system
+  differ across individual executions;
+\item the return value of many system calls depends on the current system
   resource usage (\eg number of running processes and threads, amount of
   available memory) which could differ from one run to another.
 \end{inparaenum}
-Finally, we concatenated the trace files for all tests in a each revision,
-ending up with one trace for each run of the test suite. We then compared the
-traces of consecutive revisions using the edit distance.
+
+We then compared the post-processed traces of the consecutive revisions using
+the edit distance. To distinguish the differences in the external behaviour
+introduced by the changes in the code from differences introduced by the
+changes in the test suite, we have only considered consecutive revisions which
+do not modify tests for comparison. To determine the differences between the
+two revisions, we calculated the edit distance for every pair of traces between
+the two revisions. Since we traced each revision five times, this gives us
+twenty five edit distance values for every pair of revisions.
+
+The next step was to determine whether the observed differences are caused by
+the actual changes in the code or by the non-determinism. To do so, we
+calculated the mean and the variance for each vector of edit distance values;
+these were used to calculate the \emph{index of dispersion}, which is defined
+as a ratio of the variance to the mean and is often used as a is a normalized
+measure of the dispersion of a probability distribution. The value of index
+greater greater than one is an indicator of over-dispersion meaning that the
+variability present in the given data set is greater than that would be
+expected based on a given statistical model. Since frequencies of each sequence
+of system calls in all possible traces are not known a priori, we must choose a
+frequency distribution for abnormal sequences. There are several possibilities
+for choosing this distribution, the simplest of which is to assume that the
+abnormal distribution is uniform~\cite{helman97}. We then interpret the
+presence of over-dispersion as ``noise'' due to non-determinism, and as such we
+discard these measurement. Otherwise, we used the mean value as the actual
+value for the set. Through this process, for each pair of revisions considered,
+we obtain a vector of edit distances where individual elements are edit
+distances of individual processes.
 
 \subsection{Trace Differences}
 
@@ -137,82 +185,86 @@ differences in system calls are not evenly spaced but they are often located
 in particular versions, such as the aforementioned change in version 7.1.296
 responsible for 3489 differences across all tests.
 
-\begin{table}
-  \centering
-  \begin{tabular}{r @{\qquad}c}
-    \toprule
-    Version & \#Differences \\
-    \midrule
-    7.1.017 & 182 \\
-    7.1.025 & 2 \\
-    7.1.045 & 16 \\
-    7.1.186 & 69 \\
-    7.1.256 & 3 \\
-    7.1.270 & 2 \\
-    7.1.296 & 3489 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+% \begin{table}
+%   \centering
+%   \begin{tabular}{r @{\qquad}c}
+%     \toprule
+%     Version & \#Differences \\
+%     \midrule
+%     7.1.017 & 182 \\
+%     7.1.025 & 2 \\
+%     7.1.045 & 16 \\
+%     7.1.186 & 69 \\
+%     7.1.256 & 3 \\
+%     7.1.270 & 2 \\
+%     7.1.296 & 3489 \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+% \begin{table}
+%   \centering
+%   \begin{tabular}{r @{\qquad}c}
+%     \toprule
+%     Revision & \#Differences \\
+%     \midrule
+%     2436 & 182 \\
+%     2466 & 2 \\
+%     2524 & 16 \\
+%     2550 & 69 \\
+%     2578 & 3 \\
+%     2606 & 2 \\
+%     2612 & 3489 \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
 
 \begin{table}
-  \centering
-  \begin{tabular}{r @{\qquad}c}
-    \toprule
-    Revision & \#Differences \\
-    \midrule
-    2436 & 182 \\
-    2466 & 2 \\
-    2524 & 16 \\
-    2550 & 69 \\
-    2578 & 3 \\
-    2606 & 2 \\
-    2612 & 3489 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\begin{table}
-  \centering
-  \begin{tabular}{r @{\qquad}c c}
-    \toprule
-    & \multicolumn{2}{c}{Frequency} \\
-    \cmidrule(r){2-3}
-    \#Differences & Versions & Percentage \\
-    \midrule
-    0 & 322 & 97.872\% \\
-    2 & 2 & 0.608\% \\
-    3 & 1 & 0.304\% \\
-    16 & 1 & 0.304\% \\ 
-    69 & 1 & 0.304\% \\
-    182 & 1 & 0.304\% \\
-    3489 & 1 & 0.304\% \\
-    \bottomrule
-  \end{tabular}
-  \caption{Differences in post-processed system call traces between 330
-  versions of Vim text editor aggregated per version on Vim's regression
-  suite.}
+  \begin{subtable}[t]{0.5\textwidth}
+    \centering
+    \begin{tabular}{r @{\qquad}c c}
+      \toprule
+      & \multicolumn{2}{c}{Frequency} \\
+      \cmidrule(r){2-3}
+      \#Differences & Versions & Percentage \\
+      \midrule
+      0 & 322 & 97.872\% \\
+      2 & 2 & 0.608\% \\
+      3 & 1 & 0.304\% \\
+      16 & 1 & 0.304\% \\ 
+      69 & 1 & 0.304\% \\
+      182 & 1 & 0.304\% \\
+      3489 & 1 & 0.304\% \\
+      \bottomrule
+    \end{tabular}
+    \caption{330 revisions of \vim.}
+  \end{subtable}
+  ~
+  \begin{subtable}[t]{0.5\textwidth}
+    \centering
+    \begin{tabular}{r @{\qquad}c c}
+      \toprule
+      & \multicolumn{2}{c}{Frequency} \\
+      \cmidrule(r){2-3}
+      \#Differences & Versions & Percentage \\
+      \midrule
+      0 & 156 & 95.706\% \\
+      1 & 1 & 0.613\% \\
+      7 & 1 & 0.613\% \\
+      10 & 1 & 0.613\% \\ 
+      14 & 1 & 0.613\% \\
+      24 & 1 & 0.613\% \\
+      42 & 1 & 0.613\% \\
+      273 & 1 & 0.613\% \\
+      \bottomrule
+    \end{tabular}
+    \caption{164 revisions of \lighttpd.}
+  \end{subtable}
+  \caption{Differences in post-processed system call traces aggregated per revision.}
   \label{tab:perversion}
 \end{table}
 
 \begin{table}
-  \centering
-  \begin{tabular}{r @{\qquad}c c}
-    \hline
-    \#Differences & Versions & Percentage \\
-    \hline
-    0 & 156 & 95.706\% \\
-    1 & 1 & 0.613\% \\
-    7 & 1 & 0.613\% \\
-    10 & 1 & 0.613\% \\ 
-    14 & 1 & 0.613\% \\
-    24 & 1 & 0.613\% \\
-    42 & 1 & 0.613\% \\
-    273 & 1 & 0.613\% \\
-    \hline
-  \end{tabular}
-  \caption{Differences in post-processed system call traces between 164
-  revisions of \lighttpd aggregated per version on the subset of \lighttpd's
-  regression suite.}
   \label{tab:perversion}
 \end{table}
 

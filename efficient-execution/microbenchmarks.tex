@@ -20,7 +20,7 @@ call executed natively. We used five different system calls:
 %  event in the ring buffer.  We invoke the system call to write a
 %  512-byte buffer to \lstinline`/dev/null`.
 
-\item \lstinline`write(DEV_NULL, "...", 512)` is representative of system
+\item \lstinline`write(DEV_NULL, ..., 512)` is representative of system
   calls which involve expensive I/O, but whose result can be sent
   entirely as a single event in the ring buffer.
 
@@ -30,7 +30,7 @@ call executed natively. We used five different system calls:
 %  via additional shared memory (\S\ref{sec:ring}). We invoke the
 %  system call to read a 512-byte buffer from \lstinline`/dev/zero`.
 
-\item \lstinline`read(DEV_NULL, "...", 512)` is representative of system calls which
+\item \lstinline`read(DEV_NULL, ..., 512)` is representative of system calls which
   involve expensive I/O, and whose result cannot be fully included in the
   associated event in the ring buffer.  Instead, it has to be copied via
   additional shared memory (\S\ref{sec:ring}).
@@ -60,7 +60,7 @@ call executed natively. We used five different system calls:
 %% the buffer read using the shared memory (\S\ref{sec:streaming}). The
 %% \lstinline`close` system call is a representative of all other cases.
 
-We execute each system call one million times and compute the average
+We executed each system call one million times and computed the average
 of all execution times.  Time measurements were done using the time
 stamp counter (\ie the \lstinline`RDTSC` instruction). Each set of
 measurements was preceded by a warm-up stage in which we executed the
@@ -68,7 +68,7 @@ system call \num{10000} times. % to warm up the caches.
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=0.75\textwidth]{efficient-execution/graphs/micro}
+  \includegraphics[width=\textwidth]{efficient-execution/graphs/micro}
   \caption{System call microbenchmarks.}
   \label{fig:micro_syscall}
 \end{figure}
@@ -87,18 +87,18 @@ time with interception, measuring the cost of binary rewriting: for
 these experiments, the intercepted system call is immediately
 executed, without any additional processing.  As it can be seen, the
 interception cost is small, at under \maxInterceptOvh in all
-cases. The overhead of intercepting the virtual system calls is high
+cases except for \lstinline`time`. The overhead of intercepting virtual system calls is high
 in relative terms, but low in absolute ones: \vdsoIntercept vs
-\vdsoNative for native execution in case of \lstinline`time`.
+\vdsoNative for native execution for \lstinline`time`.
 
 The set of bars labeled \textit{leader} shows the execution time for
 each system call to be intercepted, executed and recorded by the
 leader.  That is, it is the sum of the \textit{intercept} cost and the
 cost of recording the system call.  For \lstinline`close` and \lstinline`write`,
 the overhead is only \closeLeaderOvh and \writeLeaderOvh respectively
-on top of the native execution, because the arguments and results of
+on top of native execution, because the arguments and results of
 these system calls can be recorded in a single event.  For \lstinline`read`,
-this is more expensive, at \SI{139}{\percent}, because transferring the result also
+it is more expensive, at \SI{139}{\percent}, because transferring the result also
 involves accessing additional shared memory.  Finally, the cost for
 \lstinline`open` is the highest, since it also involves the slower transfer
 of the returned file descriptor via a UNIX domain socket.

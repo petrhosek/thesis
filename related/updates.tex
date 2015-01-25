@@ -1,0 +1,138 @@
+\section{Software updates}
+
+Closely related to the execution of multiple versions is the management of
+multiple versions, environment and software updates, such as deciding when to
+upgrade, applying updates, \etc Previous work on improving the software update
+process has looked at different aspects related to managing and deploying new
+software versions. 
+
+\subsection{Dynamic software updates}
+
+Dynamic software updating (DSU) systems are concerned with the problem of
+updating programs while they are running. These systems have been implemented
+both in kernel-space~\cite{k42,dynamos,ksplice,proteos} and in
+user-space~\cite{opus,ginseng,polus,upstare,ekiden,kitsune}.
+
+The dynamic update process typically consists of two stages---code update and
+state transfer---with different approaches available.
+
+Ginseng~\cite{ginseng} and K42~\cite{k42} employ indirection to enable the code
+update. This simplifies the code update mechanism, but the indirection
+introduces performance overhead during normal execution. Ginseng uses a
+specialized compiler which creates a ``dynamically updateable program'' where
+all function symbols are replaced with function pointers and all direct
+function calls are replaced with indirect call through this pointer. During
+update, these pointers are updated to point to the new version of the code,
+which is loaded using \lstinline`dlopen`. K42 operating system has a
+per-address-space object translation table used for all object invocations.
+When the new kernel module is loaded, the translation table entries are updated
+to point to the new version.
+
+OPUS~\cite{opus}, DynAMOS~\cite{dynamos}, POLUS~\cite{polus} and
+Ksplice~\cite{ksplice} use binary rewriting instead of indirection to replace
+the entry point of the functions being updated with a jump to a trampoline.
+Compared to indirection, this approach does not require the use of specialized
+compiler, but it is highly platform-dependent. We use the same approach in \nx
+to handle virtual system calls (\S\ref{sec:vsyscall}).
+
+The aforementioned systems treat individual functions or objects as the unit of
+code for updates. Such systems are incapable of handling functions that rarely
+end (\eg \lstinline`main` or functions that contain event-handling loops). This
+was addressed by systems such as UpStare~\cite{upstare}, Ekiden~\cite{ekiden}
+and Kitsune~\cite{kitsune}, which update the code by loading an entirely new
+program instead of replacing individual functions. After the new version has
+been loaded, either through \lstinline`fork-exec` or through
+\lstinline`dlopen`, the execution needs to be restarted from the previous
+point. UpStare uses stack reconstruction to achieve this by replacing the stack
+frames for old functions with their new versions. Ekiden and Kitsune on the
+other hand rely on manual approach requiring the programmer to direct the
+execution into the equivalent update point in the new version.
+
+%\textsc{PROTEOS}~\cite{proteos}.
+
+Dynamic software updating (DSU) systems such as Ginseng~\cite{ginseng},
+UpStare~\cite{upstare} or Kitsune~\cite{kitsune} are concerned with the problem
+of updating programs while they are running.
+
+Opposed to \mx, in DSU systems the two versions co-exist only for the duration
+of the software update, but DSU and the \rem component of \mx face similar
+challenges when switching execution from one version to another.  We hope that
+some of the technique developed in DSU research will also benefit the recovery
+mechanism of \mx and vice versa.
+
+%Dynamic software updating (DSU) systems such as Ginseng~\cite{ginseng},
+%UpStare~\cite{upstare} or Kitsune~\cite{kitsune} are concerned with the problem
+%of updating programs while they are running.  As opposed to \mx, the two
+%versions co-exist only for the duration of the software update, but DSU and the
+%\rem component of \mx face similar challenges when switching execution from one
+%version to another.  We hope that some of the technique developed in DSU
+%research will also benefit the recovery mechanism of \mx and vice versa.
+
+\subsection{Update management and distribution}
+
+Prior work on improving software updating has looked at different aspects
+related to managing and deploying new software versions.
+
+Beattie~\etal~\cite{beattie2002} have considered the issue of timing the application
+of security updates---patching too early could result in breaking the system by
+applying broken patch, patching too late could on the other hand lead to risk
+of penetration by an attacker exploiting a well known security issue. Using the
+cost functions of corruption and penetration, based upon real world empirical
+data, they have shown that 10 and 30 days after the patch's release date are
+the optimal times to apply the patch to minimize the risk of defective patch.
+Such delay still opens a lot of opportunities for potential attackers.
+
+Crameri \etal~\cite{crameri:updates} proposed a framework for staged
+deployment. This framework integrates upgrade deployment, user-machine testing
+and problem reporting into the overall upgrade process. The framework itself
+clusters user machines according to their environment and software updates are
+tested across clusters using several different strategies allowing for the
+deployment of complex upgrades.
+
+Solution inspired by $N$-version programming been proposed by Michael
+Franz~\cite{unibus:nspw10}---instead of executing multiple versions in parallel,
+the author proposed to distribute unique version of every program to every
+user. Such versions should be created automatically by a ``multicompiler'',
+and distributed to users through ``App Store''. This would increase security as
+it would be much more difficult to generate attack vectors by reverse
+engineering of security patches for these diversified versions.
+
+%To make such a solution work in practice, the way to manage large number of
+%different versions and the overall update process is needed.
+%Crameri~\etal~\cite{crameri:updates} proposed a framework for staged deployment
+%which integrates upgrade deployment, user-machine testing and problem reporting
+%into the overall upgrade process. The framework itself clusters users'
+%machines according to their environment, tests the upgrades using cluster
+%representatives and allows deployment of complex upgrades.
+
+%Beattie~\etal~\cite{beattie2002} considered the issue of timing the application
+%of security updates---patching too early could result in breaking the system by
+%applying broken patch, patching too late could on the other hand lead to risk
+%of penetration by an attacker exploiting a well known security issue. Using the
+%cost functions of corruption and penetration, based upon real world empirical
+%data, they have shown that 10 and 30 days after the patch's release date are
+%the optimal times to apply the patch to minimize the risk of defective patch.
+%Such delay still opens a lot of opportunities for potential attackers.
+
+In relation to this work, \mx tries to ease the decision of applying a software
+update, because incorporating a new version should only increase the security
+and reliability of the overall multi-version application.  However, in practice
+the number of versions that can be run in parallel is dictated by the number of
+available resources (\eg the number of available CPU cores), so effective
+update strategies are still needed in this context, and work in this area could
+provide helpful solutions to this problem.
+
+%In relation to this work, \mx tries to encourage users to always apply
+%a software update, but it would still benefit from effective update
+%strategies to decide what versions to keep when resources are
+%limited.
+
+Many large-scale services, such as Facebook and Flickr use a {\it continuous
+deployment} approach, where new versions are continuously released to
+users~\cite{johnson2009,flickr}, but each version is often made accessible only
+to a fraction of users to prevent complete outage in case of newly introduced
+errors.  While this approach helps minimize the number of users affected by new
+bugs, certain bugs may manifest themselves only following prolonged operation,
+after the release has been deployed to the entire user base.  We believe our
+proposed approach is complementary to continuous deployment, and could be
+effectively combined with it.

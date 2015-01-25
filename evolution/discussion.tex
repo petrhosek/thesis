@@ -1,21 +1,32 @@
 \section{Discussion}
 \label{evolution:discussion}
 
-Despite the important role that regression test suites play in
-software testing, there are surprisingly few empirical studies that
-report how they co-evolve with the application code, and the coverage
-level that they achieve.  Our empirical study on \numSystems popular
-open-source applications, spanning a combined period of \numYears
-years, aims to contribute to this knowledge base.  To the best of our
-knowledge, the number of revisions executed in the context of
-this study---1,500---is significantly larger than in prior work, and
-this is also the first study that specifically examines patch
-coverage.
+We believe the presented results provides evidence in support of our
+assumptions. We have shown that:%
+\begin{inparaenum}[(1)]
+\item many popular open-source projects have insufficient test suite coverage;
+\item even well tested and fully covered code may contain bugs;
+\item changes to the external behaviour are sporadic and rather small.
+\end{inparaenum}
+These results, while rather unwelcome from the general software reliability
+perspective, are encouraging for the viability and applicability of our
+multi-version execution approach.
 
-Our experience has revealed two main types of challenges for
-conducting similar or larger studies that involve running a large
-number of program revisions.  The first category relates to the
-inherent difficulty of running revisions:
+% Despite the important role that regression test suites play in
+% software testing, there are surprisingly few empirical studies that
+% report how they co-evolve with the application code, and the coverage
+% level that they achieve.  Our empirical study on \numSystems popular
+% open-source applications, spanning a combined period of \numYears
+% years, aims to contribute to this knowledge base.  To the best of our
+% knowledge, the number of revisions executed in the context of
+% this study---1,500---is significantly larger than in prior work, and
+% this is also the first study that specifically examines patch
+% coverage.
+
+Furthermore, our experience has revealed two main types of challenges for
+conducting similar or larger studies that involve running a large number of
+program revisions. The first category relates to the inherent difficulty of
+running revisions:
 
 \begin{enumerate}
 \item Decentralised repositories have non-linear histories, so even
@@ -25,14 +36,14 @@ inherent difficulty of running revisions:
   main branch.
 
 \item Older revisions have undocumented dependencies on specific
-  compiler versions, libraries, and tools.  We found it critical to
-  run each revision in a separate virtualised environment as provided
-  by \covrig, to make it easy to install the right dependencies, or
-  adjust build scripts.
+  compiler versions, libraries, and tools.  We found it critical to run each
+  revision in a separate virtualised environment as provided by \lxc or
+  \docker, to make it easy to install the right dependencies, or adjust build
+  scripts.
 
 \item Some revisions do not compile.  This may be due to errors
   introduced during development and fixed later, or due to incompatible
-  dependencies.  The execution infrastructure has to be
+  dependencies. The execution infrastructure has to be
   flexible in tolerating such cases, and one needs a methodology for
   dealing with non-compilable revisions.  In our case, we have skipped
   over the non-compilable revisions and incorporated their changes into
@@ -40,27 +51,20 @@ inherent difficulty of running revisions:
 
 \item The execution of the regression test suite is often
   nondeterministic---the test suite may nondeterministically fail
-  and some lines may be nondeterministically executed.  Studies
+  and some lines may be nondeterministically executed. Studies
   monitoring program execution need to take nondeterminism
   into account.
 \end{enumerate}
 
-The second category of challenges relates to reproducibility and
-performance. To address these challenges, we have designed and
-implemented \covrig, a flexible framework that ensures reproducibility
-through the use of software containers technology.  Performance has
-two different aspects: at the level of an individual revision, we have
-found it essential to use a form of operating system-level
-virtualisation (in our case, \lxc and \docker), in order to minimise
-the time and space overhead typically associated with hardware
-virtualisation.  Across revisions, we found it necessary to provide
-the ability of running our set of revisions on multiple local and
-cloud machines.  For example, running the \git regression suite took
-in our case 26 machine days (250 revisions $\times$ 30 min/revision
-$\times$ 5 runs), which would have been too expensive if we used a
-single machine, especially since we also had to repeat some runs
-during our experimentation.
-
-We believe this study provides evidence in support of the assumption that
-changes to the external behaviour are relatively small, which is encouraging
-for the viability and applicability of the multi-version execution approach.
+The second category of challenges relates to reproducibility and performance.
+To address these challenges, we have built an infrastructure that enables
+reproducibility through the use of software containers. Performance has two
+different aspects: at the level of an individual revision, we have found it
+essential to use a form of operating system-level virtualisation (in our case,
+\lxc and \docker), in order to minimise the time and space overhead typically
+associated with hardware virtualisation.  Across revisions, we found it
+necessary to provide the ability of running our set of revisions on multiple
+local and cloud machines. For example, running the \git regression suite took
+in our case 26 machine days (250 revisions $\times$ 30 min/revision $\times$ 5
+runs), which would have been too expensive if we used a single machine,
+especially since we also had to repeat some runs during our experimentation.

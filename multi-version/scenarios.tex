@@ -1,89 +1,126 @@
-\section{Scenarios}
+\section{Real-world scenarios}
 \label{multi-version:scenarios}
 
-In this section we motivate our approach using existing scenarios involving the
-\chrome browser and the \vim editor, as well as the \lighttpd, \redis and \vsftpd
-servers. These correspond to two categories of applications that could benefit
-from our multi-version software update approach: desktop applications such as
-web browsers and office tools for which reliability is a key concern; and
-network servers, with stringent security and dependability requirements.
+To motivate the multi-version execution technique, we present several existing
+scenarios involving the the \vim editor, as well as the \lighttpd, and \redis.
+These correspond to two categories of applications that could benefit from our
+approach: user applications such as text editors for which reliability is a key
+concern; and network servers, with stringent security and availability
+requirements.
 
-\gchrome\footnote{\url{http://www.google.com/chrome}} is one of the most widely
-used web browsers.  Even though \chrome releases are tested extensively before
-deployment, they sometimes introduce new bugs that affect the stability of the
-browser.  A concrete example is version $6.0.466.0$, which introduced a bug
-that caused \chrome to crash when trying to load certain web pages over
-SSL.\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49197}}
-One might argue that in this case the user should downgrade to an older version
-and wait until the bug is fixed. However, versions immediately preceding
-$6.0.466.0$ suffer from a different
-bug,\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49721}}
-which was introduced in version $6.0.438.0$ and which crashes Chrome during
-certain sequences of repeated back and forward navigation.
+% To motivate the multi-version execution technique, we present several existing
+% scenarios involving the \chrome browser and the \vim editor, as well as the
+% \lighttpd, \redis and \vsftpd servers. These correspond to two categories of
+% applications that could benefit from our approach: desktop applications such as
+% web browsers and office tools for which reliability is a key concern; and
+% network servers, with stringent security and dependability requirements.
+
+% \gchrome\footnote{\url{http://www.google.com/chrome}} is one of the most widely
+% used web browsers.  Even though \chrome releases are tested extensively before
+% deployment, they sometimes introduce new bugs that affect the stability of the
+% browser.  A concrete example is version $6.0.466.0$, which introduced a bug
+% that caused \chrome to crash when trying to load certain web pages over
+% SSL.\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49197}}
+% One might argue that in this case the user should downgrade to an older version
+% and wait until the bug is fixed. However, versions immediately preceding
+% $6.0.466.0$ suffer from a different
+% bug,\footnote{\url{http://code.google.com/p/chromium/issues/detail?id=49721}}
+% which was introduced in version $6.0.438.0$ and which crashes Chrome during
+% certain sequences of repeated back and forward navigation.
+
+% \vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
+% text editors.  In version $7.1.127$, while trying to fix a memory leak,
+% \vim developers introduced a double \textstt{free} bug that caused \vim to
+% crash whenever the user tried to use a path completion feature.  This bug made
+% its way into \textit{Ubuntu} $8.04$, affecting a large number of
+% users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
+
+% \lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular web-server used
+% by several high-traffic websites such as Wikipedia and Xkcd.
+% Despite its popularity, crash bugs are still a common
+% occurrence in \lighttpd, as evident from its bug tracking
+% database.\footnote{\url{http://redmine.lighttpd.net/issues/}}
+% As one example, a patch introduced in April
+% 2009\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
+% (correctly) fixed the way HTTP ETags are computed.
+% Unfortunately, this fix broke the support for compression, which relied on the
+% previous way in which ETags were computed and resulted in a segmentation fault
+% whenever a client requested HTTP compression.  This issue was only diagnosed
+% and reported in March
+% 2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed at the
+% end of April
+% 2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
+% more than one year after it was introduced, leaving the server vulnerable to
+% possible attacks in between.
+
+% \redis is an advanced key-value data structure
+% server,\footnote{\url{http://redis.io/}} often referred to as one the most
+% popular NoSQL databases.  Due to its performance and low-resource requirements,
+% \redis is being used by many well-known services such as GitHub.  Because the
+% whole dataset is held in memory, reliability is critically important, as a
+% crash could result in total data loss.  However, like any other large software
+% system, \redis is subject to crash bugs. Issue
+% 344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
+% such example.  This issue causes \redis to crash when the \textstt{HMGET}
+% command is used with the wrong type. The bug was introduced in April 2010,
+% diagnosed and reported only half a year later in October 2010 and then fixed
+% after fifteen days.
+
+% \vsftpd\footnote{\url{https://security.appspot.com/vsftpd.html}} is a fast and 
+% secure FTP server for UNIX systems.  Version $2.2.0$ added several new
+% features such as network isolation, but unfortunately also introduced
+% a bug\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vsftpd/+bug/462749}}
+% which triggered a segmentation fault whenever a client used the
+% passive FTP mode.  This bug made \vsftpd practically unusable since
+% the passive mode is being frequently used by clients behind firewalls.
+% Despite being reported several times, this bug was only fixed in
+% version $2.2.1$, released more than two months after the bug was
+% introduced.
+
+\subsection{\vim}
 
 \vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
-text editors.  In version $7.1.127$, while trying to fix a memory leak,
-\vim developers introduced a double \textstt{free} bug that caused \vim to
-crash whenever the user tried to use a path completion feature.  This bug made
-its way into \textit{Ubuntu} $8.04$, affecting a large number of
+text editors. While trying to fix a memory leak, \vim developers introduced a
+double \lstinline`free` bug that caused \vim to crash whenever the user tried to
+use a path completion feature. This bug was introduced in version 7.1.127,
+released in September 2007. The incorrectly fixed version of the
+\lstinline`ExpandOne` function is shown in Listing~\ref{lst:vim-bug}. The newly
+introduced code frees up the memory used to store the expanded path.
+Unfortunately, when path contains the \lstinline`~` symbol used as an alias for
+user's home directory, this code path will be invoked twice leading to a crash.
+
+\begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:vim-bug,caption={First (incorrect) fix of \lstinline`ExpandOne` function in \vim.}]
+@@ -3543,0 +3548,4 ExpandOne(xp, str, orig, options, mode)
++    /* Free "orig" if it wasn't stored in "orig_save". */
++    if (orig != orig_save)
++       vim_free(orig);
++
+\end{lstlisting}
+
+The double \lstinline`free` bug was detected and fixed in version 7.1.147, released
+one month later in October 2007. The correct version of the \lstinline`ExpandOne`
+function is shown in Listing~\ref{lst:vim-fixed}. In this version, the
+\lstinline`orig_saved` variable type has been changed to \lstinline`int` and it is
+being used as a flag preventing the second \lstinline`free` invocation.
+
+\begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:vim-fixed,caption={Second (correct) fix \lstinline`ExpandOne` function in \vim.}]
+@@ -3355,0 +3356 @@ ExpandOne(xp, str, orig, options, mode)
++    int                orig_saved = FALSE;
+@@ -3423,0 +3425 @@ ExpandOne(xp, str, orig, options, mode)
++       orig_saved = TRUE;
+@@ -3549 +3551 @@ ExpandOne(xp, str, orig, options, mode)
+-    if (orig != orig_save)
++    if (!orig_saved)
+        vim_free(orig);
+\end{lstlisting}
+
+Despite the bug being fixed promptly, it made its way into Ubuntu 8.04,
+affecting a large number of
 users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
-
-\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular web-server used
-by several high-traffic websites such as Wikipedia and Xkcd.
-Despite its popularity, crash bugs are still a common
-occurrence in \lighttpd, as evident from its bug tracking
-database.\footnote{\url{http://redmine.lighttpd.net/issues/}}
-As one example, a patch introduced in April
-2009\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
-(correctly) fixed the way HTTP ETags are computed.
-Unfortunately, this fix broke the support for compression, which relied on the
-previous way in which ETags were computed and resulted in a segmentation fault
-whenever a client requested HTTP compression.  This issue was only diagnosed
-and reported in March
-2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed at the
-end of April
-2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
-more than one year after it was introduced, leaving the server vulnerable to
-possible attacks in between.
-
-\redis is an advanced key-value data structure
-server,\footnote{\url{http://redis.io/}} often referred to as one the most
-popular NoSQL databases.  Due to its performance and low-resource requirements,
-\redis is being used by many well-known services such as GitHub.  Because the
-whole dataset is held in memory, reliability is critically important, as a
-crash could result in total data loss.  However, like any other large software
-system, \redis is subject to crash bugs. Issue
-344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
-such example.  This issue causes \redis to crash when the \textstt{HMGET}
-command is used with the wrong type. The bug was introduced in April 2010,
-diagnosed and reported only half a year later in October 2010 and then fixed
-after fifteen days.
-
-\vsftpd\footnote{\url{https://security.appspot.com/vsftpd.html}} is a fast and 
-secure FTP server for UNIX systems.  Version $2.2.0$ added several new
-features such as network isolation, but unfortunately also introduced
-a bug\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vsftpd/+bug/462749}}
-which triggered a segmentation fault whenever a client used the
-passive FTP mode.  This bug made \vsftpd practically unusable since
-the passive mode is being frequently used by clients behind firewalls.
-Despite being reported several times, this bug was only fixed in
-version $2.2.1$, released more than two months after the bug was
-introduced.
-
-All the scenarios presented above describe software updates which,
-while trying to add new features or bug fixes, also introduced new
-bugs that caused the code to crash under certain conditions.
-Improving the reliability of such updates is the main goal of our
-proposed approach: running both the old and the new version in
-parallel after an update can enable applications to survive more
-errors, without giving up the new features introduced by the update.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-To motivate our approach, we present real scenarios involving \lighttpd and
-\redis, which are representatives of one type of applications which could
-benefit from our approach, namely server applications with stringent security
-and availability requirements.
+Since the 8.04 is a long-term support version, the Ubuntu maintainers avoid
+incorporating new changes except for critical security bug fixes. This meant
+that the \vim users affected by this bug had to build and install their own
+version of \vim from the source.
 
 \subsection{\lighttpd}
 

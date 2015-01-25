@@ -1,0 +1,179 @@
+\section{N-version programming}
+
+The original idea of concurrently running multiple versions of the same
+application was first explored in the context of $N$-version programming, a
+software development approach introduced in the 1970's in which multiple teams
+of programmers independently develop functionally equivalent versions of the
+same program in order to minimise the risk of having the same bugs in all
+versions~\cite{chen1995}. During runtime, these versions are executed in
+parallel atop $N$-version execution environment (NVX)  in order to improve the
+fault tolerance of the overall. Both version generation and the synchronization
+mechanism required manual effort.
+
+%system and majority voting is used to continue in the best possible way when a
+%divergence occurs.
+
+%N-version programming was introduced in the seventies by Chen and
+%Avizienis~\cite{chen1995}.  The core idea was to have multiple teams
+%of programmers develop the same software independently and then run
+%the produced implementations in parallel in order to improve the fault
+%tolerance of the overall system.  Both version generation and the
+%synchronization mechanism required manual effort.
+
+\subsection{Multi-variant execution}
+
+Cox \etal~\cite{cox2006} propose a general framework for increasing application
+security by running in parallel several automatically-generated diversified
+variants of the same program.  The technique was implemented in two prototypes,
+one in which variants are run on different machines, and one in which they are
+run on the same machine and synchronised at the system call level, using a
+modified Linux kernel.  By using multiple variants with potentially disjoint
+exploit sets, the proposed approach helps applications survive certain classes
+of security vulnerabilities such as buffer overflows, as attackers would need
+to simultaneously compromise all variants.
+
+Berger \etal~\cite{diehard06} described a different approach which uses heap
+over-provisioning and full randomisation of object placement and memory reuse
+to run multiple replicas and reduce the likelihood that a memory error will
+have any effect
+%uses address space layout randomization to generate multiple replicas that are
+%executed concurrently. This approach is combined with randomization and
+%replication to provide memory error tolerance.
+The goal of their work is to increase reliability by tolerating memory errors
+in exchange for space costs and execution time.
+
+%A different solution described by Shye \etal in~\cite{shye2009} runs multiple
+%instances of the same version of a single application aiming to overcome
+%transient failures by monitoring and comparing their execution on the level of
+%kernel system calls.  However, this solution does not aim to overcome such
+%failures.
+
+Within this paradigm, the Orchestra framework~\cite{orchestra09} uses a
+modified compiler to produce two versions of the same application with stacks
+growing in opposite directions, runs them in parallel on top of an unprivileged
+user-space monitor, and raises an alarm if any divergence is detected to
+protect against stack-based buffer overflow attacks.  This work has been
+further improved in~\cite{orchestra11} with new method for signal delivery
+accompanied with detailed analysis of the benchmark characteristics. However,
+their approach is still limited to two versions running in lockstep with only
+difference being the opposite growing stack.
+
+Trachsel \etal~\cite{trachsel10} use the multi-variant execution approach to
+increase performance, where program variants are obtained by using different
+(compiler) optimisations and algorithms.  The goal is to increase the overall
+system performance by always selecting the variant which finishes its execution
+first. Thereby, no synchronisation across variants is needed.
+
+More recently, researchers have proposed additional multi-variant techniques
+that fit within the $N$-version programming paradigm, \eg by employing
+complementary thread schedules to survive concurrency
+errors~\cite{compl-schedules11}, or using genetic programming to automatically
+generate a large number of application variants that can be combined to reduce
+the probability of failure or improve various non-functional
+requirements~\cite{gismoe}. Yumerefendi \etal~\cite{tightlip} run multiple
+sandboxed copies of the same process to detect potential privacy leaks and to
+enforce access control and privacy management; Shye \etal~\cite{shye2009} use
+multiple instances of the same application in order to overcome transient
+hardware failures. Cadar \etal have also argued that automatically generated
+software variants are a good way for exploiting the highly parallel nature of
+modern hardware platforms~\cite{multiplicity}.
+
+%Also ManySAT~\cite{manysat} %% \todo{\ldots missing rest of the sentence}
+
+There are two key differences between our approach and the work discussed
+hereinbefore.  First, we do not rely on automatically-generated variants, but
+instead run in parallel existing software versions, which raises a number of
+different technical challenges.  This means that in our case, the variants are
+not semantically equivalent, this eliminates the challenge of generating
+diversified variants and creates opportunities in terms of recovery from
+failures, but also introduces additional challenges in terms of synchronising
+the execution of the different versions.  Second, this body of work has mostly
+focused on detecting divergences, while our main concern is to \textit{survive}
+them (keeping all versions alive), in order to increase both the security and
+availability of the overall application.
+
+%Recent work on NVX systems has moved in the direction of
+%opportunistically using existing versions---\eg different browser
+%implementations~\cite{cocktail} or different software
+%revisions~\cite{mx}---or automatically synthesizing them---\eg by
+%varying the memory layout~\cite{cox2006,diehard06}, or the direction
+%of stack growth~\cite{orchestra09}.  Significant effort has also been
+%expended on running multiple versions in parallel in the context of
+%online and offline
+%testing~\cite{back-to-back90,onlinevalidation,bandaid-patch07,tachyon12}.
+%\nx targets NVX systems that use
+%system-call level synchronization and is oblivious to the way in which
+%the versions are generated.
+
+Recent NVX systems that synchronize versions at the level of system
+calls use either the \ptrace interface~\cite{orchestra09,tachyon12}
+or kernel modifications~\cite{cox2006} to implement monitors.  As
+discussed, \stt{ptrace}-based systems incur an unacceptable overhead
+on I/O-bound applications---for instance, \tachyon~\cite{tachyon12}
+reports an overhead of \tachyonLighttpd on \lighttpd and \mx~\cite{mx}
+achieved an overhead of up to \mxRedis in one of the Redis
+experiments.  By contrast, kernel-based systems~\cite{cox2006} achieve
+overheads competitive to \varan~\footnote{although we were not able to compare
+directly with \cite{cox2006}, as they use a different benchmark and a
+single-core machine}---but the major downside of kernel-level approaches are
+the increase in the size of the trusted computing base (TCB), the additional
+privileges required for deployment, and the difficulty of maintaining the
+kernel patches.  Finally, all existing NVX systems operating at the level of
+system calls, both user- and kernel-level, require lockstep execution, which
+introduces significant limitations both in terms of performance and
+flexibility, as discussed in detail in Sections~\ref{sec:coordination} and
+\ref{sec:patternmatching}.
+
+\subsection{Multi-version Execution}
+
+Cook and Dage~\cite{cook:icse99} proposed a multi-version framework for
+upgrading components.  Users formally specify the specific input subdomain that
+each component version should handle, after which versions are run in parallel
+and the output of the version whose domain includes the current input is
+selected as the overall output of the computation.  The system was implemented
+at the level of leaf procedures in the Tcl language.  The key difference with
+\mx is that this framework requires a formal description of what input domain
+should be handled by each version; in comparison, \mx targets crash bugs and is
+fully automatic.  Moreover, \mx's goal is to have all versions alive at all
+times, so crash recovery plays a key role.  Finally, \mx has to carefully
+synchronise access to shared state, which is not an issue at the level of Tcl
+leaf procedures.
+
+%A possible realization of the original N-version programming paradigm is
+An approach closer to the original N-version programming paradigm is
+Cocktail~\cite{cocktail}, which proposes the idea of running different web
+browsers in parallel under the assumption that any two of them are unlikely to
+be vulnerable to the same attacks.  Compared to \mx and other techniques
+inspired by the N-version programming paradigm, Cocktail's task is simplified
+by exclusively targeting web browsers, which implement common web standards.
+
+%\subsection{Software testing}
+
+The multi-version execution approach has been in the past successfully used for
+testing. Back-to-back testing~\cite{back-to-back90}, where the same input is
+sent to different variants or versions of an application and their outputs
+compared for equivalence, has been used since the 1970s.  Band-aid
+patching~\cite{bandaid-patch07} proposed an online patch testing system that
+splits execution before a patch, and then retroactively selects one code
+version based on certain criteria.  More recently, delta
+execution~\cite{onlinevalidation} proposed to run two different versions of a
+single application, splitting the execution at points where the two versions
+differ, and comparing their behaviour to test the patch for errors and validate
+its functionality.  Similarly, Tachyon~\cite{tachyon12} is an online patch
+testing system
+%developed in recent independent work 
+in which the old and the new version of an application are run concurrently;
+when a divergence is detected, the options are to either halt the program, or
+to create a manual rewrite rule specifying how to handle the divergence.
+
+The idea of running multiple executions concurrently has also been used in an
+offline testing context.  For instance, d'Amorin \etal~\cite{delta-exec-oop}
+optimise the state-space exploration of object oriented code by running the
+same program on multiple inputs simultaneously, while Kim
+\etal~\cite{shared-exec12} improve the testing of software product lines by
+sharing executions across a program family.
+
+By comparison with this body of work, our focus is on managing
+divergences across software versions at runtime in order to keep the
+application running, and therefore runtime deployment and automatic
+crash recovery play a central role in both \mx and \varan.

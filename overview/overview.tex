@@ -158,16 +158,38 @@ energy consumption.
 
 \section{Organization}
 
-Chapter~\ref{chap:overview} gives an overview of the $N$-version and
-multi-version execution techniques and gives the background used in the rest of
-the thesis. Chapter~\ref{chap:evolution} presents a study of software
-evolution in several real-world open-source systems and acts as a motivation for many
-of the design choices made in the systems presented in this thesis.
+The rest of the thesis is organized as follows:
 
-Chapter~\ref{chap:related} discusses work related to $N$-version and multi-version
-execution both in the reliability and the security context. Finally, the thesis concludes
-with Chapter~\ref{chap:conclusion}, which summarizes the contributions and
-discusses the possible future work.
+\begin{chapterdescription}
+\item[Chapter~\ref{chap:multi-version}] gives an overview of the $N$-version,
+multi-variant and multi-version execution techniques and sets the background
+for the rest of the thesis. The chapter also presents several real-world scenarios
+which are used as a part of the evaluation throughout the thesis.
+
+\item[Chapter~\ref{chap:evolution}] presents a study of software evolution in several
+real-world open-source systems and acts as a motivation for many of the design
+choices made in the systems presented in this thesis.
+
+\item[Chapter~\ref{chap:efficient-execution}] describes \varan, an efficient $N$-version
+monitor designed to run large number of versions in parallel. The chapter presents
+the high-level architecture as well as details of the prototype implementation,
+and includes thorough evaluation including a comparison with previous.
+
+\item[Chapter~\ref{chap:safe-updates}] presents \mx, a mulit-version execution runtime focused
+on fail-recovery from crashes caused by bugs introduced in software updates. The chapter
+gives a detailed overview of the fail-recovery mechanism and explains how \mx survives
+bugs in several existing open-source applications.
+
+\item[Chapter~\ref{chap:applications}] other possible application of multi-version and $N$-version
+execution techniques, such as live sanitization, record and replay and security honeypots.
+
+\item[Chapter~\ref{chap:related}] discusses work related to $N$-version and multi-version
+execution both in the reliability and the security context.
+\end{chapterdescription}
+
+Finally, the thesis concludes with Chapter~\ref{chap:conclusion}, which
+summarizes the contributions, discusses the possible future work and raises
+additional research questions.
 
 %The rest of this paper is structured as follows.
 %Section~\ref{sec:overview} gives a high-level overview of our

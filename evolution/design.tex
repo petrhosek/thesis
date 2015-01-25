@@ -151,6 +151,23 @@ In our study, we used line mapping to determine whether patches are
 tested within the next few revisions after they were created
 (\S\ref{sec:lpcoverage}).
 
+\paragraph{Edit distance.} Edit distance, also known as Levenshtein edit
+distance~\cite{levenshtein1966binary} is defined as a the minimum number of
+operations (insertions, deletions, and subtitutions) required to transform one
+string into the other. We use edit distance to measure the similarity of the
+system call traces (\S\ref{sec:behavior-evolution}). However, these traces are
+not strings, rather sequences of strings. To allow the use of edit distance on
+these sequences, we use a hashing scheme, which assigns each string in the
+sequence a 32-bit number. The algorithm then calulcates edit distance between
+the integer strings.
+
+Another problem is the efficiency of the implementation. The sequences we are
+comparing in our study are hundreds of millions entries long. We have
+implemented the Levenshtein algorithm as a native C Python extension and used
+OpenMP to parallelize this implementation to take advantage of all available
+cores. This implementation only keeps one line of the computation matrix, and
+divides this line into strides which are then processed by different cores.
+
 \paragraph{Cloud deployment.} To enable large-scale data collection and
 processing, we deployed \covrig to our private cloud.  We have built our
 system around a standard set of tools: Packer for building custom

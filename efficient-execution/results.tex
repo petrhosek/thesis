@@ -16,31 +16,34 @@
 
 \newcommand{\ptracesyscalloverhead}{$36.50\times$\xspace} % 46203
 
-\newcommand{\vdsoNative}{\num{49} ticks\xspace} 
-\newcommand{\vdsoIntercept}{\num{122} ticks\xspace} 
-\newcommand{\vdsoLeader}{\num{429} ticks\xspace} 
-\newcommand{\vdsoFollower}{\num{189} ticks\xspace} 
+\newcommand{\vdsoNative}{\num{49} cycles\xspace} 
+\newcommand{\vdsoIntercept}{\num{122} cycles\xspace} 
+\newcommand{\vdsoLeader}{\num{429} cycles\xspace} 
+\newcommand{\vdsoFollower}{\num{189} cycles\xspace} 
 
 
 % Macrobenchmarks
 
 \newcommand{\nservers}{five\xspace}
 
-\newcommand{\nginxIntercept}{\SI{3}{\percent}\xspace}
-\newcommand{\beanstalkdIntercept}{\SI{11}{\percent}\xspace}
+\newcommand{\nginxIntercept}{\SI{4}{\percent}\xspace}
+\newcommand{\beanstalkdIntercept}{\SI{10}{\percent}\xspace}
 
 \newcommand{\beanstalkdOneFollower}{$1.52\times$\xspace}
 \newcommand{\lighttpdOneFollower}{$1.12\times$\xspace}
+\newcommand{\memcachedOneFollower}{$1.30\times$\xspace}
 \newcommand{\nginxOneFollower}{$1.28\times$\xspace}
 \newcommand{\redisOneFollower}{$1.06\times$\xspace}
 
 \newcommand{\beanstalkdSixFollowers}{$1.77\times$\xspace}
 \newcommand{\lighttpdSixFollowers}{$1.15\times$\xspace}
+\newcommand{\memcachedSixFollowers}{$1.32\times$\xspace}
 \newcommand{\nginxSixFollowers}{$1.64\times$\xspace}
 \newcommand{\redisSixFollowers}{$1.25\times$\xspace}
 
 \newcommand{\beanstalkdSevenFollowers}{$1.82\times$\xspace}
 \newcommand{\lighttpdSevenFollowers}{$1.49\times$\xspace}
+\newcommand{\memcachedSevenFollowers}{$1.37\times$\xspace}
 \newcommand{\nginxSevenFollowers}{$1.67\times$\xspace}
 \newcommand{\redisSevenFollowers}{$1.27\times$\xspace}
 
@@ -85,7 +88,7 @@
 \newcommand{\redisRROvhNx}{\SI{14}{\percent}\xspace}
 \newcommand{\redisRROvhScribe}{\SI{53}{\percent}\xspace}
 
-\newcommand{\redisNoSanitizationMedianLength}{\num{2}\xspace}
-\newcommand{\redisSanitizationMedianLength}{\num{6}\xspace}
-\newcommand{\redisNoSanitizationAverageLength}{\num{3}\xspace}
+\newcommand{\redisNoSanitizationMedianLength}{two\xspace}
+\newcommand{\redisSanitizationMedianLength}{six\xspace}
+\newcommand{\redisNoSanitizationAverageLength}{three\xspace}
 \newcommand{\redisSanitizationAverageLength}{\num{24}\xspace}

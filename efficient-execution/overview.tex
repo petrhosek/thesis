@@ -26,24 +26,25 @@ each in turn below.
 %% \end{enumerate}
 
 The biggest downside of existing system call monitors based on the
-\ptrace interface is the performance
-overhead~\cite{cox2006,orchestra09,tachyon12,mx}.  For each system
-call performed by each version, the monitor has to perform several
-additional system calls and interrupts in order to be notified about
-system call entry and exit, copy buffers to and from the version being
-monitored, nullify the system call, \etc
+\ptrace interface is the high performance
+overhead~\cite{orchestra09,tachyon12}.  For each system call
+performed by each version, execution must switch to the monitor
+process, which has to perform several additional system calls in order
+%to be notified about system call entry and exit, 
+to copy buffers to and from the version being monitored, nullify the
+system call, \etc
 
-For CPU-intensive applications which perform few system calls,
-this overhead will be amortised, resulting in a modest
-slowdown. However, for heavily I/O-bound applications,
-% such as those addressing the "C10k" problem (\eg nginx or lighttpd)
-the slowdown can be up to two orders of magnitude, which is
-unacceptable for many real-world deployments.
+For CPU-intensive applications which perform few system calls, this
+overhead will be amortised, translating into a modest overall
+slowdown.  However, for heavily I/O-bound applications, the slowdown
+can be up to two orders of magnitude, which is unacceptable for many
+real-world deployments.
 %
 Consequently, in order to implement a system call monitor with
 acceptable overhead even for heavily I/O-bound applications, we need
 to eliminate context switching to the monitor and back during
-interception.  This is accomplished through a combination of binary
+interception and eliminate the need for additional system calls.  
+This is accomplished through a combination of selective binary
 rewriting and an interprocess communication mechanism based on a
 fast shared memory ring buffer.
 
@@ -66,32 +67,31 @@ discussed in detail in Section~\ref{sec:streaming}.
 \label{sec:coordination}
 
 In prior NVX systems, versions are typically run in lockstep, with a
-centralised monitor coordinating and virtualizing their execution.
+centralised monitor coordinating and virtualising their execution.
 Essentially, at each system call, the versions pass control to the
 monitor, which waits until all versions reach the same system call.
 Once this happens, the monitor executes the system call and
-communicates the result to each individual version. The situation when
-one or more versions execute a different system call or do not execute
-any system call at all is seen as a divergence, which needs to be
-handled by the monitor (\eg by terminating these versions or the
-entire application).
+communicates the result to each individual version.  If two or more
+versions try to break the lockstep by executing different system
+calls, the monitor needs to either terminate the entire application or
+continue executing a subset of the versions in lockstep.
 
-There are two key disadvantages in this approach.  First, the
-centralised monitor acts as a bottleneck, which can have a significant
-impact on performance.  Note that in addition to the synchronisation
-overhead, this centralised monitor makes the NVX application execute
-at the speed of the slowest individual version.
+This approach has two key disadvantages.  First, the centralised
+monitor is a bottleneck, which can have a significant impact on
+performance.  Note that in addition to the synchronisation overhead,
+this centralised monitor makes the NVX application execute at the
+speed of the slowest individual version.
 
 Second, this approach is totally inflexible to any divergence in the
-sequence of system calls executed across versions; this is an issue
+sequence of system calls executed across versions.  This is an issue
 both when running automatically-diversified variants, where certain
-transformations can affect the external behaviour, and when running
-existing software versions, where (slight) changes in the sequences of
-system calls can occur between versions. 
+transformations may affect the external behaviour, and when running
+existing software revisions, where changes in the sequences of
+system calls can occur between revisions. 
 
 \begin{figure}[t]
   \begin{center}
-    \includegraphics[width=0.75\textwidth]{efficient-execution/figures/architecture}
+    \includegraphics[width=0.5\textwidth]{efficient-execution/figures/architecture}
     \caption{The event-streaming architecture of \varan.}
     \label{fig:architecture}
   \end{center}
@@ -100,22 +100,23 @@ system calls can occur between versions.
 To address these limitations, \varan uses a new approach which we call
 \emph{event streaming}.  In this decentralised architecture,
 depicted in Figure~\ref{fig:architecture}, one of the
-versions is designated as the \emph{leader}, while the others are
-\emph{followers}. During execution, the leader records all events into a
+versions is designated as the \textit{leader}, while the others are
+\textit{followers}. During execution, the leader records all events into a
 shared ring buffer, which are later read by followers to mimic the leader's
-external behaviour (\S\ref{sec:streaming}). Events consist primarily of system
+external behaviour (\S\ref{sec:streaming}). Events consist primarily
+of regular system
 call invocations, but also of signals, process forks (\ie \lstinline`clone`
 and \lstinline`fork` system calls) and exits (\ie \lstinline`exit` and
 \lstinline`exit_group` system calls).
 
 In general, any version can be the leader, although in some situations
 some may be a better choice than others--\eg when running multiple
-software versions in parallel, one might prefer to designate the
+software revisions in parallel, one might prefer to designate the
 newest one as leader.  However, the leader can be easily replaced if
 necessary, \eg if it crashes (\S\ref{sec:leader-repl}).
 
 The only centralised component in this architecture is the
-\emph{coordinator}, whose main job is to prepare the versions for
+\textit{coordinator}, whose main job is to prepare the versions for
 execution and establish the necessary communication channels.  At a
 high level, the coordinator first loads the variants into memory,
 injects several special handlers and memory objects into their address
@@ -124,7 +125,7 @@ special handlers and then starts executing the variants
 (\S\ref{sec:setup}) in a decentralised manner.
 
 %% recorded by one application version are shortly replayed
-%% (\emph{streamed}) to the others, which keeps the log small, as
+%% (\textit{streamed}) to the others, which keeps the log small, as
 %% events which have been replayed by all versions can be discarded.
 %% Similarly, the NVX context allows for the log to be kept in memory,
 %% and for the replay to be done incrementally, with significant
@@ -139,7 +140,7 @@ special handlers and then starts executing the variants
 %% applications; and (2)~the long time necessary to replay the execution.
 %% Because the multiple versions are executed concurrently, events
 %% recorded by one application version are shortly replayed
-%% (\emph{streamed}) to the others, which keeps the log small, as
+%% (\textit{streamed}) to the others, which keeps the log small, as
 %% events which have been replayed by all versions can be discarded.
 %% Similarly, the NVX context allows for the log to be kept in memory,
 %% and for the replay to be done incrementally, with significant
@@ -152,8 +153,8 @@ special handlers and then starts executing the variants
 
 In addition to eliminating the central monitor bottleneck, our
 event-streaming architecture also supports (small) divergences between
-the system call sequences of different versions.  For example,
-different software versions (revisions) can be run inside an NVX
+the system call sequences of different variants.  For example,
+different software revisions can be run inside a classical NVX
 system only as long as they all issue the same sequence of system
 calls~\cite{mx}.  However, software patches sometimes change the
 external behavior of an application.  In particular, many divergences
@@ -183,10 +184,10 @@ in system call traces fall into the following two categories:
 %     write the same bytes (\eg because extra buffering is used).  
 % \end{description}
 
-Unlike prior NVX systems that run versions in lockstep, \varan is able
-to deal with such changes.  When followers process the
-event sequence streamed by the leader, they can rewrite it to account
-for any differences: \eg they can skip and merge system calls, or perform some
-calls themselves.  We provide a flexible implementation of such rewrite rules
-using Berkeley Packet Filters~\cite{bpf} (\S\ref{sec:patternmatching}).
+\varan is the first NVX system that is able to deal with such changes.
+When followers process the event sequence streamed by the leader, they
+can rewrite it to account for any such differences: \eg they can skip
+and merge system calls, or perform some calls themselves.  We provide
+a flexible implementation of such rewrite rules using Berkeley Packet
+Filters (\S\ref{sec:patternmatching}).
 

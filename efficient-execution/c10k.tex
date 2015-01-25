@@ -2,11 +2,9 @@
 \label{sec:c10k}
 
 Existing NVX systems, including those based on \lstinline`ptrace`, can
-already run CPU-bound applications efficiently with an overhead
+already run many (two-version) CPU-bound applications efficiently with an overhead
 typically less than \SI{20}{\percent}.  As a result, we focus our evaluation on
-high-performance, heavily I/O-bound C10k servers\footnote{Numeronym used
-  for servers capable of concurrently handling ten thousand connections.}
-  which%
+high-performance, heavily I/O-bound C10k servers which%
 \begin{inparaenum}[(1)]
 \item represent the worst-case scenario for a system call monitor; and
 \item form the backbone of modern, highly-scalable web applications,
@@ -16,12 +14,11 @@ high-performance, heavily I/O-bound C10k servers\footnote{Numeronym used
 The \nservers server applications used in our evaluations are
 summarized in Table~\ref{tbl:apps} (the size is measured in lines of
 code, as reported by the \emph{cloc} tool). For our performance experiments, we
-ran the same version of each application multiple times with different number
-of instances. 
-%(in practice you would typically run different versions as shown in \S\ref{sec:applications}).  
+ran multiple instances of the same version of each application.
+%(in practice you would typically run different versions as shown in Section \ref{sec:applications}).  
 Each experiment was performed six times, with
 the first measurement used to warm up the caches and discarded.  The overhead
-was calculated as a median of the remaining five measurements.
+was calculated as the median of the remaining five measurements.
 
 \begin{table}
 \begin{center}
@@ -66,7 +63,7 @@ was calculated as a median of the remaining five measurements.
 \begin{figure}[!t]
  \centering
  \includegraphics[width=\textwidth]{efficient-execution/graphs/c10k}
- \caption{Performance overhead for the \beanstalkd, \lighttpd, \nginx
+ \caption{Performance overhead for the \beanstalkd, \lighttpd, \memcached, \nginx
    and \redis servers for different number of followers.  The client
    and server are located on the same rack, simulating a worst-case scenario.}
  \label{fig:servers}
@@ -83,6 +80,7 @@ writing.  To measure performance, we used
 \lstinline`beanstalkd-benchmark`\footnote{\url{https://github.com/fangli/beanstalkd-benchmark}}
 with \num{10} concurrent workers each performing \num{10000} push operations
 using \SI{256}{\byte} of data per operation.
+%The results are summarized in Figure~\ref{fig:macro_beanstalkd}.
 
 %\boldtext{\textit{Lighttpd}}\footnote{\url{http://www.lighttpd.net/}}
 %is a lightweight web server optimized for high performance
@@ -108,11 +106,11 @@ a \SI{4}{\kilo\byte} page using
 
 \paragraph{\memcached}\footnote{\url{http://memcached.org/}} 
 is a high-performance, distributed memory object caching system, used by
-many high-profile websites to alleviate database load. We used the
-revision 1.4.17, latest at the time of writing. To measure the performance
-overhead, we used the \emph{memslap} benchmark,\footnote{url{http://libmemcached.org/}}
+many high-profile websites to alleviate database load. We used 
+revision 1.4.17, the latest at the time of writing. To measure the performance
+overhead, we used the \emph{memslap} benchmark, \footnote{\url{http://libmemcached.org/}}
 part of the \emph{libMemcached} library. We used the default workload,
-\ie initial load of \num{10000} key pairs and \num{10000} test executions.
+\ie an initial load of \num{10000} key pairs and \num{10000} test executions.
 
 %% To measure the performance overhead introduced by \varan when running
 %% \memcached, we used \lstinline`memslap`, a load generation and benchmarking
@@ -140,7 +138,7 @@ performance, we used
 distributed as part of Redis. The benchmark issues different types
 of commands supported by Redis and measures both the throughput and
 the latency for each type. We used the default workload, \ie 50
-clients issuing \num{10000} requests and calculated and average overhead
+clients issuing \num{10000} requests and calculated the average overhead
 across all commands. 
 
 Figure~\ref{fig:servers} shows the results for all servers. All
@@ -158,7 +156,7 @@ machine.
 %worst-case scenario, as the network latency would hide some of the
 %overhead for a more distant client machine.
 
-For each benchmark, we show one bar, normalized relative to native
+For each benchmark, we show one bar, normalised relative to native
 execution, showing the performance of \varan using a given number of
 followers.  We stop at six followers, because our machine has eight
 threads, and we also need one thread for the leader and one for the

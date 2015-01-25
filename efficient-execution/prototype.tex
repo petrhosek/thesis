@@ -11,7 +11,7 @@
 
 \begin{figure*}[t]
   \begin{center}
-    \includegraphics[width=\textwidth]{efficient-execution/figures/address-space}
+    \includegraphics[width=0.75\textwidth]{efficient-execution/figures/address-space}
     \caption{Setup of address spaces and communication channels.}
     \label{fig:setup}
   \end{center}
@@ -37,12 +37,10 @@ its followers (\S\ref{sec:streaming}).
 
 The main steps involved in the setup of version address spaces and the
 needed communication channels are shown in Figure~\ref{fig:setup}.  To
-run multiple versions in parallel, the user launches \varan providing the
-paths to all versions, together with any command line arguments required
-to start them (Step \circl{A} in Figure~\ref{fig:setup}). \varan is built
-as a statically-linked, position-independent library, to make sure it
-does not stand in the way of any segments which have to be loaded by the
-application at fixed addresses.
+run multiple versions in parallel, the user launches \varan's
+\emph{coordinator} providing the paths to all versions, together with
+any command line arguments required to start them (Step \circl{A} in
+Figure~\ref{fig:setup}).
 
 % \begin{lstlisting}[language=bash,numbers=none]
 % varan -p /path/to/executable1 
@@ -55,9 +53,9 @@ application at fixed addresses.
 %to make sure it does not stand in the way of any segments which have
 %to be loaded by the application at fixed addresses.
 
-The \emph{coordinator} code first creates the shared memory segment
+The \emph{coordinator} first creates the shared memory segment
 used for communication among versions, and then spawns the
-\emph{zygote} process (\circl{B}), which is responsible for starting
+\textit{zygote} process (\circl{B}), which is responsible for starting
 the individual versions. The coordinator communicates with the zygote
 via a UNIX domain socket. For each version $i$ that needs to be spawned,
 the coordinator sends a fork request to the zygote over this socket
@@ -104,21 +102,21 @@ randomisation schemes to be used by the operating system.
 % The rest of this section provides some extra details regarding the
 % role and implementation of the coordinator, monitor and zygote.
 
-\paragraph{Coordinator.}  To set up the address spaces of the versions,
+\boldtext{Coordinator.}  To set up the address spaces of the versions,
 the coordinator acts as a specialized preloader, inspired by
 \emph{rtldi}.\footnote{\url{http://www.bitwagon.com/rtldi/rtldi.html}}
 However, the coordinator does not attempt to replace the existing
 dynamic linker, which would be unnecessarily complex and may affect
 compatibility with existing applications. Instead, it simply
 intercepts the system calls performed by the linker to enable the
-binary rewriter (discussed in \S\ref{sec:rewriting}) to rewrite the
-code of dynamically-linked shared libraries.  One important advantage
-of our interception mechanism is that we do not make use of \ptrace to
+binary rewriter (\S\ref{sec:rewriting}) to rewrite the code of
+dynamically-linked shared libraries.  One important advantage of our
+interception mechanism is that we do not make use of \ptrace to
 intercept calls to the dynamic linker---instead, the binary rewriter
 is used to rewrite all the system calls done by the linker with jumps
 into the coordinator code.  As a result, \varan can be used in
 combination with existing \lstinline`ptrace`-based tools such as \gdb
-or \emph{strace}, which greatly simplifies debugging.
+or \textit{strace}, which greatly simplifies debugging.
 
 %% This also has an advantage of supporting arbitrary dynamic linkers,
 %% not just the one provided by GNU C library, albeit it is going to be
@@ -130,11 +128,11 @@ or \emph{strace}, which greatly simplifies debugging.
 
 
 
-\paragraph{Zygote.} The role of the zygote is to spawn new processes on
+\boldtext{Zygote.} The role of the zygote is to spawn new processes on
 request from the coordinator.  Zygote processes are already used in
-systems such as \emph{Android} and
-\emph{Chrome}~\cite{linuxzygote}---in this paper, we use the term to
-refer to the concept rather than a concrete implementation, as \varan
+systems such as \textit{Android} and
+\textit{Chrome}~\cite{linuxzygote}---in this paper, we use the term to
+refer to the architectural pattern rather than a particular implementation, as \varan
 provides its own clean-slate implementation.  While it would be
 technically possible for the coordinator to create the processes in
 which versions run, this would bring some complications regarding the
@@ -142,14 +140,16 @@ communication channels: for example, the second version spawned would
 inherit the communication channel between the first version and the
 coordinator, which would be undesirable.
 
-\paragraph{Monitor.} To ensure that \varan can be compiled as
-statically-linked position-independent code, we must avoid using any
-global variables (\ie those in the \lstinline`.data` section). One
-consequence of this is that \varan cannot use any of the existing C
-libraries such as \emph{GNU C Library}, as these are not typically
-built to support this requirement.  Instead, \varan provides its own
-implementation of the necessary C library functions based on the
-\emph{Bionic C
+\boldtext{Monitor.} The monitor code is built as a statically-linked,
+position-independent library, to make sure it does not stand in the
+way of any segments which have to be loaded by the application at
+fixed addresses.  To ensure that the code can be compiled like this,
+we must avoid using any global variables (\ie those in the
+\lstinline`.data` section). One consequence is that \varan
+cannot use any of the existing C libraries such as \textit{GNU C
+  Library}, as these are not typically built to support this
+requirement.  Instead, \varan provides its own implementation of the
+necessary C library functions based on the \textit{Bionic C
   library}.\footnote{\url{https://android.googlesource.com/platform/bionic}}
 To support the use of Linux system calls, \varan uses a modified
 version of the \lstinline`linux_syscall_support.h`
@@ -202,7 +202,7 @@ To intercept system calls, \varan uses selective binary
 rewriting~\cite{bird}. Unlike traditional dynamic binary rewriting
 implemented by tools like DynamoRIO~\cite{dynamorio02} or
 Pin~\cite{pin05}, where the entire process image is being rewritten,
-often introducing significant performance overhead, \varan only
+often introducing a significant performance overhead, \varan only
 replaces the instructions for performing system calls (\ie
 \lstinline[language={[x64]Assembler}]`int $0x80` on x86 and
 \lstinline[language={[x64]Assembler}]`syscall` on x86-64).
@@ -225,26 +225,24 @@ instruction is only one byte long, a jump instruction requires five
 bytes.  Therefore, in order to rewrite the system call with a jump, we
 also need to relocate some of the instructions surrounding the system
 call---\ie perform binary detouring via trampolines~\cite{detours}.
-On rare occasions when this is not possible (\eg because the
+On the rare occasions when this is not possible (\eg because the
 surrounding instructions are potential branch targets), we replace the
 system call with an interrupt (\lstinline`INT 0x0`).  This interrupt
 is handled by \varan through a signal handler installed during
 initialisation, which redirects the control flow to the system call
 entry point as for other system calls.
 
-The system call entry point first saves all registers, and then checks
-an internal system call table to see whether there is a 
+The system call entry point first saves all registers, and then
+consults an internal system call table to check whether there is a
 handler installed for that particular system call; if so, it calls
-that handler, % (using a user space calling convention), 
-otherwise it
-invokes the default handler.  After processing the system call, the
-entry point handler restores all registers and returns to the original
-caller (using \lstinline`sigreturn` in the case of system calls intercepted
-via an interrupt). The system call entry point also implements support
-for restarting system calls %, normally handled by the kernel 
-(\ie signaled by the \lstinline`-ERESTARTSYS` error code). This is used in
-certain scenarios supported by \varan such as transparent failover
-(\S\ref{sec:failover}).
+that handler, otherwise it invokes the default handler.  After
+processing the system call, the entry point handler restores all
+registers and returns to the original caller (using
+\lstinline`sigreturn` in the case of system calls intercepted via an
+interrupt). The system call entry point also implements support for
+restarting system calls (\ie signaled by the \lstinline`-ERESTARTSYS`
+error code). This is used in certain scenarios supported by \varan
+such as transparent failover (\S\ref{sec:failover}).
 
 The internal system call table can be easily changed to accommodate
 various application scenarios.  In particular, the only difference
@@ -267,7 +265,7 @@ and their implementations using templates.
 %% generator. We have also used the generator throughout the \varan
 %% development for testing and debugging purposes.
 
-Finally, note that in order to prevent attackers to easily inject
+Finally, note that in order to prevent potential attackers to easily inject
 system calls into the program, the binary rewriter follows a
 W$\mathbin{\oplus}$X discipline throughout execution, making sure that
 segments are not marked as both writable and executable at the same
@@ -277,12 +275,12 @@ time.
 \subsubsection{Virtual System Calls}
 \label{sec:vsyscall}
 
-The \emph{vsyscall} page and the \emph{vDSO} segment are two
-mechanisms used to accelerate certain system calls in Linux. Each
-process in Linux has two special segments mapped into its address
-space, containing virtual system call implementations. These system
-calls do not incur the context switch overhead between kernel and
-user space associated with ``standard'' system calls.
+Certain Linux system calls are accelerated through the \emph{vsyscall}
+page and the \emph{vDSO} segment. These are mapped into the address
+space of each Linux process, and contain system call
+implementations. These \textit{virtual system calls} do not incur the
+context switch overhead between kernel and user space associated with
+standard system calls.
 
 The \emph{vsyscall} page was introduced first, but is being deprecated
 in favor of the \emph{vDSO} segment.
@@ -298,7 +296,7 @@ virtual system calls (currently \lstinline`clock_gettime`, \lstinline`getcpu`,
 \lstinline`gettimeofday` and \lstinline`time`).
 
 Virtual system calls represents one of the major limitations of
-\lstinline`ptrace` based monitors. Since these system calls are entirely
+\lstinline`ptrace`-based monitors. Since these system calls are entirely
 implemented in user space, they cannot be intercepted via \ptrace.
 This is an important limitation: as these system calls provide access
 to timing information, they are often used as a source of
@@ -311,28 +309,27 @@ To our knowledge, \varan is the first NVX system which handles virtual
 system calls, using binary rewriting. 
 %In \varan, binary rewriting is also used to intercept virtual system
 %calls.
-Handling calls made via the \emph{vsyscall} page is easier, as
+Handling calls made via the \textit{vsyscall} page is easier because
 the function symbols are always mapped to the same address.  
 %% We can therefore easily identify calls to these functions while
 %% scanning the text segment and rewrite them to calls into our system
 %% call table.
-To handle \emph{vDSO} calls, we first need to
-determine the base address of the \emph{vDSO} segment; this address
-is passed by the kernel in the ELF auxiliary vector via the
-\lstinline`AT_SYSINFO_EHDR`
+To handle \textit{vDSO} calls, we first need to determine the base
+address of the \textit{vDSO} segment; this address is passed by the
+kernel in the ELF auxiliary vector via the \lstinline`AT_SYSINFO_EHDR`
 flag.\footnote{\url{https://www.gnu.org/software/libc/manual/html_node/Auxiliary-Vector.html}}
-Second, we need to examine the ELF headers of the \emph{vDSO}
-segment to find all symbols.  Since these symbols are allocated at
-arbitrary addresses, statically identifying calls to these symbols as
-in the \emph{vsyscall} case would be complicated. Instead, we
-replace the entry point of each function with a jump to dynamically
-generated code which sets up the stack and then issues a call to the
-\varan system call entry point as in case of regular system
-calls. Furthermore, we provide a trampoline, which allows the
-invocation of the original function, by moving the first few
-instructions of each function to a new place, followed by a jump to
-the original code. This allows \varan to take advantage of the virtual
-system call mechanism to further improve performance.
+Second, we need to examine the ELF headers of the \textit{vDSO}
+segment to find all symbols.  Identifying calls to these symbols is
+more complicated than in the \textit{vsyscall} case because these
+symbols are allocated at arbitrary addresses.  Instead, we replace the
+entry point of each function with a jump to dynamically generated code
+which sets up the stack and then issues a call to the \varan system
+call entry point as in the case of regular system calls. Furthermore, we
+provide a trampoline, which allows the invocation of the original
+function, by moving the first few instructions of each function to a
+new place, followed by a jump to the original code. This allows \varan
+to take advantage of the virtual system call mechanism to further
+improve performance.
 
 %% Finally, we note that this function interception mechanism is not
 %% specific to system calls and can be used to intercept arbitrary
@@ -356,21 +353,21 @@ system call mechanism to further improve performance.
 %% \item When the leader crashes, followers elect a new leader
 %% \end{structure}
 
-As briefly discussed in Section~\ref{sec:overview} and graphically
-illustrated in Figure~\ref{fig:architecture}, the leader records all
+As we discussed briefly in Section~\ref{sec:overview} and illustrated
+graphically in Figure~\ref{fig:architecture}, the leader records all
 external events into a shared ring buffer, while the followers replay
-them to mimic the leader's behavior. The leader
-is the only version interacting with the environment, \ie executing
-the system calls, with exception of system calls which are local to
-the process (\eg \lstinline`mmap`). % or \lstinline`sigaction`).
+them to mimic the leader's behavior. The leader is the only version
+interacting with the environment, \ie executing the system calls, with
+the exception of system calls which are local to the process (\eg
+\lstinline`mmap`). % or \lstinline`sigaction`).
 
 As in any NVX system operating at the level of system calls, \varan
 has to be aware of the system call semantics, in order to transfer the
 arguments and results of each system call.  \varan currently
 implements \syscallsHandlers system calls, which were all the system
-calls encountered across our benchmarks.  (We have configured \varan
-to emit an error message when an unhandled system call is encountered,
-and have implemented system call handlers on demand).
+calls encountered across our benchmarks.\footnote{We configured \varan
+  to emit an error message when an unhandled system call is
+  encountered, and have implemented system call handlers on demand.}
 
 %% All application instances running in parallel under \varan are assigned
 %% ranks, similarly to OpenMPI~\cite{OpenMPI}. The instance\footnote{We
@@ -433,8 +430,8 @@ pump quickly became a bottleneck.
 % interception---over $20\times$ for a worst-case microbenchmark,
 % compared to $4\times$ in the final implementation.
 
-As a result, we have instead opted for a design based on Disruptor
-pattern~\cite{disruptor} which uses a shared ring buffer allowing concurrent
+As a result, we have instead opted for a design based on the Disruptor
+pattern~\cite{disruptor}, which uses a shared ring buffer allowing concurrent
 access by multiple producers and consumers, eliminating the need to dispatch
 events among queues, and thus improving both performance and memory
 consumption.  Our implementation uses C11 atomics, 
@@ -443,18 +440,18 @@ in combination with cache aligning to
 achieve maximum performance with minimal use of locking (locks are used only
 during memory allocation and deallocation).
 
-The ring buffer is used to stream events between processes.  By
-default, \varan uses a ring of size 256 events, but this default
-size can be easily changed at startup if desired.  Each event has a
-fixed size of 64 bytes; the size has been deliberately chosen to fit
-into a single cache line on modern x86 CPUs.  This is sufficient for
-sending signals and system calls for which all arguments are passed by
-value (on x86-64, a system call can have up to six arguments of eight
-bytes, to fit into general purpose registers).  However, for system
-call arguments passed by reference, the payload might have variable
-size and can be potentially larger than the event itself.  In this
-case, we use events only to transfer shared pointers, which identify
-memory shared across versions.
+%The ring buffer is used to stream events between processes.  
+The size of the ring \varan uses is configurable and has a default
+value of 256 events.  Each event has a fixed size of 64 bytes; the
+size has been deliberately chosen to fit into a single cache line on
+modern x86 CPUs.  This is sufficient for sending signals and system
+calls for which all arguments are passed by value (on x86-64, a system
+call can have up to six arguments of eight bytes, to fit into general
+purpose registers).  However, for system call arguments passed by
+reference, the payload might have variable size and can be potentially
+larger than the event itself.  In this case, we use events only to
+transfer shared pointers, which identify memory shared across
+versions.
 
 The use of a shared memory buffer may result in a waste of system
 resources when the leader process performs a system call which blocks
@@ -469,7 +466,7 @@ atomics and futexes~\cite{futex}.
 \subsubsection{Transferring file descriptors and leader replacement}
 \label{sec:leader-repl}
 
-Apart from the ring buffer, each version has a \emph{data channel},
+Apart from the ring buffer, each version has a \textit{data channel},
 implemented using UNIX domain sockets.
 % Together, the ring buffer and data channel form an \emph{event
 % stream} which is a primary communication mechanism for exchanging
@@ -518,7 +515,7 @@ system call ordering across all tuples using Lamport's
 \emph{happens-before} relation~\cite{lamport78}. Currently, this is
 only implemented for multi-threaded applications, which make intensive
 use of synchronisation primitives, but the same solution could be
-easily used for multi-process applications too.
+employed for multi-process applications too.
 
 \begin{figure}[t]
   \begin{center}
@@ -541,8 +538,9 @@ situation where $e_1\to e_2$, but $e'_1\not\to e'_2$, which could lead
 to a divergence. A similar approach has been proposed in the past for
 record-replay in shared-memory systems~\cite{levrouw94}.
 
-To implement the internal clocks shared by the threads of a variant,
-we used an atomic counter allocated in the shared memory space and
+To implement the internal clocks shared by the threads of a variant
+($T$ and $T'$ in Figure~\ref{fig:multithreaded}),
+we use an atomic counter allocated in the shared memory space and
 updated using C11 atomics for efficiency.  When the leader thread
 writes a new event into the ring buffer, it increments its variant's
 clock value and attaches it to the event.  When a follower thread
@@ -556,24 +554,25 @@ wait instead (\eg a futex).
 
 % Since Disruptor (\S\ref{sec:ring})
 % allows concurrent writes by multiple producers without the need for
-% expensive synchronization, the use of a single shared buffer does not
+% expensive synchronisation, the use of a single shared buffer does not
 % create a performance bottleneck. %hinder the application performance.
 
-Our mechanism resembles existing deterministic multi-threading (DMT)
+Our solution resembles existing deterministic multi-threading (DMT)
 mechanisms~\cite{coredet:asplos10,dthreads:sosp11}. The guarantees
 provided by \varan are weaker than those typically provided by these
-systems as we do not enforce ordering across atomics-based synchronization
-primitives. We have not detected any system call divergences caused by related
-data races in our benchmarks, which include multi-threaded applications (\eg
-\redis), similar to the experience reported for prior NVX systems. However,
-shall this become a problem, we could address it by employing a stronger form
-of determinism similar to existing DMT systems.
+systems as we do not enforce ordering across atomics-based
+synchronisation primitives. We have not detected any system call
+divergences caused by related data races in our benchmarks, which
+include multi-threaded applications (\eg \redis), similar to the
+experience reported for prior NVX systems. However, shall this become
+a problem, we could address it by employing a stronger form of
+determinism similar to existing DMT systems.
 
 %
 % However, this weaker form of determinism
 % does not typically pose a problem for real-world applications as long
 % as they are properly synchronised.  Note that data races resulting
-% from missing or incorrect synchronization can cause followers to issue
+% from missing or incorrect synchronisation can cause followers to issue
 % a different sequence of system calls from the leader.  If this
 % happens, we could either try to apply one of the rewriting rules
 % (\S\ref{sec:patternmatching}), or terminate the follower.
@@ -592,7 +591,7 @@ of determinism similar to existing DMT systems.
 %% the coordinator where it is associated with the new process.
 
 %Note that data races resulting from missing or incorrect
-%synchronization can cause followers to issue a different sequence of
+%synchronisation can cause followers to issue a different sequence of
 %system calls from the leader.  If this happens, that follower would
 %have to be terminated.  We first note that \varan has not detected any
 %system call divergences caused by data races in our benchmarks (which
@@ -656,7 +655,7 @@ allocation from that bucket.
 %\subsubsection{System call filtering and rewriting}
 \label{sec:patternmatching}
 
-\varan uses Berkeley Packet Filters (BPF) to implement the system call
+\varan uses Berkeley Packet Filters (BPF)~\cite{bpf} to implement the system call
 rewrite rules introduced in Section~\ref{sec:rw}.  BPF is a machine
 language for writing rules and an interpreter shipped with many UNIX
 implementations, including Linux and BSD.  BPF filters have been
@@ -668,11 +667,10 @@ We have integrated a BPF interpreter in \varan to allow for system
 call rewrite rules. Our implementation is based on the Linux kernel
 code which was ported to user space and extended for NVX
 execution. \varan provides BPF extensions on top of the instruction
-set used by the seccomp
-BPF.\footnote{\url{https://www.kernel.org/doc/Documentation/networking/filter.txt}}
+set used by seccomp-bpf.\footnote{\url{https://www.kernel.org/doc/Documentation/networking/filter.txt}}
 The \lstinline[language={[bpf]Assembler}]`event` extension allows
 access to the event stream, which can be used to compare the system
-calls executed by the leader, as we will show in
+calls executed across versions, as we will show in
 Section~\ref{sec:mv-execution}.
 
 %We have also made the offset, used to access the \lstinline`struct seccomp_data` content writable.
@@ -689,9 +687,9 @@ Section~\ref{sec:mv-execution}.
 
 The use of BPF has a number of advantages.  First, it does not require
 the user to modify and recompile the monitor on every rule
-change. This is particularly important as rewrite rules can 
-be application specific. Second, the BPF machine language was
-designed to be simple enough to prevent a large class of errors---\eg
+change. This is particularly important as rewrite rules can be
+application specific. Second, the BPF machine language was designed to
+be simple enough to prevent certain classes of errors---in particular,
 all filters are statically verified when loaded to ensure termination.
 % (\ie every filter has to end with a \lstinline`ret` instruction).
 

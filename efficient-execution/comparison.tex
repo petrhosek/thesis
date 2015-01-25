@@ -1,17 +1,16 @@
 \subsection{Comparison with prior NVX systems}
 \label{sec:comparison}
 
-While \S\ref{sec:microbenchmarks} and \S\ref{sec:c10k} illustrate the
-worst-case synthetic and real-world scenarios for a system call
-monitor, in order to compare \varan directly with prior NVX systems,
-we have also run it on the same set of benchmarks used to evaluate
-prior systems.  In particular, we chose to compare against three %four
-state-of-the-art NVX systems: %\strata~\cite{cox2006},
-\mx~\cite{mx}, \orchestra~\cite{orchestra09}, and
-\tachyon~\cite{tachyon12}.  These systems and their benchmarks are
-briefly described  in the first three columns of Table~\ref{tbl:systems}.
-To our knowledge, we are the first to perform an extensive performance
-comparison of existing NVX systems.
+While Sections~\ref{sec:microbenchmarks} and \ref{sec:c10k} illustrate the
+worst-case synthetic and real-world scenarios for a system call monitor, in
+order to compare \varan directly with prior NVX systems, we have also run it on
+the same set of benchmarks used to evaluate prior systems.  In particular, we
+chose to compare against two state-of-the-art NVX systems:
+%\strata~\cite{cox2006}, \orchestra~\cite{orchestra09}, and
+\tachyon~\cite{tachyon12}.  These systems and their benchmarks are briefly
+described  in the first three columns of Table~\ref{tbl:systems}.  To our
+knowledge, we are the first to perform an extensive performance comparison of
+existing NVX systems.
 
 \begin{table*}[t]
 \begin{center}
@@ -42,61 +41,30 @@ comparison of existing NVX systems.
  \centering
  \includegraphics[width=\textwidth]{efficient-execution/graphs/comparison}
  \caption{Performance overhead for the \httpd, \thttpd, and \lighttpd
-   servers for different number of followers to allow for comparison
+   servers for different numbers of followers to allow for comparison
    with existing systems.}
  \label{fig:comparison}
 \end{figure}
 
-Since prior systems only handle two versions, we also run \varan with
-two versions only.  However, we remind the reader that one of the
-strengths of \varan's decentralised architecture is that it can handle
-multiple versions with minimum additional overhead.
 
-\begin{figure}[!t]
-  \centering
-  \includegraphics[width=\textwidth]{efficient-execution/graphs/spec2000}
-  \caption{\speczerozero performance overhead for different numbers of followers.}
-  \label{fig:spec2000}
-\end{figure}
+The last two columns of Table~\ref{tbl:systems} show the cumulative
+results.  Since prior systems only handle two versions, the comparison
+is done against \varan configured in the same way.  However, we remind
+the reader that one of the strengths of \varan's decentralised
+architecture is that it can often handle multiple versions with minimum
+additional overhead, and below we also show how \varan performs on
+these benchmarks when more than two versions are used.
 
-\paragraph{\speczerozero} %\footnote{\url{http://www.spec.org/cpu2000/}}
-was used to evaluate \orchestra. We used the latest available version
-1.3.1.  The cumulative results are reported in
-Table~\ref{tbl:systems}, as for all other benchmarks.  \orchestra
-reported \orchestraSpec overhead when running two instances of
-\speczerozero in parallel, while \varan introduced only
-\speczerozeroOneFollower overhead. The results for individual
-applications contained in the \speczerozero suite and for different
-numbers of followers can be seen in Figure~\ref{fig:spec2000}. The
-increased performance overhead in case of some benchmarks is due to
-memory pressure and caching effects~\cite{jaleel07}.
-
-\begin{figure}[!t]
-  \centering
-  \includegraphics[width=\textwidth]{efficient-execution/graphs/spec2006}
-  \caption{\speczerosix performance overhead for different numbers of followers.}
-  \label{fig:spec2006}
-\end{figure}
-
-\paragraph{\speczerosix} %\footnote{\url{http://www.spec.org/cpu2006/}}
-has been previously used by \mx. We used the latest version 1.2.  The
-overhead reported by \mx was \mxSpec, while \varan introduced only
-\speczerosixOneFollower overhead.
-%in contrast, \varan introduced only \speczerosixOneFollower.
-Individual results can be seen in Figure~\ref{fig:spec2006}.  As in
-the case of \speczerozero, the increased performance overhead in case
-of some benchmarks (\ie \textsf{429.mcf} and \textsf{462.libquantum})
-is due to memory pressure and caching effects. %~\cite{jaleel07}. \cite{cook:isca13}.
-
-\paragraph{\httpd} %\footnote{\url{https://httpd.apache.org/}}
-was used by \orchestra.  We used version 1.3.29, same as in the
+\paragraph{\httpd} \footnote{\url{https://httpd.apache.org/}}
+was used by \orchestra.  We used version 1.3.29, the same as in the
 original work~\cite{orchestra09}.  The overhead reported for
 \orchestra is \orchestraHttpd using the \emph{ApacheBench}
-benchmark. \varan introduces \httpdAbOneFollower overhead using the same
-benchmark, which is a significant improvement.
-Figure~\ref{fig:comparison} shows the overhead introduced by \varan for
-\httpd (and the other servers used to evaluate prior work) with
-different numbers of followers. 
+benchmark. \varan introduces \httpdAbOneFollower overhead using the
+same benchmark, which is a significant improvement.
+Figure~\ref{fig:comparison} shows the overhead introduced by \varan
+for \httpd (and the other servers used to evaluate prior work) with
+different numbers of followers.  As it can be seen, \varan scales very
+well with increasing numbers of followers for these benchmarks.
 
 %was used by both \strata and \orchestra.  We used version 1.3.29
 %mentioned by \orchestra (\strata did not report the version used).
@@ -112,25 +80,57 @@ has been used to evaluate both \mx and \tachyon.  We used version
 \mx used the \emph{http\_load} benchmark and reported \mxLighttpd overhead
 while \tachyon used the \emph{ApacheBench} benchmark and reported a
 \tachyonLighttpd overhead.  When benchmarked using \emph{http\_load},
-\varan introduced a \lighttpdHttploadOneFollower overhead, while with
+\varan introduced only \lighttpdHttploadOneFollower overhead, while with
 \emph{ApacheBench} it introduced no noticeable
 overhead. %\lighttpdAbOneFollower.  
 In both
-cases, this marks a significant improvement over previous work. To allow for
-better comparison, we have also measured the performance using the
-\lstinline`wrk` benchmark with the same settings as in case of \lighttpdtwo.
+cases, this marks a significant improvement over previous work.
 
-\paragraph{\thttpd} %\footnote{\url{http://www.acme.com/software/thttpd/}}
-was shown to introduce \tachyonThttpd overhead when running on top of \tachyon using
-the \emph{ApacheBench} benchmark. When run of top of \varan using the same settings
-as in \cite{tachyon12}, we have not measured any noticeable overhead.
+\paragraph{\thttpd}\footnote{\url{http://www.acme.com/software/thttpd/}}
+was shown to introduce \tachyonThttpd overhead when run on top of
+\tachyon using the \emph{ApacheBench} benchmark. When run on top of
+\varan using the same settings as in \cite{tachyon12}, we have not
+measured any noticeable overhead.
 
-\paragraph{\redis} 1.3.8 %\footnote{\url{http://redis.io/}}
+\paragraph{\redis} 1.3.8 \footnote{\url{http://redis.io/}}
 was used in the evaluation of \mx.  The performance
 overhead reported by \mx was \mxRedis using the \lstinline`redis-benchmark`
-utility. When ran with \varan using the same benchmark and the same workload,
+utility. When run with \varan using the same benchmark and the same workload,
 the overhead we measured was \redisOneFollower, which is again a significant
 improvement over previous work.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{efficient-execution/graphs/spec2000}
+  \caption{\speczerozero performance overhead for different numbers of followers.}
+  \label{fig:spec2000}
+\end{figure*}
+
+\paragraph{\speczerozero}\footnote{\url{http://www.spec.org/cpu2000/}} 
+was used to evaluate \orchestra.  We used the latest available version
+1.3.1.  \orchestra reported a \orchestraSpec overhead, while \varan
+introduced only a \speczerozeroOneFollower overhead. The results for
+the individual applications contained in the \speczerozero suite and
+for different numbers of followers can be seen in
+Figure~\ref{fig:spec2000}. The reason these applications scale poorly
+with the number of followers is likely due to memory pressure and
+caching effects~\cite{jaleel07}, and to the fact that our machine has
+only four physical cores (with two logical cores each).  We plan to
+investigate these results in more detail in future work.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{efficient-execution/graphs/spec2006}
+  \caption{\speczerosix performance overhead for different numbers of followers.}
+  \label{fig:spec2006}
+\end{figure*}
+
+\paragraph{\speczerosix}\footnote{\url{http://www.spec.org/cpu2006/}}
+was previously used to evaluate \mx. We used the latest version 1.2.  The
+overhead reported by \mx was \mxSpec, while \varan introduced only
+a \speczerosixOneFollower overhead.
+Individual results can be seen in Figure~\ref{fig:spec2006}.  
+
 
 %\begin{figure}[!t]
   %\centering

@@ -10,48 +10,42 @@ evaluation reported in Section~\ref{sec:evaluation} considers the
 overhead in terms of throughput or clock time.  However, an NVX
 framework introduces a CPU utilisation overhead linear in the number
 of versions.  While this might be a serious concern in some scenarios,
-idle cores are not ``free'' either~\cite{barroso2007} and in many
-cases they could be profitably used to increase software reliability
-and security~\cite{cox2006,multiplicity,orchestra09,diehard06}.
-
-%% the overall CPU utilization, while smaller than the pure
-%% sum of each version, since followers do not perform any I/O system
-%% calls, is still going to be higher than the reported performance
-%% overhead.
+leaving cores idle has a cost as well~\cite{barroso2007} and in many
+cases idle cores can be profitably used to increase software reliability
+and security~\cite{cox2006,multiplicity,orchestra09,diehard06,mvupdates12}.
 
 Similarly, the memory overhead imposed by \varan is linear in the
 number of versions, as in prior NVX systems.  This can lead to
-degradations in performance for memory-hungry applications, as
-illustrated in Section~\ref{sec:comparison}.
+degradations in performance due to memory pressure and caching
+effects, as we have observed in Section~\ref{sec:comparison}.
 
 
-\paragraph{Memory-based communication.} As prior NVX
-systems, %~\cite{orchestra09,tachyon12,mx}, 
-\varan does not support memory-based communication.  More exactly,
-\varan only allows files to be mapped into memory as read-only---if
-the file would be mapped as read-write, any writes by the leader would
-likely lead to divergences in followers, as they would read the value
-written by the leader rather than the original value.  This limitation
-comes from the fact that memory-based communication cannot be
-intercepted by interposing upon the system call interface, and as such
-is invisible to NVX systems operating at the system call level.
+\paragraph{Memory-based communication.} As prior NVX systems, \varan
+does not support memory-based communication.  More exactly, \varan
+only allows files to be mapped into memory as read-only---if the file
+would be mapped as read-write, any writes by the leader would likely
+lead to divergences in followers, as they would read the value written
+by the leader rather than the original value.  This limitation comes
+from the fact that memory-based communication cannot be intercepted by
+interposing upon the system call interface, and as such is invisible
+to NVX systems operating at the system call level.
 
 
 \paragraph{Synchronisation.} While \varan supports multi-threaded and
 multi-process applications (\S\ref{sec:threading}), there is a
-potential issue with synchronization primitives implemented entirely
+potential issue with synchronisation primitives implemented entirely
 in user space, as these primitives will be invisible to \varan. While
-it is possible to use entirely user space synchronization primitives,
+it is possible to use entirely user-space synchronisation primitives,
 in our experience, they are not that frequent and standard
-synchronization primitives combine atomics with system calls (\ie
+synchronisation primitives combine atomics with system calls (\ie
 futex). We have not observed any related problems in our concurrent
-benchmarks (\S\ref{sec:c10k},\S\ref{sec:comparison}).
+benchmarks (\S\ref{sec:c10k}, \S\ref{sec:comparison}).
 
 \paragraph{Security.} Although our focus with \varan has been on
-improving software reliability (\S\ref{sec:applications}), \varan
-could be also used to implement existing NVX security
-defences~\cite{cox2006,orchestra09}.  However, there are two
-additional problems that \varan may introduce, as discussed below.  
+improving software reliability, \varan could be also used to implement
+existing NVX security defences~\cite{cox2006,orchestra09}.  However,
+there are two additional problems that \varan introduces, as discussed
+below.
 
 First, the use of buffering, while essential for improving
 performance, leads to delayed detection of divergences, providing
@@ -62,7 +56,7 @@ could be set to one to disable buffering. Even without buffering,
 \lstinline`ptrace`-based solutions.
 
 Second, since \varan resides in the same address space as the
-application, a return-based programming (ROP) attack can bypass
+application, a return-oriented programming (ROP) attack can bypass
 \varan's tracing mechanism and thus escape detection.  Furthermore,
 \varan's code could be a primary target of such an attack. However,
 this is partially mitigated by the fact that \varan's code is loaded
