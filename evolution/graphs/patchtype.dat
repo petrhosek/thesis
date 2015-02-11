@@ -1,7 +1,7 @@
 Beanstalkd 155 57 38 156
 Binutils 180 20 50 124
 Git 77 100 73 204
-Lighttpd 215 22 13 133
+"Lighttpd 1.4" 215 22 13 133
 "Lighttpd 2.0" 182 16 52 87
 Memcached 130 68 52 123
 Redis 218 1 31 61

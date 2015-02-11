@@ -1,4 +1,4 @@
-set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,12.0cm
+set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,15.0cm
 set output "eloc.pdf"
 
 set multiplot layout 3,3
@@ -21,10 +21,10 @@ plot 'eloc-binutils.dat' using 2 w points ls 1 notitle
 set title "Git" offset 0,-0.6
 plot 'eloc-git.dat' using 2 w points ls 1 notitle
 
-set title "lighttpd" offset 0,-0.6
+set title "Lighttpd 1.4" offset 0,-0.6
 plot 'eloc-lighttpd1.4.dat' using 2 w points ls 1 notitle
 
-set title "lighttpd 2.0" offset 0,-0.6
+set title "Lighttpd 2.0" offset 0,-0.6
 plot 'eloc-lighttpd2.dat' using 2 w points ls 1 notitle
 
 set title "Memcached" offset 0,-0.6

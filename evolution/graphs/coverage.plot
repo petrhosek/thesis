@@ -1,4 +1,4 @@
-set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,12.0cm
+set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,15.0cm
 set output "coverage.pdf"
 
 set multiplot layout 3,3
@@ -32,13 +32,13 @@ plot 'coverage-git.dat' using 2 notitle w points ls 1, \
                      -1 t "Line cov" w points ls 3, \
                      -1 t "Branch cov" w points ls 4
 
-set title "lighttpd" offset 0,-0.6
+set title "Lighttpd 1.4" offset 0,-0.6
 plot 'coverage-lighttpd1.4.dat' using 2 notitle w points ls 1, \
                              '' using 3 notitle w points ls 2, \
                              -1 t "Line cov" w points ls 3, \
                              -1 t "Branch cov" w points ls 4
 
-set title "lighttpd 2.0" offset 0,-0.6
+set title "Lighttpd 2.0" offset 0,-0.6
 plot 'coverage-lighttpd2.dat' using 2 notitle w points ls 1, \
                            '' using 3 notitle w points ls 2, \
                            -1 t "Line cov" w points ls 3, \

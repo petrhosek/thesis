@@ -157,33 +157,133 @@ value for the set. Through this process, for each pair of revisions considered,
 we obtain a vector of edit distances where individual elements are edit
 distances of individual processes.
 
-\subsection{Trace Differences}
+\subsection{Trace differences}
 
 \begin{figure}[t]
   \begin{center}
-    \includegraphics[width=\columnwidth]{evolution/graphs/traces}
-    \caption{Correlation of differences in post-processed system call
-      traces with differences in source code. The named versions
-      are the only ones introducing external behaviour changes.}
-    \label{fig:correlation}
+    \includegraphics[width=\columnwidth]{evolution/graphs/trace}
+    \caption{Co-evolution of executable code and external behaviour. Each
+    increment represents a change.}
+    \label{fig:coexternal}
   \end{center}
 \end{figure}
 
-Our results are shown in Figure~\ref{fig:correlation}, which correlates the
+Our results are shown in Figure~\ref{fig:coexternal}, which correlates the
+differences in post-processed system call traces with the source code changes.
+Out of 274 \lighttpd revisions considered, 199 introduced no changes in
+external behaviour, which accounts for 72.6\% of revisions considered. In case
+of \lighttpdtwo, this number is even higher, with 180 out 209 revisions
+introducing no changes accounting for 86.1\% of revisions. Finally, in case of
+%\vim, there was \ldots, out of \ldots revisions, which introduced no changes
+%accounting for \ldots\%.
+
+These results show that in changes in externally observable behaviour are
+sporadic. In particular, the revisions which introduced bugs described in
+Section~\ref{multi-version:scenarios} are among revisions which did not
+introduce any changes, yet these revisions are responsible for critical crash
+bugs.
+
+\subsection{Manual analysis}
+
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\columnwidth]{evolution/graphs/analysis}
+    \caption{Correlation of differences in post-processed system call traces
+      with differences in source code. The named versions are the only ones
+      introducing external behaviour changes.}
+    \label{fig:coanalysis}
+  \end{center}
+\end{figure}
+
+To get more data points, we also did a manual analysis on the subset of revisions
+for two applications---\lighttpd and \vim.
+
+In case of \lighttpd, we compared 164 successive revisions, namely revisions in
+the range 2379--2635 of branch \textstt{lighttpd-1.4.x}, which were developed
+and released over a span of approximately ten months, from January to October
+2009. In case of \vim, we compared 330 successive versions; in particular
+versions 7.1--7.1.330, which were developed and released in slightly-over one
+year time-frame, from May 2007 to June 2008.
+
+%To understand the amount of code changes in these versions, we 
+%computed the number of lines of code (LOC) that have changed from
+%one version to the next.  
+%% Figure~\ref{fig:differences} summarises these differences.  This graph
+%% shows that patches in \lighttpd are relatively small, most of them
+%% affecting less than 30 LOC.
+
+%During this period, code patches in \lighttpd varied between
+%\lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
+%\lighttpdMedPatch~LOC.
+
+For the manual analysis, we traced the system calls made by these revisions
+using the
+\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}} tool,
+while running subset of the tests from the \lighttpd regression suite targeting
+the core functionality (a total of seven tests, but each test contains a large
+number of test cases issuing HTTP requests).
+
+%% This suite consists of 19 tests files, each of them consisting of
+%% number of individual tests. 
+%% For the purpose of our experiment, we have selected a subset of 7 core
+%% test files excluding those targeting standalone modules.
+
+Same as in the case of the automated analysis, the recorded system call traces
+were normalised and post-processed. We split the traces on a per-process basis,
+and normalised all differences caused by timing, \eg we collapsed all sequences
+of \lstinline`accept`--\lstinline`poll` and
+\lstinline`select`--\lstinline`wait` system calls, which represent repeated
+polling operations. We have also eliminated any \lstinline`brk` system calls
+from traces, as these calls are usually used for managing heap memory and their
+occurence is often dependent on process scheduling.  Finally, for the manual
+analysis, we also eliminated individual system call arguments and return
+values. This post-processing step might reduce the precision of our comparison,
+but we performed to make the manual analysis actually feasible.
+
+Our results are shown in Figure~\ref{fig:coanalysis}, which correlates the
 differences in post-processed system call traces with the source code changes.
 The graph shows that changes in externally observable behaviour occur only
-sporadically.  In fact, 156 out of 163 revisions of \lighttpd and 322 out 329
-revisions of \vim (which account for more than 95\% of all the revisions
-considered in both cases) introduced \textit{no changes} in external behaviour.
-In particular, the revisions which introduced bugs described in
-\sref{multi-version:scenarios} are among revisions which did not introduce any
-changes, yet these revisions are responsible for critical crash bugs.
+sporadically. In fact, 156 out of 163 revisions of \lighttpd and 322
+out 329 revisions of \vim (which account for more than 95\% of all the
+revisions considered in both cases) introduced no changes in external
+behaviour.
 
-To better understand the results, we have also looked at the number of
-differences per version. Results in Table~\ref{tab:perversion} show that
-differences in system calls are not evenly spaced but they are often located
-in particular versions, such as the aforementioned change in version 7.1.296
-responsible for 3489 differences across all tests.
+%% external behaviour observable via system
+%% calls tracing.  In the remaining cases, these changes were \ldots, such
+%% as the one introduced in revision 2612 as a result of
+%% replacing \textstt{poll} system calls with their
+%% \textstt{epoll} counter-parts.
+
+%% as a result of newly implemented
+%% support for SELinux resulting in 25 changes over 59 tests, were caused mainly by
+%% different ordering of system calls or by splitting individual call into multiple
+%% different calls.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%In fact, 156 versions (which account for around 95\% of all the
+%versions considered) introduced no changes in external behaviour.  In
+%particular, the revision which introduced the bug described in
+%\sref{sec:example} is one of the versions that introduces no changes, yet this
+%revision is responsible for a critical crash bug.
+
+% These results clearly show that our assumption is correct and in majority of
+% cases (99.59\%), there were no differences in application behavior, observable
+% via system calls tracing.  Remaining changes, such as the one introduced in
+% version 7.1.296 as a result of newly implemented support for SELinux resulting
+% in 25 changes over 59 tests, were caused mainly by different ordering of system
+% calls or by splitting individual call into multiple different calls.
+
+% The differences in system call traces across all 164 revisions are
+% summarised in Table~\ref{tab:differences}. These results clearly show
+% that our assumption is correct and in the majority of cases (96.76\%),
+% the sequences of system calls 
+
+% To better understand the results, we have also looked at the number of
+% differences per revision. Results in Table~\ref{tab:perrevision} show that
+% differences in system calls are not evenly spaced but they are often located
+% in particular versions, such as the aforementioned change in version 7.1.296
+% responsible for 3489 differences across all tests.
 
 % \begin{table}
 %   \centering
@@ -219,54 +319,50 @@ responsible for 3489 differences across all tests.
 %   \end{tabular}
 % \end{table}
 
-\begin{table}
-  \begin{subtable}[t]{0.5\textwidth}
-    \centering
-    \begin{tabular}{r @{\qquad}c c}
-      \toprule
-      & \multicolumn{2}{c}{Frequency} \\
-      \cmidrule(r){2-3}
-      \#Differences & Versions & Percentage \\
-      \midrule
-      0 & 322 & 97.872\% \\
-      2 & 2 & 0.608\% \\
-      3 & 1 & 0.304\% \\
-      16 & 1 & 0.304\% \\ 
-      69 & 1 & 0.304\% \\
-      182 & 1 & 0.304\% \\
-      3489 & 1 & 0.304\% \\
-      \bottomrule
-    \end{tabular}
-    \caption{330 revisions of \vim.}
-  \end{subtable}
-  ~
-  \begin{subtable}[t]{0.5\textwidth}
-    \centering
-    \begin{tabular}{r @{\qquad}c c}
-      \toprule
-      & \multicolumn{2}{c}{Frequency} \\
-      \cmidrule(r){2-3}
-      \#Differences & Versions & Percentage \\
-      \midrule
-      0 & 156 & 95.706\% \\
-      1 & 1 & 0.613\% \\
-      7 & 1 & 0.613\% \\
-      10 & 1 & 0.613\% \\ 
-      14 & 1 & 0.613\% \\
-      24 & 1 & 0.613\% \\
-      42 & 1 & 0.613\% \\
-      273 & 1 & 0.613\% \\
-      \bottomrule
-    \end{tabular}
-    \caption{164 revisions of \lighttpd.}
-  \end{subtable}
-  \caption{Differences in post-processed system call traces aggregated per revision.}
-  \label{tab:perversion}
-\end{table}
-
-\begin{table}
-  \label{tab:perversion}
-\end{table}
+% \begin{table}
+%   \begin{subtable}[t]{0.5\textwidth}
+%     \centering
+%     \begin{tabular}{r @{\qquad}c c}
+%       \toprule
+%       & \multicolumn{2}{c}{Frequency} \\
+%       \cmidrule(r){2-3}
+%       \#Differences & Versions & Percentage \\
+%       \midrule
+%       0 & 322 & 97.872\% \\
+%       2 & 2 & 0.608\% \\
+%       3 & 1 & 0.304\% \\
+%       16 & 1 & 0.304\% \\ 
+%       69 & 1 & 0.304\% \\
+%       182 & 1 & 0.304\% \\
+%       3489 & 1 & 0.304\% \\
+%       \bottomrule
+%     \end{tabular}
+%     \caption{330 revisions of \vim.}
+%   \end{subtable}
+%   ~
+%   \begin{subtable}[t]{0.5\textwidth}
+%     \centering
+%     \begin{tabular}{r @{\qquad}c c}
+%       \toprule
+%       & \multicolumn{2}{c}{Frequency} \\
+%       \cmidrule(r){2-3}
+%       \#Differences & Versions & Percentage \\
+%       \midrule
+%       0 & 156 & 95.706\% \\
+%       1 & 1 & 0.613\% \\
+%       7 & 1 & 0.613\% \\
+%       10 & 1 & 0.613\% \\ 
+%       14 & 1 & 0.613\% \\
+%       24 & 1 & 0.613\% \\
+%       42 & 1 & 0.613\% \\
+%       273 & 1 & 0.613\% \\
+%       \bottomrule
+%     \end{tabular}
+%     \caption{164 revisions of \lighttpd.}
+%   \end{subtable}
+%   \caption{Differences in post-processed system call traces aggregated per revision.}
+%   \label{tab:perrevision}
+% \end{table}
 
 % Differences in system call traces across all 330 versions are summarized in
 % Table~\ref{tab:differences}. These results clearly show that our assumption is
@@ -304,18 +400,18 @@ responsible for 3489 differences across all tests.
 %   \label{tab:differences}
 % \end{table}
 
-The most important finding is that in version 7.1.127, which introduced the
-bug in path completion functionality described in Section~\ref{sub:vim}, there
-were no observable differences in system call traces when running the complete
-regression suite. Yet this version still introduced critical bug, which
-affected thousands of users. This clearly demonstrates viability and necessity
-of our approach.
+% The most important finding is that in version 7.1.127, which introduced the
+% bug in path completion functionality described in Section~\ref{sub:vim}, there
+% were no observable differences in system call traces when running the complete
+% regression suite. Yet this version still introduced critical bug, which
+% affected thousands of users. This clearly demonstrates viability and necessity
+% of our approach.
 
-We have also looked at differences in source code across all 330 versions of
-Vim text editor. Histogram which can be seen in the
-Figure~\ref{fig:differences} summarizes these differences.  This graph shows
-that in the majority of cases, differences across versions in terms of LOC are
-very small, with patches consisting of 5-10 changed LOC being the most common.
+% We have also looked at differences in source code across all 330 versions of
+% Vim text editor. Histogram which can be seen in the
+% Figure~\ref{fig:differences} summarizes these differences.  This graph shows
+% that in the majority of cases, differences across versions in terms of LOC are
+% very small, with patches consisting of 5-10 changed LOC being the most common.
 
 % \begin{figure}[!ht]
 %   \begin{center}
@@ -325,13 +421,13 @@ very small, with patches consisting of 5-10 changed LOC being the most common.
 %   \end{center}
 % \end{figure}
 
-For comparison, we have also correlated differences in post-processed system
-call traces with differences in source code. From the
-Figure~\ref{fig:correlation} and measurements described herein before, it is
-obvious that while number of changes in code-base grow continuously between
-each version, changes in externally observable behavior (\ie system calls)
-occur only sporadically. Again, this result supports our original assumption
-and further motivates our approach.
+% For comparison, we have also correlated differences in post-processed system
+% call traces with differences in source code. From the
+% Figure~\ref{fig:correlation} and measurements described herein before, it is
+% obvious that while number of changes in code-base grow continuously between
+% each version, changes in externally observable behavior (\ie system calls)
+% occur only sporadically. Again, this result supports our original assumption
+% and further motivates our approach.
 
 % \begin{figure}[!ht]
 %   \begin{center}
@@ -342,20 +438,20 @@ and further motivates our approach.
 %   \end{center}
 % \end{figure}
 
-To verify this assumption, we compared 164 successive revisions of the
-\lighttpd web server, namely revisions in the range 2379--2635 of
-branch \textstt{lighttpd-1.4.x}, which were developed and released
-over a span of approximately ten months, from January to October 2009.
-%19 January 2009 to 11 October 2009).
-To understand the amount of code changes in these versions, we 
-computed the number of lines of code (LOC) that have changed from
-one version to the next.  
-%% Figure~\ref{fig:differences} summarises these differences.  This graph
-%% shows that patches in \lighttpd are relatively small, most of them
-%% affecting less than 30 LOC.
-During this period, code patches in \lighttpd varied between
-\lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
-\lighttpdMedPatch~LOC.
+% To verify this assumption, we compared 164 successive revisions of the
+% \lighttpd web server, namely revisions in the range 2379--2635 of
+% branch \textstt{lighttpd-1.4.x}, which were developed and released
+% over a span of approximately ten months, from January to October 2009.
+% %19 January 2009 to 11 October 2009).
+% To understand the amount of code changes in these versions, we 
+% computed the number of lines of code (LOC) that have changed from
+% one version to the next.  
+% %% Figure~\ref{fig:differences} summarises these differences.  This graph
+% %% shows that patches in \lighttpd are relatively small, most of them
+% %% affecting less than 30 LOC.
+% During this period, code patches in \lighttpd varied between
+% \lighttpdMinPatch and \lighttpdMaxPatch~LOC, with a median value of 
+% \lighttpdMedPatch~LOC.
 
 %% This suite consists of 19 tests files, each of them consisting of
 %% number of individual tests. 

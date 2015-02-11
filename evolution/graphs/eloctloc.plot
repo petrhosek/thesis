@@ -1,4 +1,4 @@
-set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,8.0cm
+set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,15.0cm
 set output "eloctloc.pdf"
 
 set multiplot layout 3,3
@@ -24,11 +24,11 @@ set title "Git" offset 0,-0.6
 plot 'eloctloc-git.dat' using 2 ls 1 t "Code" w lines, \
                      '' using 3 ls 2 t "Test" w lines #axes x1y2
 
-set title "lighttpd" offset 0,-0.6
+set title "Lighttpd 1.4" offset 0,-0.6
 plot 'eloctloc-lighttpd1.4.dat' using 2 ls 1 t "Code" w lines, \
                              '' using 3 ls 2 t "Test" w lines #axes x1y2
 
-set title "lighttpd 2.0" offset 0,-0.6
+set title "Lighttpd 2.0" offset 0,-0.6
 plot 'eloctloc-lighttpd2.dat' using 2 ls 1 t "Code" w lines, \
                            '' using 3 ls 2 t "Test" w lines #axes x1y2
 
