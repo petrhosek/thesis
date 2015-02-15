@@ -16,6 +16,7 @@ set style line 4 lt 1 lc rgb "#777777"
 set style line 5 lt 1 lc rgb "#FFFFFF"
 
 set boxwidth 0.7 relative
+set xtics rotate by -60
 
 plot 'patchcoverage.dat' u 2 t "0%" ls 5, \
                       '' u 3 t "(0%,     25%]" ls 1, \

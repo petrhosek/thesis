@@ -1,0 +1,18 @@
+\section{Summary}
+\label{safe-updates:summary}
+
+Software updates are an important part of the software development and
+maintenance process. Unfortunately, they also present a high failure risk, and
+many users refuse to upgrade their software, relying instead on outdated
+versions, which often leave them exposed to known software bugs and security
+vulnerabilities.
+
+In this chapter, we have presented \mx, a multi-version execution system for
+improving the software update process. Whenever a new program update becomes
+available, instead of upgrading the software to the newest version, we run the
+new version in parallel with the old one, and carefully synchronise their
+execution to create a more secure and reliable multi-version application.
+
+\mx supports off-the-shelf Linux applications and our evaluation has shown that
+it can be applied successfully to several real applications such as \coreutils,
+\lighttpd, and \redis.

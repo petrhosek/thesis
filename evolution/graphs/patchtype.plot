@@ -14,6 +14,7 @@ set style line 3 lt 1 lc rgb "#CCCCCC"
 set style line 4 lt 1 lc rgb "#FFFFFF"
 
 set boxwidth 0.7 relative
+set xtics rotate by -60
 
 plot 'patchtype.dat' u 2 t "Code only" ls 1, \
                   '' u 3 t "Code+Test" ls 2, \

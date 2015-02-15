@@ -1,15 +1,17 @@
+\section{Study infrastructure}
+\label{sec:design}
+
 \begin{figure}[t!]
 \centering
 \includegraphics[width=0.75\textwidth]{evolution/figures/pipeline}
-\caption{\covrig infrastructure.}
+\caption{The architecture of the infrastructure used in the empirical study.}
 \label{fig:arch}
 \end{figure}
 
-The overall architecture of the \covrig infrastructure is depicted
-in Figure~\ref{fig:arch}.  It contains a generic driver which
-iterates through all the revisions in a given range and invokes
-routines specific to each system to compile, run, and collect
-statistics of interest.
+The overall architecture of the infrastructure used in our study is depicted in
+Figure~\ref{fig:arch}.  It contains a generic driver which iterates through all
+the revisions in a given range and invokes routines specific to each system to
+compile, run, and collect statistics of interest.
 
 %% To collect information about each program revision, such as whether it
 %% successfully compiles, whether it passes the regression tests and with
@@ -24,67 +26,55 @@ statistics of interest.
 %revisions do not influence each other, \eg by inadvertently leaving
 %behind lock files or not properly freeing up resources.
 
-\paragraph{Lightweight software containers.} \covrig employs software
+\paragraph{Lightweight software containers.} We employed software
 containers~\cite{containers:eurosys07}, an operating system-level
-virtualisation mechanism that provides the ability to run multiple
-isolated virtual Linux systems (``containers'') inside a single host
-OS.  When launched, \covrig starts by loading the selected range of
-revisions from the project's \git repository, and for each revision
-starts a new software container.  The use of containers offers
-increased isolation and reproducibility guarantees by providing a
-consistent environment in which to run each software revision and
-ensuring that different revisions do not interfere with each other,
-\eg by inadvertently leaving behind lock files or not properly freeing
-up resources.
+virtualisation mechanism that provides the ability to run multiple isolated
+virtual Linux systems (``containers'') inside a single host OS.  When launched,
+the driver starts by loading the selected range of revisions from the project's
+\git repository, and for each revision starts a new software container.  The
+use of containers offers increased isolation and reproducibility guarantees by
+providing a consistent environment in which to run each software revision and
+ensuring that different revisions do not interfere with each other, \eg by
+inadvertently leaving behind lock files or not properly freeing up resources.
 
-The choice of lightweight OS-level virtualisation rather than more
-traditional virtual machines (\eg
-\kvm\footnote{\url{http://www.linux-kvm.org/}} or
-\xen\footnote{\url{http://www.xenproject.org/}}) reduces the
-performance penalty associated with spawning and tearing down VMs,
-operations performed for each revision analysed.  To get a sense of
-this difference, we compared an
-\lxc\footnote{\url{http://linuxcontainers.org/}} container, which
-required under a second for these operations, with a \xen VM, which
-needed over a minute.
+The choice of lightweight OS-level virtualisation rather than more traditional
+virtual machines (\eg \kvm\footnote{\url{http://www.linux-kvm.org/}} or
+\xen\footnote{\url{http://www.xenproject.org/}}) reduces the performance
+penalty associated with spawning and tearing down VMs, operations performed for
+each revision analysed.  To get a sense of this difference, we compared an
+\lxc\footnote{\url{http://linuxcontainers.org/}} container, which required
+under a second for these operations, with a \xen VM, which needed over a
+minute.
 
-In our implementation, we use
-\docker\footnote{\url{https://www.docker.io/}} to create and manage
-the lower-level \lxc containers, and
-%Vagrant to
-deploy them on multiple local or cloud machines.
-Each container is used to configure, compile and test one
-program revision, as well as collect the metrics of interest, such as
-code size and coverage. The containers are remotely controlled through
-SSH using the \fabric\footnote{\url{http://fabfile.org/}} framework.
+In our implementation, we use \docker\footnote{\url{https://www.docker.io/}} to
+create and manage the lower-level \lxc containers, and
+\vagrant\footnote{\url{https://www.vagrantup.com/}} to deploy them on multiple
+local or cloud machines.  Each container is used to configure, compile and test
+one program revision, as well as collect the metrics of interest, such as code
+size and coverage. The containers are remotely controlled through SSH using the
+\fabric\footnote{\url{http://fabfile.org/}} framework.
 
-
-\paragraph{Configuration file.} \covrig has a modular architecture, which makes it
-possible to analyse new systems with modest effort. A potential user
-of our infrastructure only needs to provide a Python
-configuration file describing the system.  A minimal file provides
-the name of the system, its \git repository location, a method to
-compile the system, \eg install dependencies and run the appropriate
-\stt{make} command, and a method to run the regression tests, \eg run
-the \stt{make test} command.
-%
-Finally, the configuration file can also specify an {\em end revision}
-and a specific number of revisions to analyse.  
-%% \covrig will use these parameters to determine the list of revisions to
-%% analyse, independent of the target system's evolution.  
-For accurate test suite size measurements, the files or folders which
+\paragraph{Configuration file.} We used a modular pipeline architecture, which
+makes it possible to analyse new systems with modest effort. A potential user
+of our infrastructure only needs to provide a Python configuration file
+describing the system. A minimal file provides the name of the system, its \git
+repository location, a method to compile the system, \eg install dependencies
+and run the appropriate \stt{make} command, and a method to run the regression
+tests, \eg run the \stt{make test} command.  Finally, the configuration file
+can also specify an {\em end revision} and a specific number of revisions to
+analyse.  For accurate test suite size measurements, the files or folders which
 make up the test suite can also be indicated.
 
-For each revision, \covrig collects several static and dynamic metrics.  The
-static metrics are obtained either directly from the version control
-system (\eg the number of lines of test code) or after compiling each
-revision (\eg the number of executable lines of code).  The dynamic
-metrics require running the regression tests (\eg the overall line
-coverage or the regression test success status).
+For each revision, we collect several static and dynamic metrics.  The static
+metrics are obtained either directly from the version control system (\eg the
+number of lines of test code) or after compiling each revision (\eg the number
+of executable lines of code).  The dynamic metrics require running the
+regression tests (\eg the overall line coverage or the regression test success
+status).
 
-Further information and graphs---including the ones presented in our
-empirical study---are automatically derived in the post-processing
-stage from these primary metrics using a set of scripts.
+Further information and graphs---including the ones presented in this
+thesis---are automatically derived in the post-processing stage from these
+primary metrics using a set of scripts.
 
 %% For example, we were able to verify that the {\em latent patch
 %% coverage}, \ie the fraction of code which is executed only several
@@ -92,32 +82,27 @@ stage from these primary metrics using a set of scripts.
 %% safely ignore it most of the time when evaluating test suite
 %% augmentation or coverage-improvement techniques.
 
-
-%\subsection{Bug Data} \label{ssec:bugdesign}
-
-\paragraph{Bug data.} One possible application of \covrig is finding
-useful data about software bugs and correlating them with the static
-and dynamic metrics collected. For our study, we mined bug data from
-both software repositories and, where available, bug tracking systems.
-We automatically obtained a list of candidate bug-fixing revisions by
-iterating through the list of commits and checking the commit message
-for words such as {\em fix}, {\em bug} or {\em issue}, followed by a
-number representing the bug identifier.  For example, a typical
-\memcached bug fix commit message looks like {\em "Issue 224 - check
-  retval of main event loop"}. The regular expression that we used to
+\paragraph{Bug data.} One possible application of our infrastructure is finding
+useful data about software bugs and correlating them with the static and
+dynamic metrics collected. For our study, we mined bug data from both software
+repositories and, where available, bug tracking systems.  We automatically
+obtained a list of candidate bug-fixing revisions by iterating through the list
+of commits and checking the commit message for words such as {\em fix}, {\em
+bug} or {\em issue}, followed by a number representing the bug identifier.  For
+example, a typical \memcached bug fix commit message looks like {\em "Issue 224
+- check retval of main event loop"}. The regular expression that we used to
 identify these commits is similar to the ones used in prior
 work~\cite{genealogies:issre13}:
 
 \lstinline`(?:bug|issue|fix|resolve|close)\s*\#?\s?(\d+)`
 
-Where possible, we confirmed that the bug identifier is valid by
-querying the associated bug tracking system. We further manually
-checked all reported revisions and confirmed that they included no
-false positives.  While it is impossible to quantify the false
-negative rate without a knowledgeable developer manually checking all
-the revisions in a repository, we believe that the automatically
-obtained bug fixes create a representative subset of the fixes in the
-repository.
+Where possible, we confirmed that the bug identifier is valid by querying the
+associated bug tracking system. We further manually checked all reported
+revisions and confirmed that they included no false positives.  While it is
+impossible to quantify the false negative rate without a knowledgeable
+developer manually checking all the revisions in a repository, we believe that
+the automatically obtained bug fixes create a representative subset of the
+fixes in the repository.
 
 \paragraph{Line mapping.} The ability to track how lines move and change
 across revisions is the cornerstone of many high-level software
@@ -169,13 +154,13 @@ cores. This implementation only keeps one line of the computation matrix, and
 divides this line into strides which are then processed by different cores.
 
 \paragraph{Cloud deployment.} To enable large-scale data collection and
-processing, we deployed \covrig to our private cloud.  We have built our
-system around a standard set of tools: Packer for building custom
-Docker-enabled machine images, Vagrant for controlling and provisioning
-the virtual machines based on these images, a Docker registry for
-serving \covrig's Docker containers and a {\em fabfile} for
-orchestrating the entire cluster. The same set of tools and scripts
-can be used to deploy \covrig to different private or public clouds.
+processing, we deployed the infrastructure to our private cloud. We have built
+our system around a standard set of tools: \packer for building custom
+\docker-enabled machine images, \vagrant for controlling and provisioning the
+virtual machines based on these images, a private \docker registry for serving
+\docker containers containing the driver scripts, and a {\em fabfile} for
+orchestrating the entire cluster. The same set of tools and scripts can be used
+to deploy the infrastructure to different private or public clouds.
 
 %% \subsection{High-Level Questions} \label{ssec:highlevel}
 

@@ -1,0 +1,17 @@
+\section{Summary}
+\label{efficient-execution:summary}
+
+Recent years have seen a growing interest in using NVX systems as a way to
+increase the reliability and security of software systems.  While NVX systems
+hold promise, frameworks for implementing them efficiently have lagged behind.
+
+In this chapter, we have presented \varan, a novel architecture for
+implementing NVX monitors. \varan combines selective binary rewriting with
+high-performance event streaming to deliver a flexible and efficient user-space
+solution that incurs a low performance overhead, can scale to large numbers of
+versions, is easier to debug than prior systems, and can handle small
+divergences in the sequences of system calls issued across versions.
+
+Our experimental evaluation has demonstrated that \varan can run C10k network
+servers with low performance overhead and can be used in various scenarios such
+as multi-revision execution and transparent failover.

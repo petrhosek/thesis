@@ -1,9 +1,9 @@
-\section{Study setup}
-\label{sec:study-setup}
+\section{Overview}
+\label{evolution:overview}
 
-We used the \covrig infrastructure to understand the evolution of
-\numSystems popular open-source applications written in C/C++, over a
-combined period of \numYears years. The six evaluated applications are:
+We used the our infrastructure to understand the evolution of \numSystems
+popular open-source applications written in C/C++, over a combined period of
+\numYears years. The \numSystems evaluated applications are:
 
 \begin{enumerate}
 
@@ -87,48 +87,50 @@ analysed.}
 \\ \bottomrule
 \end{tabular}
 \end{center}
-\label{tbl:systems}
+\label{tbl:study-systems}
 \end{table}
 
-\paragraph{Basic characteristics} Table~\ref{tbl:systems} shows some basic
-characteristics of these systems: the language in which the code and tests are
-written, the number of executable lines of code (ELOC) and the number of lines
-of test code (TLOC) in the last revision analysed. To accurately measure the
-number of ELOC, we leveraged the information stored by the compiler in
-\texttt{gcov} graph files, while to measure the number of TLOC we did a simple
-line count of the test files (using \texttt{cloc}, or \texttt{wc~-l} when
-\texttt{cloc} cannot detect the file types).
+\subsection{Basic characteristics}
 
-The code size for these applications varies from only \memcachedSize
-ELOC for \memcached to \gitSize ELOC for \git.  The test code is written in
-a variety of languages and ranges from \lighttpdtwoTsize lines of Python
-code for \lighttpdtwo to \gitTsize lines of C and shell code for \git.
-The test code is 36\% larger than the application code in the case
-of \git, approximately as large as the application code for
-\memcached, around 40\% of the application code for \redis and \zeromq,
-and only around 10\% and 19\% of the application code for \lighttpdtwo and
-\binutils respectively.  Running the test suite on the last version 
-takes only a few seconds for \binutils, \lighttpdtwo, and \zeromq,
-\memcachedTestTime seconds for \memcached, \redisTestTime seconds for 
-\redis, and 30 minutes for \git, using a four-core Intel Xeon 
-E3-1280 machine with 16 GB of RAM.
+Table~\ref{tbl:study-systems} shows some basic characteristics of these
+systems: the language in which the code and tests are written, the number of
+executable lines of code (ELOC) and the number of lines of test code (TLOC) in
+the last revision analysed. To accurately measure the number of ELOC, we
+leveraged the information stored by the compiler in \texttt{gcov} graph files,
+while to measure the number of TLOC we did a simple line count of the test
+files (using \texttt{cloc}, or \texttt{wc~-l} when \texttt{cloc} cannot detect
+the file types).
 
-The version control system used by all these applications is \git.  Four
-of these projects---\git, \memcached, \redis, and \zeromq ---are hosted
-on the \github\footnote{\url{https://github.com/}} online project site.
-The other two---\binutils and \lighttpdtwo---use their own \git hosting.
+The code size for these applications varies from only \memcachedSize ELOC for
+\memcached to \gitSize ELOC for \git.  The test code is written in a variety of
+languages and ranges from \lighttpdtwoTsize lines of Python code for
+\lighttpdtwo to \gitTsize lines of C and shell code for \git.  The test code is
+36\% larger than the application code in the case of \git, approximately as
+large as the application code for \memcached, around 40\% of the application
+code for \redis and \zeromq, and only around 10\% and 19\% of the application
+code for \lighttpdtwo and \binutils respectively.  Running the test suite on
+the last version takes only a few seconds for \binutils, \lighttpdtwo, and
+\zeromq, \memcachedTestTime seconds for \memcached, \redisTestTime seconds for
+\redis, and 30 minutes for \git, using a four-core Intel Xeon E3-1280 machine
+with 16 GB of RAM.
 
+The version control system used by all these applications is \git.  Four of
+these projects---\git, \memcached, \redis, and \zeromq ---are hosted on the
+\github\footnote{\url{https://github.com/}} online project site.  The other
+two---\binutils and \lighttpdtwo---use their own \git hosting.
 
-\paragraph{Selection of revisions} Our goal was to select a comparable number
-of revisions across applications. The methodology was to start from the current
-version at the day of our experiments, and select an equal number of previous
-revisions for all systems. We only counted revisions which modify executable
-code, tests or both because this is what our analyses look at. We decided to
-select 250 such revisions from each system because some systems had non-trivial
-dependency issues further back than this, which prevented us from properly
-compiling or running them.  We still had to install the correct dependencies
-where appropriate, \eg downgrade \stt{libev} for older versions of \lighttpdtwo
-and \stt{libevent} for \memcached.
+\subsection{Selection of revisions}
+
+Our goal was to select a comparable number of revisions across applications.
+The methodology was to start from the current version at the day of our
+experiments, and select an equal number of previous revisions for all systems.
+We only counted revisions which modify executable code, tests or both because
+this is what our analyses look at. We decided to select 250 such revisions from
+each system because some systems had non-trivial dependency issues further back
+than this, which prevented us from properly compiling or running them.  We
+still had to install the correct dependencies where appropriate, \eg downgrade
+\stt{libev} for older versions of \lighttpdtwo and \stt{libevent} for
+\memcached.
 
 Note that not all revisions compile, either due to development errors
 %(an example of this would be someone forgetting to add a file) 
@@ -139,23 +141,22 @@ distributions).
 %% more transient compilation errors that affect only some program
 %% versions.  
 Redis has the largest number of such transient compilation
-errors---\redisTransientCompErrs.  The prevailing reasons are
-missing \stt{\#include} directives, \eg \stt{unistd.h} for
-the \stt{sleep} function, and compiler warnings subsequently treated as errors.
-The missing \stt{\#include} directives most likely slipped past the
-developers because on some systems other \stt{libc} headers cause the
-missing headers to be indirectly included. The compiler warnings were
-generated because newer compiler versions, such as the one that we used,
-are more pedantic.
-Other reasons include forgotten files and even missing semicolons.
+errors---\redisTransientCompErrs.  The prevailing reasons are missing
+\stt{\#include} directives, \eg \stt{unistd.h} for the \stt{sleep} function,
+and compiler warnings subsequently treated as errors.  The missing
+\stt{\#include} directives most likely slipped past the developers because on
+some systems other \stt{libc} headers cause the missing headers to be
+indirectly included. The compiler warnings were generated because newer
+compiler versions, such as the one that we used, are more pedantic.  Other
+reasons include forgotten files and even missing semicolons.
 
-We decided to fix the errors which had likely not been seen at the
-time a particular revision was created, for example by adding the
-compile flag \stt{-Wno-error} in \binutils so that warnings do not
-terminate the build process. In all situations when we could not
-compile a revision, we rolled over the changes to the next revisions
-until we found one where compilation was successful.  Revisions which
-do not successfully compile are not counted towards the 250 limit.
+We decided to fix the errors which had likely not been seen at the time a
+particular revision was created, for example by adding the compile flag
+\stt{-Wno-error} in \binutils so that warnings do not terminate the build
+process. In all situations when we could not compile a revision, we rolled over
+the changes to the next revisions until we found one where compilation was
+successful.  Revisions which do not successfully compile are not counted
+towards the 250 limit.
 
 Another important decision concerns the granularity of the revisions
 being considered.  Modern decentralised software repositories based on
@@ -188,7 +189,6 @@ provides meaningful answers.
 % integrator exists (the project owner) and we considered their history
 % to be the official one, essentially always following the first parent
 % in a merge.
-
 
 \begin{table}[t]
 \centering
@@ -236,11 +236,13 @@ that we analysed ranges from a little over 2 years for \lighttpdtwo,
 to 11 years for \binutils.
 %6 years memcached, 4 years redis, 2yr 9mo zeromq, 8 years git
 
-\paragraph{Setup} All the programs analysed were compiled to record coverage
-information. In addition, we disabled compiler optimisations, which generally
-interact poorly with coverage measurements. For this we used existing build
-targets and configuration options if available, otherwise we configured the
-application with the flags \lstinline`CFLAGS='-O0 -coverage'` and
+\subsection{Revision setup}
+
+All the programs analysed were compiled to record coverage information. In
+addition, we disabled compiler optimisations, which generally interact poorly
+with coverage measurements. For this we used existing build targets and
+configuration options if available, otherwise we configured the application
+with the flags \lstinline`CFLAGS='-O0 -coverage'` and
 \lstinline`LDFLAGS=-coverage`. All code from the system headers, \ie
 \stt{/usr/include/} was excluded from the results.
 

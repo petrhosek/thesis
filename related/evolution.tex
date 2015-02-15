@@ -35,26 +35,25 @@ however, prior work has focused almost exclusively on static metrics,
 while in this work we propose using dynamic metrics such as patch
 coverage to aid the task.
 
-Our ongoing effort is to develop \covrig into a flexible platform for
-mining static and dynamic metrics from software repositories.  In
-terms of similar infrastructure efforts, SIR~\cite{sir:2005} is a
-well-known repository for software testing research, which offers a
-variety of programs written in several different languages, together
-with test suites, bug data, and scripts.  SIR also provides multiple
-versions for the same application, but typically less than a dozen.
-Furthermore, SIR does not include any support for running versions in
-isolation.  Ideally, the mechanisms provided by \covrig would be
-integrated with the rich data in SIR to enable more types of analyses
-at the intersection of software testing and evolution.
+% Our ongoing effort is to develop \covrig into a flexible platform for
+% mining static and dynamic metrics from software repositories.  In
+% terms of similar infrastructure efforts, SIR~\cite{sir:2005} is a
+% well-known repository for software testing research, which offers a
+% variety of programs written in several different languages, together
+% with test suites, bug data, and scripts.  SIR also provides multiple
+% versions for the same application, but typically less than a dozen.
+% Furthermore, SIR does not include any support for running versions in
+% isolation.  Ideally, the mechanisms provided by \covrig would be
+% integrated with the rich data in SIR to enable more types of analyses
+% at the intersection of software testing and evolution.
 
-
-While SIR contains mostly artificially-generated faults,
-iBUGS~\cite{ibugs} provides a semi-automated approach for extracting
-benchmarks with real bugs from project histories, using an approach
-based on commit messages and regression tests. iBUGS' idea of using
-the regression tests as a semi-automatic bug confirmation mechanism
-could be borrowed by \covrig whenever fixes are accompanied by tests,
-reducing the manual effort needed to apply it to new projects.
+% While SIR contains mostly artificially-generated faults,
+% iBUGS~\cite{ibugs} provides a semi-automated approach for extracting
+% benchmarks with real bugs from project histories, using an approach
+% based on commit messages and regression tests. iBUGS' idea of using
+% the regression tests as a semi-automatic bug confirmation mechanism
+% could be borrowed by \covrig whenever fixes are accompanied by tests,
+% reducing the manual effort needed to apply it to new projects.
 
 % While SIR is restricted to a fixed set of bugs, iBUGS~\cite{ibugs}
 % provides a semi-automated approach for extracting benchmarks with real
