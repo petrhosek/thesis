@@ -1,5 +1,6 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,5.5cm
-set output "analysis.pdf"
+if (!exists("filename")) filename='analysis.pdf'
+set output filename
 
 set multiplot layout 1,2
 

@@ -199,7 +199,7 @@ more than one year after it was introduced.
 
 \subsection{\redis}
 
-\begin{figure*}[t]
+\begin{figure}[t]
 \begin{minipage}[b]{0.90\columnwidth}
 \begin{lstlisting}[label=lst:original, caption={Original (correct) version of the {\footnotesize \texttt{hmgetCommand}} function in \redis.}]
 robj *o = lookupKeyRead(c->db, c->argv[1]); /*@\label{line:key-found}@*/
@@ -237,7 +237,7 @@ for (i = 2; i < c->argc; i++) {
 }
 \end{lstlisting}
 \end{minipage}
-\end{figure*}
+\end{figure}
 
 \redis is an advanced key-value data structure
 server,\footnote{\url{http://redis.io/}} often referred to as one the most

@@ -1,5 +1,6 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,10' size 17.0cm,7.0cm
-set output 'spec2006.pdf'
+if (!exists("filename")) filename='spec2006.pdf'
+set output filename
 
 set style data histogram
 set style histogram cluster gap 3.5

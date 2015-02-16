@@ -1,5 +1,6 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,15.0cm
-set output "tloc.pdf"
+if (!exists("filename")) filename='tloc.pdf'
+set output filename
 
 set multiplot layout 3,3
 

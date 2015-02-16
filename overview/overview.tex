@@ -78,6 +78,19 @@ available resources have been exhausted, or a user-specified threshold has been
 reached.  At that point, we can either discard the very oldest versions, or we
 can use more sophisticated replacement strategies.
 
+\begin{figure}[t]
+\begin{minipage}[b]{0.5\textwidth}
+  \includegraphics[width=\textwidth]{overview/figures/failover}
+  \caption{Failover scheme.}
+  \label{fig:failover-scheme}
+\end{minipage}
+\begin{minipage}[b]{0.5\textwidth}
+  \includegraphics[width=\textwidth]{overview/figures/failrecovery}
+  \caption{Failure recovery scheme.}
+  \label{fig:failrecovery-scheme}
+\end{minipage}
+\end{figure}
+
 We believe that multi-version execution updates is a timely solution in the
 context of today's computing platforms~\cite{multiplicity}. The last decade has
 seen the emergence of new hardware platforms, ranging from multi-core

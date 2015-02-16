@@ -1,5 +1,6 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,12.0cm
-set output "patchtype.pdf"
+if (!exists("filename")) filename='patchtype.pdf'
+set output filename
 
 set xtics nomirror
 set grid y linetype 0 linewidth 1.000,  linetype 0 linewidth 1.000

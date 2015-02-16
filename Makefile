@@ -12,7 +12,7 @@ all: $(TARGETS)
 -include $(DEPS)
 
 %.pdf: %.tex
-	$(LATEXMK) -bibtex -pdflatex="lualatex -halt-on-error -interaction=nonstopmode -file-line-error %O %S" -pdf -dvi- -ps- -deps-out=$(patsubst %.pdf,%.d,$@) $<
+	$(LATEXMK) -f -bibtex -pdflatex="lualatex -halt-on-error -interaction=nonstopmode -file-line-error %O %S" -pdf -dvi- -ps- -deps-out=$(patsubst %.pdf,%.d,$@) $<
 
 %.pdf: %.plot
 	$(SHELL) -c "pushd `dirname $<` > /dev/null;\

@@ -12,7 +12,7 @@ described  in the first three columns of Table~\ref{tbl:systems}.  To our
 knowledge, we are the first to perform an extensive performance comparison of
 existing NVX systems.
 
-\begin{table*}[t]
+\begin{table}[t]
 \begin{center}
 \caption{Existing systems we have compared \varan against.}
 \label{tbl:systems}
@@ -35,7 +35,7 @@ existing NVX systems.
   \bottomrule
 \end{tabular}
 \end{center}
-\end{table*}
+\end{table}
 
 \begin{figure}[!t]
  \centering
@@ -99,12 +99,12 @@ utility. When run with \varan using the same benchmark and the same workload,
 the overhead we measured was \redisOneFollower, which is again a significant
 improvement over previous work.
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
   \centering
   \includegraphics[width=\textwidth]{efficient-execution/graphs/spec2000}
   \caption{\speczerozero performance overhead for different numbers of followers.}
   \label{fig:spec2000}
-\end{figure*}
+\end{figure}
 
 \paragraph{\speczerozero}\footnote{\url{http://www.spec.org/cpu2000/}} 
 was used to evaluate \orchestra.  We used the latest available version
@@ -118,12 +118,12 @@ caching effects~\cite{jaleel07}, and to the fact that our machine has
 only four physical cores (with two logical cores each).  We plan to
 investigate these results in more detail in future work.
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
   \centering
   \includegraphics[width=\textwidth]{efficient-execution/graphs/spec2006}
   \caption{\speczerosix performance overhead for different numbers of followers.}
   \label{fig:spec2006}
-\end{figure*}
+\end{figure}
 
 \paragraph{\speczerosix}\footnote{\url{http://www.spec.org/cpu2006/}}
 was previously used to evaluate \mx. We used the latest version 1.2.  The

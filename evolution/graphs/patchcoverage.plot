@@ -1,5 +1,6 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 17.0cm,12.0cm
-set output "patchcoverage.pdf"
+if (!exists("filename")) filename='patchcoverage.pdf'
+set output filename
 
 set grid layerdefault linetype 0 linewidth 1.0, linetype 0 linewidth 1.0
 set border 3 front linetype -1 linewidth 1.0

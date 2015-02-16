@@ -1,5 +1,6 @@
 set term pdfcairo enhanced color solid font 'MyriadPro,12' size 9.0cm,17.0cm
-set output 'syscall.pdf'
+if (!exists("filename")) filename='syscall.pdf'
+set output filename
 
 set style data histogram
 set style histogram gap 1
