@@ -222,6 +222,15 @@ some of the performance being more lenient with respect to the third goal, we
 can make the second goal more stringent by requiring the multi-version
 application to be as reliable as any of the two versions ran in parallel.
 
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{multi-version/figures/platform}
+    \caption{A multi-version execution platform running conventional and multi-version
+      applications side by side.}
+    \label{fig:mx-platform}
+  \end{center}
+\end{figure}
+
 As shown in Figure~\ref{fig:mx-platform}, our solution requires a form of
 virtualization framework that would coordinate the execution of multiple
 application versions, and mediate their interaction with the external
@@ -237,9 +246,8 @@ consumption.
 
 \begin{figure}[t]
   \begin{center}
-    \includegraphics[width=0.5\textwidth]{multi-version/figures/platform}
-    \caption{A platform running conventional and multi-version
-      applications side by side.}
+    \includegraphics[width=0.5\textwidth]{multi-version/figures/lockstep}
+    \caption{Lockstep execution of two version synchronized by the monitor.}
     \label{fig:mx-platform}
   \end{center}
 \end{figure}
