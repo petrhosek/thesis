@@ -8,8 +8,8 @@
 \label{fig:arch}
 \end{figure}
 
-The overall architecture of the infrastructure used in our study is depicted in
-Figure~\ref{fig:arch}.  It contains a generic driver which iterates through all
+The architecture of the infrastructure used to perform our study is depicted in
+Figure~\ref{fig:arch}. It contains a generic driver which iterates through all
 the revisions in a given range and invokes routines specific to each system to
 compile, run, and collect statistics of interest.
 
@@ -126,24 +126,22 @@ also uses the \emph{Hungarian algorithm}~\cite{hungarian} to find the
 optimal matching of lines across versions.  Compared to previous work,
 our implementation can also improve precision by using coverage information to filter
 non-executable lines.
-
 %% We used line mapping in two ways in our analysis: to determine whether
 %% patches are tested within the next few revisions after they were
 %% created (\S\ref{sec:lpcoverage}), and to estimate where bugs were
 %% introduced (\S\ref{sec:bugs}).
-
 In our study, we used line mapping to determine whether patches are
 tested within the next few revisions after they were created
 (\S\ref{sec:lpcoverage}).
 
 \paragraph{Edit distance.} Edit distance, also known as Levenshtein edit
-distance~\cite{levenshtein1966binary} is defined as a the minimum number of
-operations (insertions, deletions, and subtitutions) required to transform one
+distance~\cite{levenshtein1966binary} is defined as the minimum number of
+operations (insertions, deletions, and substitutions) required to transform one
 string into the other. We use edit distance to measure the similarity of the
 system call traces (\S\ref{sec:behavior-evolution}). However, these traces are
 not strings, rather sequences of strings. To allow the use of edit distance on
 these sequences, we use a hashing scheme, which assigns each string in the
-sequence a 32-bit number. The algorithm then calulcates edit distance between
+sequence a 32-bit number. The algorithm then calculates edit distance between
 the integer strings.
 
 Another problem is the efficiency of the implementation. The sequences we are

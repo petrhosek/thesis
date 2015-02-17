@@ -4,6 +4,9 @@ set output filename
 
 set multiplot layout 3,3
 
+set decimal locale
+set format "%'g"
+
 set ylabel "Revisions"
 set ytics mirror 50
 set xrange [0:]

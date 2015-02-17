@@ -51,10 +51,10 @@ number of organisations such as Los Alamos Labs, NASA and CERN.
 
 \end{enumerate}
 
-The \numSystems applications are representative for C/C++ open-source
-code: GNU \binutils are user-level utilities, \git is a version
-control system, \beanstalkd, \lighttpdtwo, \memcached and \redis are server
-applications, while \zeromq is a library.  All applications include a
+The \numSystems applications are representative for C/C++ open-source code: GNU
+\binutils are user-level utilities, \git is a version control system,
+\beanstalkd, \lighttpdtwo, \memcached and \redis are server applications, \vim
+is a text editor while \zeromq is a library.  All applications include a
 regression test suite.
 
 \begin{table}[t]
@@ -83,6 +83,8 @@ analysed.}
 \\
 \redis       & C         & \redisSize     & Tcl       & \redisTsize       % & \redisTestTime    
 \\
+\vim         & C         & \vimSize       & Vim script       & \vimTsize      % & \vimTestTime   
+\\
 \zeromq      & C++       & \zeromqSize    & C++       & \zeromqTsize      % & \zeromqTestTime   
 \\ \bottomrule
 \end{tabular}
@@ -108,16 +110,18 @@ languages and ranges from \lighttpdtwoTsize lines of Python code for
 36\% larger than the application code in the case of \git, approximately as
 large as the application code for \memcached, around 40\% of the application
 code for \redis and \zeromq, and only around 10\% and 19\% of the application
-code for \lighttpdtwo and \binutils respectively.  Running the test suite on
-the last version takes only a few seconds for \binutils, \lighttpdtwo, and
-\zeromq, \memcachedTestTime seconds for \memcached, \redisTestTime seconds for
-\redis, and 30 minutes for \git, using a four-core Intel Xeon E3-1280 machine
-with 16 GB of RAM.
+code for \lighttpdtwo, \vim and \binutils respectively.  Running the test suite
+on the last version takes only a few seconds for \binutils, \lighttpdtwo, \vim
+and \zeromq, \memcachedTestTime seconds for \memcached, \redisTestTime seconds
+for \redis, and 30 minutes for \git, using a four-core Intel Xeon E3-1280
+machine with 16 GB of RAM.
 
-The version control system used by all these applications is \git.  Four of
-these projects---\git, \memcached, \redis, and \zeromq ---are hosted on the
-\github\footnote{\url{https://github.com/}} online project site.  The other
-two---\binutils and \lighttpdtwo---use their own \git hosting.
+The version control system used by majority of these applications is \git.
+Four of these projects---\git, \memcached, \redis, and \zeromq ---are hosted on
+the \github\footnote{\url{https://github.com/}} online project site.  The other
+two---\binutils and \lighttpdtwo---use their own \git hosting. \lighttpd uses
+Subversion, but the project also provides a \git mirror on \github. \vim uses
+Mercurial.
 
 \subsection{Selection of revisions}
 
@@ -176,10 +180,10 @@ unusable or even non-compilable, reflecting work-in-progress.  Second,
 the main branch is generally the one tracked by most users, therefore
 analysing revisions at this level is a good match in terms of
 understanding what problems are seen in the field.  This being said,
-there are certainly development styles and/or research questions that
-would require tracking additional branches; however, we believe that
-for our benchmarks and research questions this level of granularity
-provides meaningful answers.
+there are certainly development styles and research questions that would
+require tracking additional branches; however, we believe that for our
+benchmarks and research questions this level of granularity provides meaningful
+answers.
 
 % On a secondary note, we remark that an additional complication with
 % this approach is that version control systems do not associate a
@@ -211,6 +215,7 @@ provides meaningful answers.
 \lighttpdtwo    &  \lighttpdtwoOK   & \lighttpdtwoTransientTestErrs  & \lighttpdtwoTransientTestTimeouts  & \lighttpdtwoTransientCompErrs  &  {\lighttpdtwoTimespan}mo  \\
 \memcached   &  \memcachedOK  & \memcachedTransientTestErrs & \memcachedTransientTestTimeouts & \memcachedTransientCompErrs &  {\memcachedTimespan}mo \\
 \redis       &  \redisOK      & \redisTransientTestErrs     & \redisTransientTestTimeouts     & \redisTransientCompErrs     &  {\redisTimespan}mo     \\
+\vim         &  \vimOK        & \vimTransientTestErrs       & \vimTransientTestTimeouts       & \vimTransientCompErrs    &  {\vimTimespan}mo    \\
 \zeromq      &  \zeromqOK     & \zeromqTransientTestErrs    & \zeromqTransientTestTimeouts    & \zeromqTransientCompErrs    &  {\zeromqTimespan}mo    \\
 \bottomrule
 \end{tabular}
@@ -219,14 +224,13 @@ provides meaningful answers.
 
 
 Table~\ref{tbl:revisions} summarises the revisions that we selected:
-they are grouped into those that compile and pass all the tests
-(\textit{OK}), compile but fail some tests (\textit{TF}),
-and compile but time out while running the test suite
-(\textit{TO}).
-The time limit that we enforced was empirically selected for
-each system such that it is large enough to allow a correct revision
-to complete all tests. As shown in the table, timeouts were a rare
-occurrence, with at most one occurrence per application.
+they are grouped into those that compile and pass all the tests (\emph{OK}),
+compile but fail some tests (\emph{TF}), compile but time out while running the
+test suite (\emph{TO}), and fail to compile (\emph{CF}).  The time limit that
+we enforced was empirically selected for each system such that it is large
+enough to allow a correct revision to complete all tests. As shown in the
+table, timeouts were a rare occurrence, with at most one occurrence per
+application.
 
 Table~\ref{tbl:revisions} also shows the development time span
 considered, which ranges from only 5-6 months for \git and \redis,
@@ -240,11 +244,10 @@ to 11 years for \binutils.
 
 All the programs analysed were compiled to record coverage information. In
 addition, we disabled compiler optimisations, which generally interact poorly
-with coverage measurements. For this we used existing build targets and
-configuration options if available, otherwise we configured the application
-with the flags \lstinline`CFLAGS='-O0 -coverage'` and
-\lstinline`LDFLAGS=-coverage`. All code from the system headers, \ie
-\stt{/usr/include/} was excluded from the results.
+with coverage measurements. We used existing build targets and configuration
+options if available, otherwise we configured the application with the flags
+\lstinline`CFLAGS='-O0 -coverage'` and \lstinline`LDFLAGS=-coverage`. All code
+from the system headers, \ie \stt{/usr/include/} was excluded from the results.
 
 Each revision was run in a virtualised environment based on 64-bit version of
 Ubuntu 12.10 (12.04.3 for \git) running inside an \lxc container.  To take

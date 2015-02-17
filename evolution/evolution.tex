@@ -9,8 +9,8 @@ stable, especially between minor revisions (\ie security and bug fixes).  While
 there is a lot of first hand and anecdotal evidence in support of these
 assumptions, despite the key role that software evolution plays in the
 application life cycle, it is surprising how few empirical studies one can find
-in the research literature regarding the co-evolution of test suites and code
-and their impact on the \emph{execution} of real systems.
+in the research literature regarding the evolution of the \emph{execution} of
+real systems.
 
 Software repositories provide rich information about the construction and
 evolution of software systems. While static data extracted from software
@@ -23,8 +23,11 @@ In this chapter, we present an empirical study concerning dynamic metrics which
 aims to answer some of the questions related to software evolution. To perform
 this study, we have built a flexible infrastructure that can be used to run
 each version of a system in isolation and collect static and dynamic software
-metrics, using a lightweight virtualization environment based on software
-containers, that can be deployed on a cluster of local or cloud machines.
+metrics from the test suite execution. We consider the tests to be an
+(imperfect) proxy for a real-world execution.
+
+%, using a lightweight virtualization environment based on software
+%containers, that can be deployed on a cluster of local or cloud machines.
 
 We have used this infrastructure to examine how code and tests co-evolve in
 \numSystems popular open-source systems. We report the main characteristics of

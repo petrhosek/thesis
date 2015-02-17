@@ -4,6 +4,9 @@ set output filename
 
 set multiplot layout 3,3
 
+set decimal locale
+set format "%'g"
+
 set xlabel ""
 set ylabel "TLOC"
 set xrange [0:]

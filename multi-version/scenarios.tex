@@ -1,8 +1,8 @@
 \section{Real-world scenarios}
 \label{multi-version:scenarios}
 
-To motivate the multi-version execution technique, we present several existing
-scenarios involving the the \vim editor, as well as the \lighttpd, and \redis.
+To motivate the multi-version execution technique, we present three existing
+scenarios involving the \vim editor, as well as \lighttpd, and \redis servers.
 These correspond to two categories of applications that could benefit from our
 approach: user applications such as text editors for which reliability is a key
 concern; and network servers, with stringent security and availability
@@ -100,7 +100,7 @@ user's home directory, this code path will be invoked twice leading to a crash.
 The double \lstinline`free` bug was detected and fixed in version 7.1.147, released
 one month later in October 2007. The correct version of the \lstinline`ExpandOne`
 function is shown in Listing~\ref{lst:vim-fixed}. In this version, the
-\lstinline`orig_saved` variable type has been changed to \lstinline`int` and it is
+\lstinline`orig_saved` variable type was changed to \lstinline`int` and is
 being used as a flag preventing the second \lstinline`free` invocation.
 
 \begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:vim-fixed,caption={Second (correct) fix \lstinline`ExpandOne` function in \vim.}]
@@ -125,7 +125,7 @@ version of \vim from the source.
 \subsection{\lighttpd}
 
 \lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular open-source 
-web-server used (either alone or in conjunction with other web-servers)
+web-server used either alone or in conjunction with other web-servers
 by several high-traffic websites such as Wikipedia and Xkcd.
 Despite its popularity, crash bugs are still a common
 occurrence in \lighttpd, as evident from its bug tracking
@@ -266,8 +266,7 @@ critical bug, which may result in losing some or even all of the stored data
 in case when Append Only File (AOF) persistence log is corrupted due to issue
 620\footnote{\url{http://code.google.com/p/redis/issues/detail?id=620}}.
 
-The bug was introduced in April 2010, diagnosed and reported only
-half a year later in October 2010 and then fixed after fifteen days.
-Same as in the case of the \lighttpd bug, this means that for several months,
-any \redis instance has been susceptible to a crash and vulnerable to a
-possible attack.
+The bug was introduced in April 2010, diagnosed and reported only half a year
+later in October 2010 and then fixed after fifteen days.  As in the case of the
+\lighttpd bug, this means that for several months, any \redis instance has been
+susceptible to a crash and vulnerable to a possible attack.

@@ -73,11 +73,11 @@ regular code.
 
 To better understand the co-evolution of executable and test code, we
 merged the above data and plotted in Figure~\ref{fig:coeloctloc}
-only whether a revision changes the code (tests) or not: that is,
+only whether a revision changes the code or tests: that is,
 the \emph{Code} and \emph{Test} values increase by one when a change is
 made to the code, respectively to the tests in a revision, and stay constant
-otherwise.  As it can be seen, while the \emph{Code} line is smoothly
-increasing over time, the \emph{Test} line frequently stays constant
+otherwise.  As it can be seen, while the \emph{Code} line smoothly
+increases over time, the \emph{Test} line frequently stays constant
 across revisions, indicating that testing is often a \textit{phased}
 activity~\cite{coevol:emse11}, that takes place only at certain times
 during development. One exception is \git, where code and
@@ -203,12 +203,11 @@ Finally, the median number of files modified by a patch is
 only \rediseFileMedian for all benchmarks with the exception
 of \zeromq, for which it is \zeromqeFileMedian. The fraction of
 patches that modify a single file is, in increasing
-order, \zeromqOneeFilePatches for \zeromq, \gitOneeFilePatches
-for \git, \beanstalkdOneeFilePatches in \beanstalkd, \lighttpdtwoOneeFilePatches
-for \lighttpdtwo, \memcachedOneeFilePatches
-for \memcached, \redisOneeFilePatches for \redis,
-and \binutilsOneeFilePatches for \binutils.
-
+order, \vimOneeFilePatches for \vim, \zeromqOneeFilePatches for \zeromq,
+\gitOneeFilePatches for \git, \beanstalkdOneeFilePatches in \beanstalkd,
+\lighttpdtwoOneeFilePatches for \lighttpdtwo, \memcachedOneeFilePatches for
+\memcached, \redisOneeFilePatches for \redis, and \binutilsOneeFilePatches for
+\binutils.
 
 %% \binutils: \binutilsOneELOCPatches, \binutilsOneeHunkPatches, \binutilsOneeFilePatches \\
 %% \git: \gitOneELOCPatches, \gitOneeHunkPatches, \gitOneeFilePatches \\
@@ -240,6 +239,7 @@ modify executable code is considered.}
 \lighttpdtwo    & \lighttpdtwoPatchMedian  & \lighttpdtwoeHunkThreeMedian  & \lighttpdtwoeFileMedian  \\
 \memcached   & \memcachedPatchMedian & \memcachedeHunkThreeMedian & \memcachedeFileMedian \\
 \redis       & \redisPatchMedian     & \rediseHunkThreeMedian     & \rediseFileMedian     \\
+\vim         & \vimPatchMedian       & \vimeHunkThreeMedian    & \vimeFileMedian    \\
 \zeromq      & \zeromqPatchMedian    & \zeromqeHunkThreeMedian    & \zeromqeFileMedian    \\
 \bottomrule
 \end{tabular}
@@ -264,6 +264,7 @@ which are nondeterministically executed in a revision.}
 \lighttpdtwo    &  \lighttpdtwoRevsTestsMixedResults  & \lighttpdtwoNonDetMax  & \lighttpdtwoNonDetMedian   & \lighttpdtwoNonDetAverage \\
 \memcached   &  \memcachedRevsTestsMixedResults & \memcachedNonDetMax & \memcachedNonDetMedian  & \memcachedNonDetAverage \\
 \redis       &  \redisRevsTestsMixedResults     & \redisNonDetMax     & \redisNonDetMedian      & \redisNonDetAverage \\
+\vim         &  \vimRevsTestsMixedResults    & \vimNonDetMax    & \vimNonDetMedian     & \vimNonDetAverage \\
 \zeromq      &  \zeromqRevsTestsMixedResults    & \zeromqNonDetMax    & \zeromqNonDetMedian     & \zeromqNonDetAverage \\
 \bottomrule
 \end{tabular}
@@ -337,16 +338,16 @@ Docker environment.
 %nondeterminism because they can receive network events
 %asynchronously.
 
-The potential drawback of nondeterminism is the inability of coverage
-comparison across revisions, lack of reproducibility and consequent
-difficulty in debugging. Developers and researchers relying on test
-suite executions should take nondeterminism into account, by either
-quantifying its effects, or by using tools that enforce deterministic
-execution across versions~\cite{mx}, as appropriate.
-Tests with nondeterministic expectations---such as the
-ones presented above---are fragile and should be rewritten. For
-example, tests relying on wall-clock time could be rewritten as
-event-based tests~\cite{imunit}.
+%The potential drawback of nondeterminism is the inability of coverage
+%comparison across revisions, lack of reproducibility and consequent
+%difficulty in debugging. Developers and researchers relying on test
+%suite executions should take nondeterminism into account, by either
+%quantifying its effects, or by using tools that enforce deterministic
+%execution across versions~\cite{mx}, as appropriate.
+%Tests with nondeterministic expectations---such as the
+%ones presented above---are fragile and should be rewritten. For
+%example, tests relying on wall-clock time could be rewritten as
+%event-based tests~\cite{imunit}.
 
 % One way of dealing with nondeterminism is through multi-version
 % execution.  Our tool \mx~\cite{mx} allows both the old and the new revision to
@@ -392,7 +393,7 @@ considered, with \lighttpdtwo increasing from only
 \lighttpdtwoInitialCoverage to 49.37\% (ignoring the last two
 versions for which the regression suite fails), and \zeromq increasing
 from \zeromqInitialCoverage to \zeromqFinalCoverage. \beanstalkd is the only
-application whose coverage decrases over time, from \beanstalkdInitialCoverage
+application whose coverage decreases over time, from \beanstalkdInitialCoverage
 to \beanstalkdFinalCoverage. An interesting observation is that coverage
 evolution is not strongly correlated to the co-evolution of executable and test
 code. Even when testing is a phased activity, coverage remains constant
@@ -467,7 +468,7 @@ coverage lies in the respective range.}
 \label{fig:patch-coverage}
 \end{figure}
 
-\subsection{Patch Coverage}
+\subsection{Patch coverage}
 \label{sec:pcoverage}
 \label{sec:lpcoverage}
 
@@ -495,7 +496,7 @@ covered.
 
 \begin{table}[t]
 \centering
-\caption{Overall patch coverage bucketed by the size of the patch in ELOC. {\bf NP} is the number of patches in the bucket and {\bf C} is their overall coverage.  Only patches which add or modify executable code are considered.}
+\caption{Overall patch coverage bucketed by the size of the patch in ELOC. \textsc{NP} is the number of patches in the bucket and {\bf C} is their overall coverage.  Only patches which add or modify executable code are considered.}
 \begin{tabular}{lrcrcrc}
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{2}{c}{\sc $\le$10} & \multicolumn{2}{c}{\sc 11-100} & \multicolumn{2}{c}{\sc >100}  \\
@@ -509,6 +510,7 @@ covered.
 \lighttpdtwo & \lighttpdtwoOverallPatchCovEntriesZero & \lighttpdtwoOverallPatchCovZero & \lighttpdtwoOverallPatchCovEntriesTen & \lighttpdtwoOverallPatchCovTen & \lighttpdtwoOverallPatchCovEntriesHundred & \lighttpdtwoOverallPatchCovHundred \\
 \memcached & \memcachedOverallPatchCovEntriesZero & \memcachedOverallPatchCovZero & \memcachedOverallPatchCovEntriesTen & \memcachedOverallPatchCovTen & \memcachedOverallPatchCovEntriesHundred & \memcachedOverallPatchCovHundred \\
 \redis & \redisOverallPatchCovEntriesZero & \redisOverallPatchCovZero & \redisOverallPatchCovEntriesTen & \redisOverallPatchCovTen & \redisOverallPatchCovEntriesHundred & \redisOverallPatchCovHundred \\
+\vim & \vimOverallPatchCovEntriesZero & \vimOverallPatchCovZero & \vimOverallPatchCovEntriesTen & \vimOverallPatchCovTen & \vimOverallPatchCovEntriesHundred & \vimOverallPatchCovHundred \\
 \zeromq & \zeromqOverallPatchCovEntriesZero & \zeromqOverallPatchCovZero & \zeromqOverallPatchCovEntriesTen & \zeromqOverallPatchCovTen & \zeromqOverallPatchCovEntriesHundred & \zeromqOverallPatchCovHundred \\
 \bottomrule
 \end{tabular}
@@ -525,12 +527,12 @@ coverage of patches with $\le$10 ELOC is higher than for those with
 \textgreater100 ELOC, but the coverage of the middle-size category varies.
 
 Finally, the first column in Table~\ref{tbl:latent} shows the overall
-patch coverage, \ie the percentage of covered ELOC across all
-patches.  For \beanstalkd, \binutils, \git and \memcached, it is within five
-percentage points from the overall program coverage, while for the
-other benchmarks it is substantially lower---for example, the average
-overall program coverage in \redis is \redisCoverageAverage, while the
-overall patch coverage is only \redisOverallPatchCoverage.
+patch coverage, \ie the percentage of covered ELOC across all patches.  For
+\beanstalkd, \binutils, \git, \memcached and \vim, it is within five percentage
+points from the overall program coverage, while for the other benchmarks it is
+substantially lower---for example, the average overall program coverage in
+\redis is \redisCoverageAverage, while the overall patch coverage is only
+\redisOverallPatchCoverage.
 
 
 %% \noindent
@@ -575,6 +577,7 @@ discussed in Section~\ref{sec:design}.
 \lighttpdtwo    & \lighttpdtwoOverallPatchCoverage  & \lighttpdtwoLatentOne  & \lighttpdtwoLatentFive  &  \lighttpdtwoLatentTen \\
 \memcached   & \memcachedOverallPatchCoverage & \memcachedLatentOne & \memcachedLatentFive &  \memcachedLatentTen \\
 \redis       & \redisOverallPatchCoverage     & \redisLatentOne     & \redisLatentFive     &  \redisLatentTen \\
+\vim      & \vimOverallPatchCoverage    & \vimLatentOne    & \vimLatentFive    &  \vimLatentTen \\
 \zeromq      & \zeromqOverallPatchCoverage    & \zeromqLatentOne    & \zeromqLatentFive    &  \zeromqLatentTen \\
 \bottomrule
 \end{tabular}
@@ -758,7 +761,8 @@ reported---they suggest the limitations of line coverage as a testing
 metric, with bugs still being introduced even by patches which are
 fully covered by the regression test suite. Therefore, even well-tested
 code may contain bugs, which can manifest themselves after prolonged
-operation in the production environment.
+operation in the production environment, and runtime technologies like
+NVX can be useful in those scenarios.
 
 %Therefore, even for
 %well-tested code, tools which thoroughly check each program statement
