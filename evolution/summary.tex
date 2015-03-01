@@ -1,13 +1,15 @@
 \section{Summary}
 \label{evolution:summary}
 
-We believe the presented results provides evidence in support of our
-assumptions. We have shown that:%
+In this chapter, we have presented a comprehensive study of evolution of
+\numSystems popular open-source systems. We believe the presented results
+provides evidence in support of our assumptions. We have shown that:%
 \begin{inparaenum}[(1)]
-\item many popular open-source projects have insufficient test suite coverage,
-\item even well tested and fully covered code may contain bugs, and
-\item changes to the external behaviour are sporadic and rather small.
+\item software patches are small and fairly localized,
+\item changes to the external behaviour are sporadic and rather small, and
+\item even well tested and fully covered code may contain bugs.
 \end{inparaenum}
-These results, while rather unwelcome from the general software reliability
-perspective, are encouraging for the viability and applicability of our
-multi-version execution approach.
+Furthermore, we have revealed that non-determinism is not a problem if we can
+intercept sources of non-determinism (\eg time and date, random number
+generators or network events). These results are encouraging for the viability
+and applicability of the multi-version execution technique.

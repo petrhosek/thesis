@@ -54,16 +54,16 @@ one program revision, as well as collect the metrics of interest, such as code
 size and coverage. The containers are remotely controlled through SSH using the
 \fabric\footnote{\url{http://fabfile.org/}} framework.
 
-\paragraph{Configuration file.} We used a modular pipeline architecture, which
-makes it possible to analyse new systems with modest effort. A potential user
-of our infrastructure only needs to provide a Python configuration file
-describing the system. A minimal file provides the name of the system, its \git
-repository location, a method to compile the system, \eg install dependencies
-and run the appropriate \stt{make} command, and a method to run the regression
-tests, \eg run the \stt{make test} command.  Finally, the configuration file
-can also specify an {\em end revision} and a specific number of revisions to
-analyse.  For accurate test suite size measurements, the files or folders which
-make up the test suite can also be indicated.
+\paragraph{Project configuration.} We used a modular pipeline architecture,
+which made it possible to automate the analysis and minimise the manual effort.
+The analysis is driven by a Python configuration file describing the system. A
+minimal file provides the name of the system, its \git repository location, a
+method to compile the system, \eg install dependencies and run the appropriate
+\stt{make} command, and a method to run the regression tests, \eg run the
+\stt{make test} command.  Finally, the configuration file can also specify an
+{\em end revision} and a specific number of revisions to analyse.  For accurate
+test suite size measurements, the files or folders which make up the test suite
+can also be indicated.
 
 For each revision, we collect several static and dynamic metrics.  The static
 metrics are obtained either directly from the version control system (\eg the
@@ -82,9 +82,7 @@ primary metrics using a set of scripts.
 %% safely ignore it most of the time when evaluating test suite
 %% augmentation or coverage-improvement techniques.
 
-\paragraph{Bug data.} One possible application of our infrastructure is finding
-useful data about software bugs and correlating them with the static and
-dynamic metrics collected. For our study, we mined bug data from both software
+\paragraph{Bug data.} For our study, we mined bug data from both software
 repositories and, where available, bug tracking systems.  We automatically
 obtained a list of candidate bug-fixing revisions by iterating through the list
 of commits and checking the commit message for words such as {\em fix}, {\em
@@ -138,7 +136,7 @@ tested within the next few revisions after they were created
 distance~\cite{levenshtein1966binary} is defined as the minimum number of
 operations (insertions, deletions, and substitutions) required to transform one
 string into the other. We use edit distance to measure the similarity of the
-system call traces (\S\ref{sec:behavior-evolution}). However, these traces are
+system call traces (\S\ref{evolution:external}). However, these traces are
 not strings, rather sequences of strings. To allow the use of edit distance on
 these sequences, we use a hashing scheme, which assigns each string in the
 sequence a 32-bit number. The algorithm then calculates edit distance between
@@ -151,14 +149,15 @@ OpenMP to parallelize this implementation to take advantage of all available
 cores. This implementation only keeps one line of the computation matrix, and
 divides this line into strides which are then processed by different cores.
 
-\paragraph{Cloud deployment.} To enable large-scale data collection and
-processing, we deployed the infrastructure to our private cloud. We have built
-our system around a standard set of tools: \packer for building custom
-\docker-enabled machine images, \vagrant for controlling and provisioning the
-virtual machines based on these images, a private \docker registry for serving
-\docker containers containing the driver scripts, and a {\em fabfile} for
-orchestrating the entire cluster. The same set of tools and scripts can be used
-to deploy the infrastructure to different private or public clouds.
+\paragraph{Cloud deployment.} Since compilation and execution of a large number
+of revisions can be very time-consuming, especially for larger projects, we
+deployed the infrastructure to our private cloud and used multiple machines to
+run the analysis in parallel on diifferent subset of revisions (\ie
+\emph{sharding}). We have built our system around a standard set of tools:
+\packer for building custom \docker-enabled machine images, \vagrant for
+controlling and provisioning the virtual machines based on these images, a
+private \docker registry for serving \docker containers containing the driver
+scripts, and a \emph{fabfile} for orchestrating the entire cluster.
 
 %% \subsection{High-Level Questions} \label{ssec:highlevel}
 

@@ -11,7 +11,7 @@
 
 \begin{figure}[t]
   \begin{center}
-    \includegraphics[width=0.75\textwidth]{efficient-execution/figures/address-space}
+    \includegraphics[width=\textwidth]{efficient-execution/figures/address-space}
     \caption{Setup of address spaces and communication channels.}
     \label{fig:setup}
   \end{center}
@@ -242,7 +242,7 @@ registers and returns to the original caller (using
 interrupt). The system call entry point also implements support for
 restarting system calls (\ie signaled by the \lstinline`-ERESTARTSYS`
 error code). This is used in certain scenarios supported by \varan
-such as transparent failover (\S\ref{sec:failover}).
+such as transparent failover (\S\ref{sec:applications}).
 
 The internal system call table can be easily changed to accommodate
 various application scenarios.  In particular, the only difference

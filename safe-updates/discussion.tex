@@ -11,10 +11,10 @@ execution and the different trade-offs involved.
 %% availability/reliability/availability and strict
 %% correctness/performance/energy consumption.
 
-\paragraph{Types of code changes.} In order for \mx to be successful, the
+\paragraph{Types of code changes} In order for \mx to be successful, the
 external behaviour of the versions that are run in parallel has to be similar
 enough to allow us to synchronise their execution.  Our empirical study in
-\sref{sec:behavior-evolution} shows that changes to the external behaviour of
+\S\ref{evolution:external} shows that changes to the external behaviour of
 an application are often minimal, so our approach should work well with
 versions that are not too distant from one another.  Similarly, our system
 relies on the assumption that versions re-converge to the same behaviour after
@@ -25,7 +25,7 @@ provides a useful re-convergence point.  Our approach is also suitable to local
 code changes, which have small propagation distances, thus ensuring that the
 different versions will eventually re-converge to the same behaviour.
 
-\paragraph{Trade-offs involved.} Our approach is targeted toward scenarios
+\paragraph{Trade-offs involved} Our approach is targeted toward scenarios
 where the availability, reliability and security of a software system is more
 important than strict correctness, high performance and low energy consumption.  
 
@@ -43,14 +43,14 @@ detected.
 %% non-crashing divergence is detected, \mx can simply continue execution
 %% with a single program version.
 
-\paragraph{CPU utilization.} \mx incurs a performance overhead, as discussed in
+\paragraph{CPU utilization} \mx incurs a performance overhead, as discussed in
 \sref{sec:performance}.  In our experience, \mx is readily deployable to
 interactive applications such as command-line utilities, text editors and other
 office tools, where the performance degradation is not noticeable to the user.
 We believe it is also applicable to server applications where availability is
 more important than high performance.  \mx is not applicable to patches that
 fix performance bugs, as the system runs no faster than the slowest
-version.\looseness=-1
+version.
 
 Our approach of using idle CPU time to run additional versions also increases
 energy consumption.  However, it is interesting to note that idle CPUs are not
@@ -61,7 +61,7 @@ worse~\cite{barroso2007}.
 % and therefore might not be applicable to energy-constrained devices
 %such as smartphones.
 
-\paragraph{Deployment strategy.} While our approach eases the decision of
+\paragraph{Deployment strategy} While our approach eases the decision of
 applying a software update---as incorporating a new version would never
 decrease the security and reliability of the overall multi-version
 application---the number of versions that can be run in parallel is limited,

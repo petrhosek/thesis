@@ -1,36 +1,30 @@
-\section{Applications}
+\section{Transparent failover}
 \label{sec:applications}
 
-Same as for other NVX systems, the primary application of \varan is
-\emph{transparent failover}, \ie the ability to transparently switch over to
-the non-crashing version in the event of failure without any disruption in the
-service. Furthemore, as an execution runtime targeted towards multi-version
-execution applications, \varan also supports running multiple different
-software versions in parallel.  We discuss both of these scenarios in detail
-below.
+%NVX systems introduce a variety of opportunities for increasing
+%software reliability and availability via transparent failover.  For
+%instance, one can run in parallel multiple variants of an application with
+%different memory layouts, different software revisions or different
+%implementations of a given interface to survive bugs that occur 
+%only in some of them.   
 
-\subsection{Transparent failover}
-\label{sec:failover}
-
-%[Cite \cite{rx,fo,mx}]
-
-NVX systems introduce a variety of opportunities for increasing
-software reliability and availability via transparent failover.  For
-instance, one can run in parallel multiple variants of an application with
-different memory layouts, different software revisions or different
-implementations of a given interface to survive bugs that occur 
-only in some of them.   
-
+The primary application of \varan is \emph{transparent failover}, \ie the
+ability to transparently switch over to the non-crashing version in the event
+of failure without any disruption in the service.
 \varan makes it easy to implement transparent failover.  When one of the
 versions crashes, the \lstinline`SIGSEGV` signal handler installed in each
-version notifies the coordinator, which decides what restart strategy
-to use.  When one of the followers crashes, the coordinator unsubscribes it
-from the list of currently-running followers, and discards it without
-affecting other followers.  When the leader crashes, it designates one
-of the followers as the new leader (currently the one with the
-smallest internal ID), and notifies it to switch its system call table
-(\S\ref{sec:rewriting}) to that of the leader, and to restart the last
-system call while discarding the old (crashed) leader.
+version notifies the coordinator, which decides what restart strategy to use.
+When one of the followers crashes, the coordinator unsubscribes it from the
+list of currently-running followers, and discards it without affecting other
+followers.  When the leader crashes, it designates one of the followers as the
+new leader (currently the one with the smallest internal ID), and notifies it
+to switch its system call table (\S\ref{sec:rewriting}) to that of the leader,
+and to restart the last system call while discarding the old (crashed) leader.
+
+%Furthermore, as an execution
+%runtime targeted towards multi-version execution applications, \varan also
+%supports running multiple different software versions in parallel.  We discuss
+%both of these scenarios in detail below.
 
 To demonstrate support for transparent failover, we reproduced a
 \redis
@@ -47,25 +41,45 @@ the latency increases from \redisnormallatency to
 \redisfailoverlatency.  In both cases, we observed no extra
 degradation in throughput for the commands that follow.
 
-While \mx can recover from the crash unlike \varan, which discards the crashing
-version, \mx can only run two versions in parallel while \varan can run
-arbitrary number of versions with significantly lower performance overhead as
-shown in Section~\ref{sec:comparison}.
+This example also demonstrates the difference between \mx and \varan; while \mx
+can recover from the crash (\S\ref{sec:redis}) unlike \varan, which discards
+the crashing version, \mx can only run two versions in parallel while \varan
+can run arbitrary number of versions with significantly lower performance
+overhead as shown in Section~\ref{sec:comparison}.
 
 As an additional experiment, we ran revisions \lstinline`2437` and
-\lstinline`2438` of \lighttpd (also used in the evaluation of \mx),
-the latter of which introduced a crash bug.  We then set up a client
-that triggers the bug and measured the latency for that request. Both when the
-buggy version was the leader or a follower, there was no significant increase
-in latency, which remained at around~\lighttpdnormallatency.
+\lstinline`2438` of \lighttpd (also used in the evaluation of \mx in
+Section~\ref{sec:lighttpd}), the latter of which introduced a crash bug.  We
+then set up a client that triggers the bug and measured the latency for that
+request. Both when the buggy version was the leader or a follower, there was no
+significant increase in latency, which remained at
+around~\lighttpdnormallatency.
 %set up a client that triggers the bug and measured the increase in
 %latency for that command. As for the \redis scenario, there is no
 %increase in latency when the buggy version is a follower.  When it is
 %the leader, the latency increases from \lighttpdnormallatency to
 %\lighttpdfailoverlatency.  
 
-\subsection{Multi-version execution}
+\subsection{Handling divergent behaviour}
 \label{sec:mv-execution}
+
+\begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:lighttpd-suid,caption={\lighttpd SUID bit detection patch}]
+@@ -66,0 +67,11 @@
++#ifdef HAVE_GETUID
++# ifndef HAVE_ISSETUGID
++
++static int l_issetugid() {
++       return (geteuid() != getuid() || getegid() != getgid());
++}
++
++#  define issetugid l_issetugid
++# endif
++#endif
++
+@@ -592 +603 @@ int main (int argc, char **argv) {
+-       if (!i_am_root && (geteuid() == 0 || getegid() == 0)) {
++       if (!i_am_root && issetugid()) {
+\end{lstlisting}
 
 Multiple different software versions (revisions) can be run inside an NVX
 system as long as they all issue the same sequence of system calls. This
@@ -75,23 +89,22 @@ limitation is due to the fact that prior NVX systems run versions in lockstep
 Because \varan does not run the versions in lockstep and can use system call
 rewrite rules, it can often overcome this limitation. To illustrate, we used
 several \lighttpd revisions from our evolution study
-(\S\ref{sec:behavior-evolution}) which introduced new system calls and as such
+(\S\ref{evolution:external}) which introduced new system calls and as such
 cannot be run in parallel by prior NVX systems that rely on lockstep execution.
 
-As a first experiment, we ran revision \lstinline`2435` as
-leader together with revision \lstinline`2436` as follower.  Revision
-\lstinline`2436` introduces two additional checks using the
-\lstinline`getuid` and \lstinline`getgid` system calls.  More
-precisely, revisions until and including \lstinline`2435` used
-\lstinline`geteuid()` and \lstinline`getegid()` C library functions to
-check the user account under which the server is being run, before
-issuing an \lstinline`open` system call.  This resulted in a sequence
-of \lstinline`geteuid`, \lstinline`getegid` and \lstinline`open`
-system calls.  Revision \lstinline`2436` replaced the use of the
-aformentioned functions with \lstinline`issetugid()` which changed the
-system call sequence to \lstinline`geteuid`, \lstinline`getuid`,
-\lstinline`getegid`, \lstinline`getgid`, followed by \lstinline`open`
-as before.
+As a first experiment, we ran revision \lstinline`2435` as leader together with
+revision \lstinline`2436` as follower. The patch is shown in
+Listing~\ref{lst:lighttpd-suid}. Revision \lstinline`2436` introduces two
+additional checks using the \lstinline`getuid` and \lstinline`getgid` system
+calls.  More precisely, revisions until and including \lstinline`2435` used
+\lstinline`geteuid()` and \lstinline`getegid()` C library functions to check
+the user account under which the server is being run, before issuing an
+\lstinline`open` system call.  This resulted in a sequence of
+\lstinline`geteuid`, \lstinline`getegid` and \lstinline`open` system calls.
+Revision \lstinline`2436` replaced the use of the aformentioned functions with
+\lstinline`issetugid()` which changed the system call sequence to
+\lstinline`geteuid`, \lstinline`getuid`, \lstinline`getegid`,
+\lstinline`getgid`, followed by \lstinline`open` as before.
 
 To allow for this divergence, we used the custom BPF filter shown in
 Listing~\ref{lst:lighttpd}.  The filter is executed by the

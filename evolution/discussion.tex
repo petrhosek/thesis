@@ -1,16 +1,6 @@
 \section{Discussion about empirical studies}
 \label{evolution:discussion}
 
-We believe the presented results provides evidence in support of our
-assumptions. We have shown that:%
-\begin{inparaenum}[(1)]
-%\item many popular open-source projects have insufficient test suite coverage,
-\item even well tested and fully covered code may contain bugs, and
-\item changes to the external behaviour are sporadic and rather small.
-\end{inparaenum}
-These results are encouraging for the viability and applicability of our
-multi-version execution approach.
-
 % Despite the important role that regression test suites play in
 % software testing, there are surprisingly few empirical studies that
 % report how they co-evolve with the application code, and the coverage
@@ -22,10 +12,9 @@ multi-version execution approach.
 % this is also the first study that specifically examines patch
 % coverage.
 
-Furthermore, our experience has revealed two main types of challenges for
-conducting similar or larger studies that involve running a large number of
-program revisions. The first category relates to the inherent difficulty of
-running revisions:
+Our experience has revealed two main types of challenges for conducting similar
+or larger studies that involve running a large number of program revisions. The
+first category relates to the inherent difficulty of running revisions:
 
 \begin{enumerate}
 \item Decentralised repositories have non-linear histories, so even

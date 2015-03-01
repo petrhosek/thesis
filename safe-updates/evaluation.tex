@@ -1,14 +1,10 @@
-\section{Reliability evaluation}
+\section{Failure recovery}
 \label{sec:reliability-evaluation}
 
 To evaluate our approach, we show that \mx can survive crash bugs in several
-real applications (\S\ref{sec:surviving}). We then examine the question of how
-far apart can be the versions run by \mx (\S\ref{sec:bounds}), and discuss
-\mx's performance overhead (\S\ref{sec:performance}).
-
-\subsection{Fault recovery}
-\label{sec:surviving}
-
+real applications. %(\S\ref{sec:surviving}). We then examine the question of how
+%far apart can be the versions run by \mx (\S\ref{sec:bounds}), and discuss
+%\mx's performance overhead (\S\ref{sec:performance}).
 We have evaluated \mx using a set of bugs in three applications: \gnu
 \coreutils, \redis and \lighttpd. We discuss each application in turn below.
 
@@ -327,7 +323,7 @@ system calls.
 We ran our experiments on a four-core server with 3.50~GHz Intel
 Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 
-\paragraph{\spec.}
+\paragraph{\spec}
 To measure the performance overhead of our prototype, we first used
 the standard \spec\footnote{\url{http://www.spec.org/cpu2006/}}
 benchmark suite.  Figure~\ref{fig:spec} shows the performance of \mx
@@ -348,7 +344,7 @@ though this work used SPEC~CPU2000 which has already been retired).
 %% $n$-fold slowdown, so the relatively high measure overhead is
 %% therefore unsurprising.
 
-\paragraph{\gnu~\coreutils.} The six \coreutils applications discussed in 
+\paragraph{\gnu~\coreutils} The six \coreutils applications discussed in 
 \sref{sec:coreutils} are mostly used in an interactive fashion via the
 command-line interface (CLI). For such applications, a high performance
 overhead is acceptable as long as it is not perceptible to the user;
@@ -364,39 +360,36 @@ which the response time with \mx stays under the 100ms threshold.  For
 overhead), and for \shasum \shasumCutoffSize (\shasumCutoffOver
 overhead).
 
-
-
-\paragraph{\redis and \lighttpd.} To measure the performance overhead for \redis, 
-we used
-the \redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}}
-utility, which is part of the standard \redis distribution and
-simulates \textstt{GET}/\textstt{SET} operations done by $N$ clients
-concurrently, with default workload.  For \lighttpd, we used the
+\paragraph{\lighttpd} For \lighttpd, we used the
 \httpload\footnote{\url{http://www.acme.com/software/http_load/}}
-multiprocessing test client that is also used by the \lighttpd
-developers.  Both of these standard benchmarks measure the end-to-end
-time as perceived by users.  As a result, we performed two sets of
-experiments: (1) with the client and server located on the same
-machine, which represents the worst case performance-wise for \mx; and
-(2) with the client and server located on different continents (one in
-England and the other in California), which represents the best case.
+multiprocessing test client that is also used by the \lighttpd developers. This
+benchmark measures the end-to-end time as perceived by users. As a result, we
+performed two sets of experiments: (1) with the client and server located on
+the same machine, which represents the worst case performance-wise for \mx; and
+(2) with the client and server located on different continents (one in England
+and the other in California), which represents the best case. The overhead for
+\lighttpd varies from \minLighttpdRemote to \maxLighttpdRemote in the remote
+scenario, and from \minLighttpdOver to \maxLighttpdOver in the local scenario.
+Despite the relatively large overhead in the local experiments, the remote
+overhead is negligible because times are dominated by the network latency
+(which in our case is over $150$ms).
 
-The overhead for \redis varies, depending on the operation being
-performed, from \minRedisRemote to \maxRedisRemote in the remote
-scenario, and from \minRedisOver to \maxRedisOver in the local
-scenario.  The overhead for \lighttpd varies from \minLighttpdRemote
-to \maxLighttpdRemote in the remote scenario, and
-from \minLighttpdOver to \maxLighttpdOver in the local scenario.
-Despite the relatively large overhead in the local experiments, the
-remote overhead is negligible because times are dominated by the
-network latency (which in our case is over $150$ms).
+\paragraph{\redis} To measure the performance overhead for \redis, we used the
+\redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}} utility,
+which is part of the standard \redis distribution and simulates
+\textstt{GET}/\textstt{SET} operations done by $N$ clients concurrently, with
+default workload. Same as in the case of \lighttpd, we performed two sets of
+experiments, one for the local scenario and one for the remote scenario. The
+overhead for \redis varies, depending on the operation being performed, from
+\minRedisRemote to \maxRedisRemote in the remote scenario, and from
+\minRedisOver to \maxRedisOver in the local scenario. 
 
-As a result, we believe \mx is most suitable for scenarios for which
-its execution overhead does not degrade the performance of the
-end-to-end task, such as the remote \redis and \lighttpd scenarios
+Given the results presented hereinbefore, we believe \mx is most suitable for
+scenarios for which its execution overhead does not degrade the performance of
+the end-to-end task, such as the remote \redis and \lighttpd scenarios
 discussed above, or interactive tasks such as those performed using
-command-line utilities, where users would not notice the overhead as
-long as the response time stays within a certain range.
+command-line utilities, where users would not notice the overhead as long as
+the response time stays within a certain range.
 
 %% \mx's performance overhead is strongly correlated with the frequency of
 %% system calls that have to be intercepted.  Therefore, we could also

@@ -18,7 +18,7 @@ set grid y
 
 set bmargin 8.0
 
-set yrange [0.0:1.2]
+set yrange [0.0:1.4]
 
 set key outside center top horizontal autotitle columnheader reverse samplen 1 title ""
 

@@ -55,17 +55,14 @@
    }[keywords,comments,strings]
 
 \lstdefinelanguage{diff}{
-   moredelim=[l][\bfseries]{@@},
-   moredelim=[l]-,
-   moredelim=[l]+,
-   moredelim=[l]{---},
-   moredelim=[l]{+++},
-%   morecomment=[f][\bfseries]{@@},
-%   morecomment=[f]-,
-%   morecomment=[f]+,
-%   morecomment=[f]{---},
-%   morecomment=[f]{+++},
+   moredelim=[s][\bfseries]{@@}{@@},%
+   moredelim=*[l]-,%
+   moredelim=*[l]+,%
+   moredelim=*[l]{---},%
+   moredelim=*[l]{+++},%
 }
+
+%\usemintedstyle{bw}
 
 \usepackage[binary-units,group-separator={,}]{siunitx}
 \sisetup{per-mode=symbol}
@@ -222,7 +219,6 @@
   urlcolor=pantone527
 }
 
-\input{evolution/rqs}
 \input{evolution/results}
 \input{safe-updates/results}
 \input{efficient-execution/results}
@@ -267,16 +263,16 @@ security of software systems. The key component of such $N$-version execution
 (NVX) systems is a runtime monitor that enables the execution of multiple
 versions in parallel.
 
-Unfortunately, existing monitors impose either a large performance overhead
-and/or rely on intrusive kernel-level changes.  Moreover, none of the existing
+Unfortunately, existing monitors impose either a large performance overhead or
+rely on intrusive kernel-level changes.  Moreover, none of the existing
 solutions scales well with the number of versions, since the runtime monitor
 acts as a performance bottleneck. Finally, none of the existing monitors is
 suited for executing mutliple different versions in parallel.
 
 In this thesis, we present two different designs for building such monitors;
-one, called \varan, aimed at running large number of versions side-by-side with
-low overhead, and second, called \mx, focused on surviving crashes caused by
-bugs introduced in software updates.
+one, called \varan, aimed at running a large number of versions side-by-side
+with low overhead, and second, called \mx, focused on surviving crashes caused
+by bugs introduced in software updates.
 
 \varan is an NVX framework that combines binary rewriting with a novel
 event-streaming architecture to significantly reduce performance overhead and
@@ -307,11 +303,11 @@ services.
 \input{multi-version/multi-version}
 \input{evolution/evolution}
 
-\input{efficient-execution/efficient-execution}
 \input{safe-updates/safe-updates}
+\input{efficient-execution/efficient-execution}
 
-\input{applications/applications}
 \input{related/related}
+\input{applications/applications}
 \input{conclusion/conclusion}
 \addcontentsline{toc}{chapter}{References}
 {

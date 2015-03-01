@@ -69,7 +69,7 @@ Sha in~\cite{lui01} uses Bubblesort as a runtime specification for Quicksort.
 %more cost-effective to develop $N$ average versions rather than one good
 %version.
 
-\section{Software updates}
+%\section{Software updates}
 
 % Recent years have seen a growing interest in using diversity as a way to
 % increase the reliability and security of software systems.  One form of
@@ -164,134 +164,6 @@ deployment or implementation of security honeypots.
 % combining multiple software versions to survive failures.
 
 \input{multi-version/scenarios}
-
-\section{Parallel software execution}
-
-% All the scenarios presented above describe software updates which, while trying
-% to fix existing bugs or refactor the code, also introduced new bugs that caused
-% the code to crash under certain conditions. Improving the reliability of such
-% updates is the main goal of our proposed approach: running both the old and the
-% new version in parallel after an update can enable applications to survive more
-% errors, without giving up the new features introduced by the update.
-
-% The bottom line for all the presented scenarios is that for significant amount
-% of time, \ie about one year in case of \lighttpd and six months in case of
-% \redis, users affected by buggy patches essentially had to decide between%
-% \begin{inparaenum}[(1)]
-% \item incorporating other security and bug fixes added to the code, but being
-%   vulnerable to these crash bug, and
-% \item giving up on these security and bug fixes and using an old version of
-%   \lighttpd or \redis, which are not vulnerable to these newly introduced bugs.
-% \end{inparaenum}
-% Note that this is particularly true for the period between the time when the
-% bug was introduced and the time it was diagnosed (\ie eleven months in case of
-% \lighttpd, six months in case of \redis), since during this period most users
-% would not know how to change the server's configuration to avoid the crash.
-
-All the scenarios presented above describe software updates which, while trying
-to fix existing bugs or refactor the code, also introduced new bugs that caused
-the code to crash under certain conditions. The bottom line for all these
-scenarios is that for significant amount of time, \ie about one year in the
-case of \lighttpd and six months in case of \redis, users affected by buggy
-patches essentially had to decide between%
-\begin{inparaenum}[(1)]
-\item incorporating other security and bug fixes added to the code, but being
-  vulnerable to these crash bugs, and
-\item giving up on these security and bug fixes and using an old version of
-  \lighttpd or \redis, which are not vulnerable to these newly introduced bugs.
-\end{inparaenum}
-Note that this is particularly true for the period between the time when the
-bug was introduced and the time it was diagnosed (\ie eleven months in case of
-\lighttpd, six months in case of \redis), since during this period most users
-would not know how to change the server's configuration to avoid the crash.
-
-Our approach aims to provide users with a third choice; when a new version
-arrives, instead of replacing the old version, we will run both. The goal
-of our approach is to run multiple versions of an application in parallel, and
-synchronize their executions so that%
-\begin{inparaenum}[(1)]
-\item users are given the illusion that they interact with a single version of
-  the application,
-\item the multi-version application is at least as reliable and secure as one
-  of the individual versions in isolation, and
-\item the synchronization mechanism incurs a reasonable performance overhead.
-\end{inparaenum}
-This applies to our first scheme presented in Section~\ref{overview:problem}.
-For our second scheme, where we survive errors, if user is willing sacrifices
-some of the performance being more lenient with respect to the third goal, we
-can make the second goal more stringent by requiring the multi-version
-application to be as reliable as any of the two versions ran in parallel.
-
-\begin{figure}[t]
-  \begin{center}
-    \includegraphics[width=0.5\textwidth]{multi-version/figures/platform}
-    \caption{A multi-version execution platform running conventional and multi-version
-      applications side by side.}
-    \label{fig:mx-platform}
-  \end{center}
-\end{figure}
-
-As shown in Figure~\ref{fig:mx-platform}, our solution requires a form of
-virtualization framework that would coordinate the execution of multiple
-application versions, and mediate their interaction with the external
-environment. Various such frameworks have been designed in the past in the
-context of running multiple automatically generated variants of a given
-application in parallel~\cite{diehard06,cox2006,orchestra09}, and some of the
-techniques proposed in prior work can be reused in our context.  To be
-practical, this coordination mechanism has to incur a reasonable overhead on
-top of native execution and ensure that the overall system is able to scale up
-and down the number of software versions run in parallel in order to balance
-conflicting requirements such as performance, reliability, security and energy
-consumption.
-
-\begin{figure}[t]
-  \begin{center}
-    \includegraphics[width=0.5\textwidth]{multi-version/figures/lockstep}
-    \caption{Lockstep execution of two version synchronized by the monitor.}
-    \label{fig:mx-platform}
-  \end{center}
-\end{figure}
-
-One particular challenge for our approach is to detect any divergences between
-different software versions, resolve them in such a way as to increase the
-overall reliability of the application.%, and finally synchronize again the
-%different versions after their executions reconverge to the same behavior.  Of
-%course, we also need to handle the case in which the executions of different
-%versions fail to reconverge to the same behavior after sufficient time.
-Selecting the ``correct'' behaviour of an application when different versions
-disagree is of course not possible in the general case without having access to
-a high-level specification.  However, one could%
-\begin{inparaenum}[(1)]
-\item focus on universal correctness properties, such as the absence of
-  crashes, and
-\item use various heuristics such as majority voting and favoring the latest
-  application versions.
-\end{inparaenum}
-Our approach is to resolve a divergence by always using the behaviour of the
-version that has not crashed, and favour the behaviour of the latest version in
-all other cases. %In this way, we ensure that the overall application has fewer
-%crashes than any of the individual versions, while still using the new security
-%and bug fixes implemented in the latest version.
-
-% Note that one key aspect on which our approach relies is
-% \textit{having the different versions be alive at all times}.  This ensures
-% that applications can survive crashes that occur at different points
-% in different versions, but adds the extra challenge of restarting
-% crashed versions.
-
-%% Once divergences are detected, we need to decide what output should be
-%% selected as the output of the multi-version system in order to improve
-%% overall reliability.  Many different strategies can be used, but the
-%% common goal is to ensure that the multi-version system will have
-%% strictly fewer errors than any of the individual versions.
-
-% Finally, our approach needs a deployment strategy to decide what versions are
-% run in parallel when the number of available resources (\eg, idle CPU cores) is
-% limited.  We envision several options---such as keeping the last $N$ released
-% versions (where $N$ is the number of available resources), or keeping several
-% very old stable versions---but the exact strategy should be decided on a
-% case-by-case basis. % using existing empirical data.
-
 \input{multi-version/rationale}
 \input{multi-version/scope}
 \input{multi-version/summary}

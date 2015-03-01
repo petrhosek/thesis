@@ -36,7 +36,16 @@ failures affecting the majority of the user-base therefore occur even in these
 applications. Such outages might cause significant financial losses and
 frustration among users, and it is therefore critical to avoid them.
 
-An example of such disruption is the recent Verizon
+The incident cause by the air traffic control failure in December 2014, which
+disrupted hundreds of flights to and from London airports, is a prime example.
+According to the interim report published by the official enquiry
+panel~\cite{natsfailure}, this incident was caused by system update in November 2014,
+which changed the number of available ``Atomic Functions''. Due to a latent
+defect, present in the system since its original development in 1990, this
+update caused the failure of the entire system following the action of the air
+traffic control, despite existing safety mechanism.
+
+Another example of such disruption is the recent Verizon
 outage~\cite{verizon-outage2014} of the billing and activation system,
 affecting a large number of users which were unable to log into their accounts.
 After the incident, Verizon issued the following statement:
@@ -53,14 +62,22 @@ hashtags.  This as well as other similar incidents (\eg
 Blogger~\cite{blogger-incident2011} or Facebook~\cite{facebook-incident2010})
 show the possible consequences of failed software updates.
 
-The problems caused by failed software updates are also not restricted to
-server applications or services. \vim,\footnote{\url{http://www.vim.org/}}
-arguably one of the most popular text editors, shipped with the popular
-Ubuntu Linux distribution has been also affected by failed software updates in
-the past.  In version 7.1.127, while trying to fix a memory leak, \vim
-developers introduced a double \textstt{free} bug that caused \vim to crash
-whenever the user tried to use a path completion feature.  This bug made its
-way into Ubuntu 8.04, affecting a large number of
+The problems caused by failed software updates are not restricted to services.
+\lighttpd,\footnote{\url{http://www.lighttpd.net/}} a popular web server used
+by numerous popular websites such as xkcd\footnote{\url{http://xkcd.com/}},
+introduced a bug, while trying to fix another bug in the implementation of HTTP
+ETags functionality, which caused the server crash on some configurations.
+This bug remained undetected for nine months, affecting number of users, and it
+took another three months to diagnose and fix the underlying
+issue.\footnote{\url{http://redmine.lighttpd.net/issues/2169}}
+
+The desktop applications are affected by failed software updates as well.
+\vim,\footnote{\url{http://www.vim.org/}} arguably one of the most popular text
+editors, shipped with the popular Ubuntu Linux distribution has been also
+affected by failed software updates in the past. In version 7.1.127, while
+trying to fix a memory leak, \vim developers introduced a double \textstt{free}
+bug that caused \vim to crash whenever the user tried to use a path completion
+feature.  This bug made its way into Ubuntu 8.04, affecting a large number of
 users.\footnote{\url{https://bugs.launchpad.net/ubuntu/+source/vim/+bug/219546}}
 
 \input{overview/problem}

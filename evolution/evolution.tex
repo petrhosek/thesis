@@ -19,22 +19,24 @@ execution of the software have received much less attention, due to the
 inherent difficulty of running and monitoring a large number of software
 versions.
 
-In this chapter, we present an empirical study concerning dynamic metrics which
-aims to answer some of the questions related to software evolution. To perform
-this study, we have built a flexible infrastructure that can be used to run
-each version of a system in isolation and collect static and dynamic software
-metrics from the test suite execution. We consider the tests to be an
-(imperfect) proxy for a real-world execution.
+In this chapter, we present an empirical study concerning both static and
+dynamic metrics which aims to answer some of the questions related to software
+evolution. To perform this study, we have built a flexible infrastructure that
+can be used to run each version of a system in isolation and collect static and
+dynamic software metrics from the test suite execution. We consider the tests
+to be an (imperfect) proxy for a real-world execution.
 
 %, using a lightweight virtualization environment based on software
 %containers, that can be deployed on a cluster of local or cloud machines.
 
 We have used this infrastructure to examine how code and tests co-evolve in
 \numSystems popular open-source systems. We report the main characteristics of
-software patches, analyse the evolution of program and patch coverage, assess
-the impact of non-determinism on the execution of test suites, and investigate
-whether the coverage of code containing bugs and bug fixes is higher than
-average.
+software patches, analyse the evolution of program from both the source code
+and the external behaviour perspective. We assess the impact of non-determinism
+on the execution of test suites. We also analyse the code and patch coverage,
+and investigate whether the coverage of code containing bugs and bug fixes is
+lower or higher than average; the latter of the two would provide an evidence
+that even well tested code still has bugs, in support of our technique.
 
 % While static metrics can provide useful insights into the construction and
 % evolution of software, there are many software engineering aspects which

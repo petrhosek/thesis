@@ -46,6 +46,7 @@
 
 % Listings
 \RequirePackage{listings}
+%\RequirePackage{minted}
 
 %
 % Colors

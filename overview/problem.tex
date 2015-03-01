@@ -1,40 +1,25 @@
 \section{Problem statement}
 \label{overview:problem}
 
-Software updates pose an important problem. We aim to tackle this problem using
-a simple yet effective \emph{multi-version execution} approach: instead of
-running only of the software versions, we run multiple versions in parallel; by
-carefully coordinating their executions and selecting the behaviour of the more
-reliable version when they diverge, we create a more secure and dependable
-multi-version application.
-
-\begin{figure}[t]
-  \begin{subfigure}[b]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{overview/figures/failover}
-    \caption{Failover scheme.}
-    \label{fig:failover-scheme}
-  \end{subfigure}
-  \quad
-  \begin{subfigure}[b]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{overview/figures/failrecovery}
-    \caption{Failure recovery scheme.}
-    \label{fig:failrecovery-scheme}
-  \end{subfigure}
-  \caption{Two schemes of multi-version execution presented in the thesis.}
-  \label{fig:mvx-schemes}
-\end{figure}
+Faults introduced by software updates pose an important problem. We aim to
+tackle this problem using a simple yet effective \emph{multi-version execution}
+approach: instead of running only of the software versions, we run multiple
+versions in parallel; by carefully coordinating their executions and selecting
+the behaviour of the more reliable version when they diverge, we create a more
+secure and dependable multi-version application.
 
 In this thesis, we present two different schemes for implementing the
-multi-version execution technique. The first is the failover scheme, shown in
-Figure~\ref{fig:failover-scheme}, in which $N$ different versions are being run
-in parallel, and if one these versions fail, we transparently switch to other
-one. This scheme offers minimal performance overhead enabling the use of large
-number of versions, but offers only limited guarantees in case of failure.  In
-addition, we propose a failure recovery scheme, conceptually depicted in
-Figure~\ref{fig:failrecovery-scheme}, which allows program to survive errors
-introduced by software patches. However, as a trade-off, this scheme introduces
-a larger perfomance penalty and is limited to only two versions being run in
-parallel.
+multi-version execution technique. The first is a \emph{failure recovery scheme},
+which allows program to survive errors introduced by software patches. The
+mechanism is completely autonomous and operates on the off-the-shelf-binaries
+making it easy to use and deploy. This scheme is limited to two versions run in
+parallel, with spare cores available, the overall performance overhead can be
+kept within acceptable limits. The second is a \emph{transparent failover
+scheme}, which allows $N$ versions to be run in parallel; if one these versions
+fail, the mechanism transparently switches to another version without any
+disruption in service. This scheme is designed to have minimal performance
+overhead enabling the use of large number of versions, but offers limited
+guarantees in case of a failure.
 
 % To tackle the software update problem, we propose \emph{multi-version
 % execution}, a novel technique, which fits within the overall theme of
@@ -60,7 +45,7 @@ processor time) made available by modern highly parallel platforms.  We believe
 that multi-version execution updates is a timely solution in the context of
 today's computing platforms~\cite{multiplicity}. The last decade has seen the
 emergence of new hardware platforms, ranging from multi-core processors to
-large-scale data centers, which provide an abundance of computational resources
+large-scale data centres, which provide an abundance of computational resources
 and a high degree of parallelism. These platforms already benefit applications
 with a great amount of inherent concurrency.  However, there has been
 relatively little progress in exploiting this abundance of resources to improve
@@ -91,13 +76,10 @@ consumption.
 There are three main challenges that we need to address to make this approach
 viable. First, we need to implement mechanisms for effectively coordinating the
 parallel execution of multiple program versions.  Second, when executions
-diverge, we need to select the output of the more reliable one, and potentially
-merge them back once executions converge again.  Finally, we need to ensure
-that the overall system is able to scale up and down the number of program
-versions run in parallel in order to balance conflicting requirements such as
-performance, reliability, and energy consumption.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+diverge, we need to select the output of the more reliable one.  Finally, we
+would like to be able to scale up and down the number of program versions run
+in parallel in order to balance conflicting requirements such as performance,
+reliability, and energy consumption.
 
 %We aim to tackle this problem using a simple but effective approach based on
 %application-level virtualization.  Whenever a new program update becomes
@@ -110,29 +92,3 @@ performance, reliability, and energy consumption.
 %be extended to work with a large number of versions run in parallel, and can
 %be applied to several different platforms, ranging from multicore processors
 %to large-scale data centers.  
-
-%The rest of this paper is organized as follows. Section~\ref{sec:background}
-%discusses related work and  Section~\ref{sec:motivation} motivates our
-%approach by using a scenarios based on Google Chrome web browser and Vim text
-%editor.  Then, Section~\ref{sec:challenges} discusses the main challenges that
-%we need to address to make this approach work in practice and
-%Section~\ref{sec:prototype} presents a protype implementing safe updates
-%in the context of multi-core processors. Finally, Section~\ref{sec:opportunities}
-%describes the potential future work and Section~\ref{sec:conclusion} concludes.
-
-%The rest of this paper is organized as follows. Section~\ref{sec:background}
-%discusses related work and  Section~\ref{sec:motivation} motivates our
-%approach by using a scenarios based on Google Chrome web browser and Vim text
-%editor.  Then, Section~\ref{sec:challenges} discusses the main challenges that
-%we need to address to make this approach work in practice and
-%Section~\ref{sec:prototype} presents a protype implementing safe updates
-%in the context of multi-core processors while Section~\ref{sec:evaluation}
-%shows a case study for our approach. Finally, Section~\ref{sec:opportunities}
-%describes future work and Section~\ref{sec:conclusion} concludes.
-
-%% Following work presents our approach approach, its advantages and
-%% disadvantages. Furthermore, it provides comparison and summarizes
-%% differences from the existing solutions aiming to achieve similar
-%% goals.
-
-

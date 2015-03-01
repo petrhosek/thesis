@@ -8,9 +8,7 @@
 \label{fig:codebase-evol}
 \end{figure}
 
-% \begin{question}
-%   \rqone
-% \end{question}
+% Do executable and test code evolve in sync?
 
 Figure~\ref{fig:codebase-evol} shows the evolution of each system in
 terms of ELOC.  As discussed above, we measured the number of ELOC in
@@ -84,11 +82,9 @@ during development. One exception is \git, where code and
 tests evolve more \textit{synchronously}, with a large number of
 revisions modifying both code and tests.
 
-\subsection{Main patch characteristics}
+\subsection{Patch characteristics}
 
-% \begin{question}
-%   \rqtwo
-% \end{question}
+% How many patches touch only code, only tests, none, or both?
 
 Each revision defines a \textit{patch}, which consists of the totality
 of changes introduced by that revision.  Software patches represent
@@ -161,20 +157,18 @@ accompanied by a test case. % exercising them.
 
 %%NB: hunks and files may appear due to more than executable code, i.e. removed code and non-executable code in code files
 
-% \begin{question}
-%   \rqthree
-% \end{question}
+% What is the distribution of patch sizes?
+% How spread out is each patch through the code?
 
-The size of a patch and the number of locations affected by it can
-provide useful guidance for longitudinal testing techniques.  The
-\textit{Lines} column in Table~\ref{tbl:exec-patch} provides
-information about the size of the executable code patches analysed in
-each system, measured in ELOC. Note that our measurements ignore
-changes in the amount of whitespace, \eg whitespace at the end of the
-line, % and equivalent sequences of one or more whitespace characters,
-because our target programming languages, C and C++, are insensitive
-to such modifications.  Most patches are small, with the median
-number of ELOC ranging from \redisPatchMedian to \gitPatchMedian.
+The size of a patch and the number of locations affected by it can provide
+useful guidance for the external behaviour changes---small, localized changes
+are likely to introduce small changes in behaviour. The \textit{Lines} column
+in Table~\ref{tbl:exec-patch} provides information about the size of the
+executable code patches analysed in each system, measured in ELOC. Note that
+our measurements ignore changes in the amount of whitespace, \eg whitespace at
+the end of the line, characters, because our target programming languages, C
+and C++, are insensitive to such modifications.  Most patches are small, with
+the median number of ELOC ranging from \redisPatchMedian to \gitPatchMedian.
 
 %% All systems exhibit a large standard deviation of this metric,
 %% corresponding to a skewed distribution of executable lines across the
@@ -209,6 +203,12 @@ order, \vimOneeFilePatches for \vim, \zeromqOneeFilePatches for \zeromq,
 \memcached, \redisOneeFilePatches for \redis, and \binutilsOneeFilePatches for
 \binutils.
 
+While these results are based on static analysis only, the fact that most
+patches are small and localized suggests that individual patches are likely to
+have only small impact on the external behaviour. This hypothesis is further
+confirmed in Section~\ref{evolution:external} which analyses the dynamic
+behaviour.
+
 %% \binutils: \binutilsOneELOCPatches, \binutilsOneeHunkPatches, \binutilsOneeFilePatches \\
 %% \git: \gitOneELOCPatches, \gitOneeHunkPatches, \gitOneeFilePatches \\
 %% \lighttpdtwo\: \lighttpdtwoOneELOCPatches, \lighttpdtwoOneeHunkPatches, \lighttpdtwoOneeFilePatches \\
@@ -216,12 +216,10 @@ order, \vimOneeFilePatches for \vim, \zeromqOneeFilePatches for \zeromq,
 %% \redis: \redisOneELOCPatches, \redisOneeHunkPatches, \redisOneeFilePatches \\
 %% \zeromq: \zeromqOneELOCPatches, \zeromqOneeHunkPatches, \zeromqOneeFilePatches \\
 
-\subsection{Overall code coverage}
+\section{Code coverage}
 \label{sec:code-cov}
 
-% \begin{question}
-%   \rqfour
-% \end{question}
+% Is test suite execution deterministic?
 
 \begin{table}[t]
 \centering
@@ -313,23 +311,40 @@ with respect to its test suite, while \redis, for example, contains on
 average \redisNonDetAverage lines that are nondeterministically
 executed.
 
+When reporting the overall coverage numbers, we accumulated the
+coverage information across all five runs.\footnote{With the exception
+of \git, where for convenience we considered a single run, as the
+number of lines affected by nondeterminism represent less than
+$0.3\%$ of the total codebase.} Therefore, the results aim to count a
+line as covered if the test suite {\em may} execute it.  The blue
+(upper) lines in Figure~\ref{fig:coverage} plot the overall line
+coverage for all benchmarks.  It can be seen that coverage level
+varies significantly, with \beanstalkd at one end achieving
+only \beanstalkdCoverageAverage coverage on average, and \git at the
+other achieving
+\gitCoverageAverage, while in-between \lighttpdtwo achieves
+\lighttpdtwoCoverageAverage, \redis~\redisCoverageAverage,
+\zeromq~\zeromqCoverageAverage, and
+\memcached~\memcachedCoverageAverage.
+
 We manually investigated the nondeterminism and pinpointed three
-sources: (1) multi-threaded code, (2) ordering of network events, and
-(3) nondeterminism in the test harness.  As an example from the first
-category, the test from \zeromq called \stt{test\_shutdown\_stress}
-creates 100 threads to check the connection shutdown sequence. In a
-small percentage of runs, this test was exposing a race
+sources:%
+\begin{inparaenum}[(1)]
+\item multi-threaded code,
+\item ordering of network events, and
+\item nondeterminism in the test harness.
+\end{inparaenum} As an example from the first category, the test from \zeromq
+called \stt{test\_shutdown\_stress} creates 100 threads to check the connection
+shutdown sequence. In a small percentage of runs, this test was exposing a race
 condition.\footnote{\url{https://github.com/zeromq/zeromq4-x/commit/de239f3}}
-In the third category, some \redis tests generate and store random
-integers, nondeterministically executing the code implementing the
-internal database data structures.  The \memcached test
-\stt{expirations.t} is representative of tests that make assumptions
-based on hardcoded wall-clock time values, which cause failures under
-certain circumstances. The test timings were previously
+In the third category, some \redis tests generate and store random integers,
+nondeterministically executing the code implementing the internal database data
+structures.  The \memcached test \stt{expirations.t} is representative of tests
+that make assumptions based on hardcoded wall-clock time values, which cause
+failures under certain circumstances. The test timings were previously
 adjusted\footnote{\url{https://github.com/memcached/memcached/commit/890e3cd}}
-in response to failures under Solaris' \stt{dtrace} and we believe
-that some of the failures that we encountered were influenced by the
-Docker environment.
+in response to failures under Solaris' \stt{dtrace} and we believe that some of
+the failures that we encountered were influenced by the Docker environment.
 %\redis and \zeromq explicitly
 %use the \stt{pthreads} library, and are thus affected by scheduler
 %nondeterminism. \lighttpdtwo and \memcached are event-based servers,
@@ -337,6 +352,24 @@ Docker environment.
 %uses its own implementation of event-loop. They are all affected by
 %nondeterminism because they can receive network events
 %asynchronously.
+
+These results show that multi-version execution environment needs to sources of
+nondeterminism to be practical. \varan and \mx intercept and emulate accesses
+to environment values which are nondeterministic, such as time and date (\eg
+through file \lstinline`/etc/localtime` or system call
+\lstinline`gettimeofday()`) or random number generators (\eg through file
+\lstinline`/dev/random` or system call \lstinline`getrandom()`). The strict
+system call ordering enforced across versions by both \varan and \mx ensures
+that all networking events are delivered in the same order in all versions.
+
+Deterministic multi-threading mechanisms (DMT) have been an active area of
+research for several years, and while there is no practical solution which
+could handle all possible cases with reasonable overhead, the existing
+solutions are already usable for many real-world
+applications~\cite{coredet:asplos10,dthreads:sosp11}. \varan uses logical
+clocks to enforce ordering across threads. While this approach provides weaker
+guarantees than those typically provided by other DMT systems, it can still
+handle most cases, as descibed in Section~\ref{sec:threading}).
 
 %The potential drawback of nondeterminism is the inability of coverage
 %comparison across revisions, lack of reproducibility and consequent
@@ -356,9 +389,9 @@ Docker environment.
 % coverage comparison and easier debugging. % We are also working on a new
 % % tool which allows executing multiple versions in parallel.
 
-% \begin{question}
-%   \rqfive
-% \end{question}
+% How does the overall code coverage evolve?  Is it stable over time?
+
+\subsection{Coverage evolution}
 
 \begin{figure}[t]
 \centering
@@ -366,22 +399,6 @@ Docker environment.
 \caption{Evolution of the overall line and branch coverage.}
 \label{fig:coverage}
 \end{figure}
-
-When reporting the overall coverage numbers, we accumulated the
-coverage information across all five runs.\footnote{With the exception
-of \git, where for convenience we considered a single run, as the
-number of lines affected by nondeterminism represent less than
-$0.3\%$ of the total codebase.} Therefore, the results aim to count a
-line as covered if the test suite {\em may} execute it.  The blue
-(upper) lines in Figure~\ref{fig:coverage} plot the overall line
-coverage for all benchmarks.  It can be seen that coverage level
-varies significantly, with \beanstalkd at one end achieving
-only \beanstalkdCoverageAverage coverage on average, and \git at the
-other achieving
-\gitCoverageAverage, while in-between \lighttpdtwo achieves
-\lighttpdtwoCoverageAverage, \redis~\redisCoverageAverage,
-\zeromq~\zeromqCoverageAverage, and
-\memcached~\memcachedCoverageAverage.
 
 One interesting question is whether coverage stays constant over time.
 As evident from Figure~\ref{fig:coverage}, for \binutils, \git,
@@ -472,9 +489,7 @@ coverage lies in the respective range.}
 \label{sec:pcoverage}
 \label{sec:lpcoverage}
 
-% \begin{question}
-%   \rqsix
-% \end{question}
+% What is the distribution of patch coverage across revisions?
 
 We define {\em patch coverage} as the ratio between the number of
 executed lines of code added or modified by a patch and the total
@@ -543,9 +558,7 @@ substantially lower---for example, the average overall program coverage in
 %% \zeromq: \zeromqCoverageAverage vs \zeromqOverallPatchCoverage\\
 %% \memcached: \memcachedCoverageAverage vs \memcachedOverallPatchCoverage \\
 
-% \begin{question}
-%   \rqseven
-% \end{question}
+% What fraction of patch code is tested within a few revisions after it is added, \ie what is the {\em latent patch coverage}?
 
 In some projects, tests exercising the patch are added only after the
 code has been submitted, or the patch is only enabled (\eg by changing
@@ -612,13 +625,7 @@ coverage is small but non-negligible.
 \subsection{Bug analysis}
 \label{sec:bugs}
 
-% \begin{question}
-%   \rqeight
-% \end{question}
-
-% \begin{question}
-%   \rqnine
-% \end{question}
+% Is the coverage of buggy code less than average?
 
 %To answer these RQs, we collected bug data according to the
 For this part of our study, we collected bug data according to the

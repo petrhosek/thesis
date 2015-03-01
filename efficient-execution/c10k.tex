@@ -28,12 +28,11 @@ was calculated as the median of the remaining five measurements.
   \toprule
   \textsc{Application} & \textsc{Size} & \textsc{Threading} \\
   \midrule
-  Beanstalkd & 6365 & single-threaded \\
-  Lighttpd & 38,590 & single-threaded\\
-  Lighttpd 2.0 & 47,873 & multi-threaded\\
-  Memcached & 9779 &  multi-threaded\\
-  Nginx & 101,852 & multi-process\\
-  Redis & 34,625 & multi-threaded\\
+  \beanstalkd & 6365 & single-threaded\\
+  \lighttpdtwo & 47,873 & multi-threaded\\
+  \memcached & 9779 &  multi-threaded\\
+  \nginx & 101,852 & multi-process\\
+  \redis & 34,625 & multi-threaded\\
   \bottomrule
 \end{tabular}
 \end{center}
@@ -98,12 +97,6 @@ a \SI{4}{\kilo\byte} page using
 \lstinline`wrk`,\footnote{\url{https://github.com/wg/wrk}}, which was run for
 \SI{10}{\second} with \num{10} clients.
 
-%% \lstinline`weighttpd`\footnote{\url{https://github.com/lighttpd/weighttp}},
-%% which is the benchmarking tool developed by the authors of
-%% \lighttpd. We set up \lstinline`weighttpd` to perform \num{100,000} requests,
-%% using \num{10} concurrent clients running in \num{2} threads.
-%The results can be seen in Figure~\ref{fig:macro_lighttpd}.
-
 \paragraph{\memcached}\footnote{\url{http://memcached.org/}} 
 is a high-performance, distributed memory object caching system, used by
 many high-profile websites to alleviate database load. We used 
@@ -139,7 +132,16 @@ distributed as part of Redis. The benchmark issues different types
 of commands supported by Redis and measures both the throughput and
 the latency for each type. We used the default workload, \ie 50
 clients issuing \num{10000} requests and calculated the average overhead
-across all commands. 
+across all commands.
+
+\begin{figure}[!t]
+ \centering
+ \includegraphics[width=\textwidth]{efficient-execution/graphs/redis}
+ \caption{Performance overhead for individual \redis operations
+   for 0, 3 and 6 followers. The client and server are located on the same
+   rack, simulating a worst-case scenario.}
+ \label{fig:redis-ops}
+\end{figure}
 
 Figure~\ref{fig:servers} shows the results for all servers. All
 performance numbers are obtained using the client-side tools presented
@@ -179,7 +181,6 @@ The figure also shows that there is a significant difference across
 benchmarks: the worst performer is \beanstalkd, which sees performance
 degradations in the range of \SIrange{55}{81}{\percent}, while the best performers are
 \lighttpd, with only \SIrange{12}{15}{\percent} overhead and some operations in \redis
-(not shown separately in Figure~\ref{fig:servers})
+(shown separately in Figure~\ref{fig:redis-ops})
 %such as \lstinline`LRANGE_300`, \lstinline`LRANGE_500` and \lstinline`LRANGE_600`
 with under \SI{3}{\percent} overhead.
-

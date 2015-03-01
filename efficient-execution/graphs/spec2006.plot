@@ -1,4 +1,4 @@
-set term pdfcairo enhanced color solid font 'Myriad Pro,14' size 17.0cm,8.5cm
+set term pdfcairo enhanced color solid font 'Myriad Pro,12' size 17.0cm,8.5cm
 if (!exists("filename")) filename='spec2006.pdf'
 set output filename
 

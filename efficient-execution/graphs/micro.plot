@@ -23,8 +23,8 @@ set ylabel "Execution Time (cycles)"
 plot 'micro.dat' using 2:xtic(1) linecolor rgb '#FFFFFF' title "native", \
 	            '' using 0:2:2 with labels left offset -2.5,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
               '' using 3:xtic(1) linecolor rgb '#666666' title "intercept", \
-	            '' using 0:3:3 with labels left offset -0.75,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
+	            '' using 0:3:3 with labels left offset 0.0,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
               '' using 4 linecolor rgb '#999999' title "leader", \
-	            '' using 0:4:4 with labels left offset 1.0,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
+	            '' using 0:4:4 with labels left offset 3.0,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
               '' using 5 linecolor rgb '#CCCCCC' title "follower", \
-	            '' using 0:5:5 with labels left offset 3.0,0.25 rotate by 90 font "Myriad Pro,11" notitle
+	            '' using 0:5:5 with labels left offset 6.0,0.25 rotate by 90 font "Myriad Pro,11" notitle

@@ -1,268 +1,268 @@
-\section{Motivating example}
-\label{sec:example}
+% \section{Motivating example}
+% \label{sec:example}
 
-%% Applicable in a variety of scenarios, example of one such
-%% application might be the desktop and office software where users
-%% care about reliability more than performance or efficiency.
-%% Examples of such scenarios are provided further in this
-%% section. Another application might be the software systems where
-%% reliability is critically important, such as web servers,
-%% databases, \etc
+% %% Applicable in a variety of scenarios, example of one such
+% %% application might be the desktop and office software where users
+% %% care about reliability more than performance or efficiency.
+% %% Examples of such scenarios are provided further in this
+% %% section. Another application might be the software systems where
+% %% reliability is critically important, such as web servers,
+% %% databases, \etc
 
-%% We also believe, that the proposed approach might facilitate and
-%% improve the \emph{continuous deployment} technique. While this
-%% technique has been frequently proposed and advocated in the
-%% software engineering community because it encourages
-%% experimentation, innovation, and rapid
-%% iteration~\cite{johnson2009,harmess2009,linden2009}, its use is
-%% still limited since updates may introduce new bugs and security
-%% vulnerabilities.  We believe that our approach provides all the
-%% benefits of continuous deployment without compromising software
-%% reliability.
+% %% We also believe, that the proposed approach might facilitate and
+% %% improve the \emph{continuous deployment} technique. While this
+% %% technique has been frequently proposed and advocated in the
+% %% software engineering community because it encourages
+% %% experimentation, innovation, and rapid
+% %% iteration~\cite{johnson2009,harmess2009,linden2009}, its use is
+% %% still limited since updates may introduce new bugs and security
+% %% vulnerabilities.  We believe that our approach provides all the
+% %% benefits of continuous deployment without compromising software
+% %% reliability.
 
-To motivate our approach, we present a real scenario involving
-\lighttpd, which is representative of one type of applications which
-could benefit from our approach, namely server applications with
-stringent security and availability requirements.
-
-
-%% that achieves high-scalability, without sacrificing
-%% standards-compliance and security having a small-memory footprint
-%% and a small CPU load.  As a result, \lighttpd is
-\lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular open-source 
-web-server used 
-%(either alone or in conjunction with other web-servers)
-by several high-traffic websites such as Wikipedia and Xkcd.
-Despite its popularity, crash bugs are still a common
-occurrence in \lighttpd, as evident from its bug tracking
-database.\footnote{\url{http://redmine.lighttpd.net/issues/}}  Below
-we discuss one such bug, which our approach could successfully
-eliminate.
-
-%% In October 2008, a bug was reported in \lighttpd affecting the HTTP
-%% ETag
-%% functionality\footnote{\url{http://redmine.lighttpd.net/issues/1800}}.
-%% An ETag a fingerprint assigned by a web server to a specific version
-%% of a web resource, which can be used to quickly determine if the
-%% resource has changed.  The bug in \lighttpd was that invalid ETags
-%% were generated when compression was used.  The bug was fixed in
-%% revision
-%% 2386\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2386}},
-
-% April 9th 2009
-In April 2009, a patch was
-applied\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
-to \lighttpd's code related to the HTTP ETag functionality.  An ETag
-is a unique string assigned by a web server to a specific version of a
-web resource, which can be used to quickly determine if the resource
-has changed.  The patch was a one-line change, which discarded the
-terminating zero when computing a hash representing the ETag.  More
-exactly, line 47 in \textstt{etag.c}:
-
-\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
-for (h=0, i=0; i < etag->used; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
-\end{lstlisting}
-\noindent was changed to:
-\begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
-for (h=0, i=0; i < etag->used@-1@; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
-\end{lstlisting}
-
-This correctly changed the way ETags are computed, but unfortunately,
-it broke the support for compression, whose implementation depended on
-the previous computation.  More precisely, \lighttpd's support for HTTP
-compression uses caching to avoid re-compressing files which have not
-changed since the last access.  To determine whether the cached
-file is still valid, \lighttpd internally uses ETags.  Unfortunately,
-the code implementing HTTP compression did not consider the case when
-ETags are disabled.  In this case, \textstt{etags->used}
-is \textstt{0}, and when the line above is
-executed, \textstt{etag->used-1} underflows to a very large value, and
-the code crashes while accessing \textstt{etag->ptr[i]}.
-Interestingly enough, the original code was still buggy (it always
-returns zero as the hash value, and thus it would never re-compress
-the files), but it was not vulnerable to a crash. %denial of service
-                                                  %attack.
-
-%% \begin{figure}
-%% \centering
-%% \includegraphics[width=0.9\columnwidth]{safe-updates/figures/lighttpd-scenario}
-%% \caption{Crash bug \#2169 from {\footnotesize \texttt{lighttpd}}.}
-%% \label{fig:lighttpd-history}
-%% \end{figure}
-
-% 8 March
-The segfault was diagnosed and reported in March
-2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed
-at the end of April
-2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
-more than one year after it was introduced.  
-%The history is depicted graphically in Figure~\ref{fig:lighttpd-history}.  
-The bottom line is
-that for about one year, users affected by this buggy patch
-essentially had to decide between%
-\begin{inparaenum}[(1)]
-\item incorporating the new features
-and bug fixes added to the code, but being vulnerable to this crash
-bug, and
-\item giving up on these new features and bug fixes and using
-an old version of \lighttpd, which is not vulnerable to this bug.
-\end{inparaenum}
-Note that this is particularly true for the eleven-month period
-between the time when the bug was introduced and the time it was
-diagnosed, since during this period most users would not know how to
-change the server's configuration to avoid the crash.
-
-%% The original code, which can be seen in Listing~\ref{lst:2437}, makes the
-%% \texttt{i < etag->used} comparison (line 4). Because both \texttt{i} and
-%% \texttt{etag->used} are $0$, the condition \texttt{0 < 0} does not hold and
-%% the loop body will never be executed.
-
-%% The affected code can be seen in Listing~\ref{lst:2438}. Here, the condition
-%% has been changed and comparison has now the form \texttt{i < etag->used-1}.
-%% When executing, the \texttt{etag->used} variable will underflow and condition
-%% \texttt{0 < 4294967295} will be true. Therefore, the loop body will be
-%% executed and access to \texttt{etag->ptr[0]} will result in segmentation
-%% fault.
-
-Our approach provides users with a third choice; when a new version
-arrives, instead of replacing the old version, we run both versions in
-parallel. In our example, consider that we are using \mx to run a
-version of \lighttpd from March 2009.  When the buggy April 2010 version
-is released, \mx runs it in parallel with the old one.  As the two
-versions execute:
-
-\begin{itemize}
-\item As long as the two versions have the same external behaviour (\eg they 
-write the same values into the same files, or send the same data over
-the network), they are run side-by-side and \mx ensures that they act
-as one to the outside world (see \S\ref{sec:mxm});
-
-\item{When one of the versions crashes (\eg the new version executes 
-the buggy patch), \mx will patch the crashing version at runtime using
-the behaviour of the non-crashing version 
-(see \S\ref{sec:rem})}.  In this way, \mx can successfully survive
-crash bugs in both the old and the new version, increasing the
-reliability and availability of the overall application;\looseness=-1
-
-\item When a non-crashing divergence is detected, \mx will discard one of
-the versions (by default the old one, but other heuristics can be
-used).  The other version can be later restarted at a convenient
-synchronisation point (\eg at the beginning of the dispatch loop of
-a network server).
-
-\end{itemize}
-
-%% When the two versions diverge because of the newly introduced bug
-%% and the April 2010 version crashes, \mx will patch the crashing
-%% version at runtime using the behaviour of the non-crashing
-%% version. While the recovered version continues to execute, \mx uses
-%% the correctly executing March 2009 version as an oracle to ensure
-%% that its behaviour is correct. When any divergence is detected, \mx
-%% will discard the recovered version and continue using only the old
-%% version to ensure correctness. If the divergence is detected
-%% during the normal execution, \mx will by default prefer the
-%% behaviour of the newer version, but other heuristics can be used as
-%% well.
-
-From the user's point of view, this process is completely transparent
-and does not cause any interruption in service. In our example, this
-effectively eliminates the bug in \lighttpd, while still allowing
-users to use the latest features and bug fixes of the recent versions.
-
-%In our proposed approach, when a new version arrives, instead of
-%replacing the old version, we run both versions in parallel.  As more
-%versions arrive, we execute them in parallel with the existing ones,
-%until all available resources have been exhausted, at which point we
-%discard some of the versions according to some strategy.
-
-%In our example, consider a system that is running a version
-%of \lighttpd from March 2009.  When the buggy April 2010 version is
-%released, our system runs it in parallel with the old one.  As the two
-%versions execute, the system checks that their external behaviour is
-%identical (\eg they write the same values into the same files, or send
-%the same data over the network).  When the two versions diverge, the
-%divergence is resolved in the favour of the more reliable version.  In
-%particular, if one of the two versions crashes, the behaviour of the
-%non-crashing version is used, and the other version is transparently
-%modified to survive the crash. (Note that the last point is of key
-%importance, as the success of our technique depends on having all
-%versions running at all times.)  If the system cannot determine which
-%behaviour is correct, a simple heuristic can be used, such as always
-%preferring the behaviour of the newer version.  In our example, this
-%effectively eliminates the bug in \lighttpd, while still allowing
-%users to use the latest features and bug fixes of the recent versions.
-
-%Figure~\ref{fig:lighttpd-history}, 
+% To motivate our approach, we present a real scenario involving
+% \lighttpd, which is representative of one type of applications which
+% could benefit from our approach, namely server applications with
+% stringent security and availability requirements.
 
 
-%% Bug 1800: not really using it
-%%
-%% The bug \#1800 was also related to the HTTP compression and ETag functionality; in
-%% particular, invalid ETags were generated for compressed variants of the same
-%% resource. The solution for this bug did not consider the situation when
-%% ETag support is completely disabled. However, due to an incorrect implementation
-%% of ETag hash function, this bug remain undetected until the revision
-%% \texttt{2438} when ETag hash function has been fixed.
+% %% that achieves high-scalability, without sacrificing
+% %% standards-compliance and security having a small-memory footprint
+% %% and a small CPU load.  As a result, \lighttpd is
+% \lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular open-source 
+% web-server used 
+% %(either alone or in conjunction with other web-servers)
+% by several high-traffic websites such as Wikipedia and Xkcd.
+% Despite its popularity, crash bugs are still a common
+% occurrence in \lighttpd, as evident from its bug tracking
+% database.\footnote{\url{http://redmine.lighttpd.net/issues/}}  Below
+% we discuss one such bug, which our approach could successfully
+% eliminate.
 
-%% The \texttt{mod\_compress} module implementing the HTTP compression support
-%% uses caching to avoid re-compression of files which has been already
-%% compressed in the past. To determine whether the cached file is still valid,
-%% \texttt{mod\_compress} internally uses ETag stored along with the file.
+% %% In October 2008, a bug was reported in \lighttpd affecting the HTTP
+% %% ETag
+% %% functionality\footnote{\url{http://redmine.lighttpd.net/issues/1800}}.
+% %% An ETag a fingerprint assigned by a web server to a specific version
+% %% of a web resource, which can be used to quickly determine if the
+% %% resource has changed.  The bug in \lighttpd was that invalid ETags
+% %% were generated when compression was used.  The bug was fixed in
+% %% revision
+% %% 2386\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2386}},
 
-%% Then, when request for a file is made, \texttt{mod\_compress} module
-%% implementation shown in Listing~\ref{lst:2386} first reads the physical file
-%% along with its ETag (line 4) and tries to match this ETag with the original
-%% one (line 9). However, if ETag support has been disabled, the ETag of the
-%% physical file would be empty.
+% % April 9th 2009
+% In April 2009, a patch was
+% applied\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
+% to \lighttpd's code related to the HTTP ETag functionality.  An ETag
+% is a unique string assigned by a web server to a specific version of a
+% web resource, which can be used to quickly determine if the resource
+% has changed.  The patch was a one-line change, which discarded the
+% terminating zero when computing a hash representing the ETag.  More
+% exactly, line 47 in \textstt{etag.c}:
 
-%% \begin{lstlisting}[label=lst:2386,caption={Refactored failing version of the function}]
-%% PHYSICALPATH_FUNC(mod_compress_physical) {
-%%   stat_cache_entry *sce = NULL;
-%%   ...
-%%   if (HANDLER_ERROR == stat_cache_get_entry(srv, con, con->physical.path, &sce)) {
-%%     ...
-%%   }
-%%   ...
-%%   /* try matching original etag of uncompressed version */
-%%   etag_mutate(con->physical.etag, sce->etag);
-%%   ...
-%% }
-%% \end{lstlisting}
+% \begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+% for (h=0, i=0; i < etag->used; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
+% \end{lstlisting}
+% \noindent was changed to:
+% \begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
+% for (h=0, i=0; i < etag->used@-1@; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
+% \end{lstlisting}
 
-%% The original code, which can be seen in Listing~\ref{lst:2437}, makes the
-%% \texttt{i < etag->used} comparison (line 4). Because both \texttt{i} and
-%% \texttt{etag->used} are $0$, the condition \texttt{0 < 0} does not hold and
-%% the loop body will never be executed.
+% This correctly changed the way ETags are computed, but unfortunately,
+% it broke the support for compression, whose implementation depended on
+% the previous computation.  More precisely, \lighttpd's support for HTTP
+% compression uses caching to avoid re-compressing files which have not
+% changed since the last access.  To determine whether the cached
+% file is still valid, \lighttpd internally uses ETags.  Unfortunately,
+% the code implementing HTTP compression did not consider the case when
+% ETags are disabled.  In this case, \textstt{etags->used}
+% is \textstt{0}, and when the line above is
+% executed, \textstt{etag->used-1} underflows to a very large value, and
+% the code crashes while accessing \textstt{etag->ptr[i]}.
+% Interestingly enough, the original code was still buggy (it always
+% returns zero as the hash value, and thus it would never re-compress
+% the files), but it was not vulnerable to a crash. %denial of service
+%                                                   %attack.
 
-%% The affected code can be seen in Listing~\ref{lst:2438}. Here, the condition
-%% has been changed and comparison has now the form \texttt{i < etag->used-1}.
-%% When executing, the \texttt{etag->used} variable will underflow and condition
-%% \texttt{0 < 4294967295} will be true. Therefore, the loop body will be
-%% executed and access to \texttt{etag->ptr[0]} will result in segmentation
-%% fault.
+% %% \begin{figure}
+% %% \centering
+% %% \includegraphics[width=0.9\columnwidth]{safe-updates/figures/lighttpd-scenario}
+% %% \caption{Crash bug \#2169 from {\footnotesize \texttt{lighttpd}}.}
+% %% \label{fig:lighttpd-history}
+% %% \end{figure}
 
-%% \begin{lstlisting}[label=lst:2437,caption={Original version of \texttt{etag\_mutate} function}]
-%% int etag_mutate(buffer *mut, buffer *etag) {
-%%   size_t i;
-%%   uint32_t h;
-%%   for (h=0, i=0; i < etag->used; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
-%%   buffer_reset(mut);
-%%   buffer_copy_string_len(mut, CONST_STR_LEN("\""));
-%%   buffer_append_long(mut, h);
-%%   buffer_append_string_len(mut, CONST_STR_LEN("\""));
-%%   return 0;
-%% }
-%% \end{lstlisting}
+% % 8 March
+% The segfault was diagnosed and reported in March
+% 2010\footnote{\url{http://redmine.lighttpd.net/issues/2169}} and fixed
+% at the end of April
+% 2010,\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2723}}
+% more than one year after it was introduced.  
+% %The history is depicted graphically in Figure~\ref{fig:lighttpd-history}.  
+% The bottom line is
+% that for about one year, users affected by this buggy patch
+% essentially had to decide between%
+% \begin{inparaenum}[(1)]
+% \item incorporating the new features
+% and bug fixes added to the code, but being vulnerable to this crash
+% bug, and
+% \item giving up on these new features and bug fixes and using
+% an old version of \lighttpd, which is not vulnerable to this bug.
+% \end{inparaenum}
+% Note that this is particularly true for the eleven-month period
+% between the time when the bug was introduced and the time it was
+% diagnosed, since during this period most users would not know how to
+% change the server's configuration to avoid the crash.
 
-%% \begin{lstlisting}[label=lst:2438,caption={Modified version of \texttt{etag\_mutate} function}]
-%% int etag_mutate(buffer *mut, buffer *etag) {
-%%   size_t i;
-%%   uint32_t h;
-%%   for (h=0, i=0; i < etag->used-1; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
-%%   buffer_reset(mut);
-%%   buffer_copy_string_len(mut, CONST_STR_LEN("\""));
-%%   buffer_append_long(mut, h);
-%%   buffer_append_string_len(mut, CONST_STR_LEN("\""));
-%%   return 0;
-%% }
-%% \end{lstlisting}
+% %% The original code, which can be seen in Listing~\ref{lst:2437}, makes the
+% %% \texttt{i < etag->used} comparison (line 4). Because both \texttt{i} and
+% %% \texttt{etag->used} are $0$, the condition \texttt{0 < 0} does not hold and
+% %% the loop body will never be executed.
+
+% %% The affected code can be seen in Listing~\ref{lst:2438}. Here, the condition
+% %% has been changed and comparison has now the form \texttt{i < etag->used-1}.
+% %% When executing, the \texttt{etag->used} variable will underflow and condition
+% %% \texttt{0 < 4294967295} will be true. Therefore, the loop body will be
+% %% executed and access to \texttt{etag->ptr[0]} will result in segmentation
+% %% fault.
+
+% Our approach provides users with a third choice; when a new version
+% arrives, instead of replacing the old version, we run both versions in
+% parallel. In our example, consider that we are using \mx to run a
+% version of \lighttpd from March 2009.  When the buggy April 2010 version
+% is released, \mx runs it in parallel with the old one.  As the two
+% versions execute:
+
+% \begin{itemize}
+% \item As long as the two versions have the same external behaviour (\eg they 
+% write the same values into the same files, or send the same data over
+% the network), they are run side-by-side and \mx ensures that they act
+% as one to the outside world (see \S\ref{sec:mxm});
+
+% \item{When one of the versions crashes (\eg the new version executes 
+% the buggy patch), \mx will patch the crashing version at runtime using
+% the behaviour of the non-crashing version 
+% (see \S\ref{sec:rem})}.  In this way, \mx can successfully survive
+% crash bugs in both the old and the new version, increasing the
+% reliability and availability of the overall application;\looseness=-1
+
+% \item When a non-crashing divergence is detected, \mx will discard one of
+% the versions (by default the old one, but other heuristics can be
+% used).  The other version can be later restarted at a convenient
+% synchronisation point (\eg at the beginning of the dispatch loop of
+% a network server).
+
+% \end{itemize}
+
+% %% When the two versions diverge because of the newly introduced bug
+% %% and the April 2010 version crashes, \mx will patch the crashing
+% %% version at runtime using the behaviour of the non-crashing
+% %% version. While the recovered version continues to execute, \mx uses
+% %% the correctly executing March 2009 version as an oracle to ensure
+% %% that its behaviour is correct. When any divergence is detected, \mx
+% %% will discard the recovered version and continue using only the old
+% %% version to ensure correctness. If the divergence is detected
+% %% during the normal execution, \mx will by default prefer the
+% %% behaviour of the newer version, but other heuristics can be used as
+% %% well.
+
+% From the user's point of view, this process is completely transparent
+% and does not cause any interruption in service. In our example, this
+% effectively eliminates the bug in \lighttpd, while still allowing
+% users to use the latest features and bug fixes of the recent versions.
+
+% %In our proposed approach, when a new version arrives, instead of
+% %replacing the old version, we run both versions in parallel.  As more
+% %versions arrive, we execute them in parallel with the existing ones,
+% %until all available resources have been exhausted, at which point we
+% %discard some of the versions according to some strategy.
+
+% %In our example, consider a system that is running a version
+% %of \lighttpd from March 2009.  When the buggy April 2010 version is
+% %released, our system runs it in parallel with the old one.  As the two
+% %versions execute, the system checks that their external behaviour is
+% %identical (\eg they write the same values into the same files, or send
+% %the same data over the network).  When the two versions diverge, the
+% %divergence is resolved in the favour of the more reliable version.  In
+% %particular, if one of the two versions crashes, the behaviour of the
+% %non-crashing version is used, and the other version is transparently
+% %modified to survive the crash. (Note that the last point is of key
+% %importance, as the success of our technique depends on having all
+% %versions running at all times.)  If the system cannot determine which
+% %behaviour is correct, a simple heuristic can be used, such as always
+% %preferring the behaviour of the newer version.  In our example, this
+% %effectively eliminates the bug in \lighttpd, while still allowing
+% %users to use the latest features and bug fixes of the recent versions.
+
+% %Figure~\ref{fig:lighttpd-history}, 
+
+
+% %% Bug 1800: not really using it
+% %%
+% %% The bug \#1800 was also related to the HTTP compression and ETag functionality; in
+% %% particular, invalid ETags were generated for compressed variants of the same
+% %% resource. The solution for this bug did not consider the situation when
+% %% ETag support is completely disabled. However, due to an incorrect implementation
+% %% of ETag hash function, this bug remain undetected until the revision
+% %% \texttt{2438} when ETag hash function has been fixed.
+
+% %% The \texttt{mod\_compress} module implementing the HTTP compression support
+% %% uses caching to avoid re-compression of files which has been already
+% %% compressed in the past. To determine whether the cached file is still valid,
+% %% \texttt{mod\_compress} internally uses ETag stored along with the file.
+
+% %% Then, when request for a file is made, \texttt{mod\_compress} module
+% %% implementation shown in Listing~\ref{lst:2386} first reads the physical file
+% %% along with its ETag (line 4) and tries to match this ETag with the original
+% %% one (line 9). However, if ETag support has been disabled, the ETag of the
+% %% physical file would be empty.
+
+% %% \begin{lstlisting}[label=lst:2386,caption={Refactored failing version of the function}]
+% %% PHYSICALPATH_FUNC(mod_compress_physical) {
+% %%   stat_cache_entry *sce = NULL;
+% %%   ...
+% %%   if (HANDLER_ERROR == stat_cache_get_entry(srv, con, con->physical.path, &sce)) {
+% %%     ...
+% %%   }
+% %%   ...
+% %%   /* try matching original etag of uncompressed version */
+% %%   etag_mutate(con->physical.etag, sce->etag);
+% %%   ...
+% %% }
+% %% \end{lstlisting}
+
+% %% The original code, which can be seen in Listing~\ref{lst:2437}, makes the
+% %% \texttt{i < etag->used} comparison (line 4). Because both \texttt{i} and
+% %% \texttt{etag->used} are $0$, the condition \texttt{0 < 0} does not hold and
+% %% the loop body will never be executed.
+
+% %% The affected code can be seen in Listing~\ref{lst:2438}. Here, the condition
+% %% has been changed and comparison has now the form \texttt{i < etag->used-1}.
+% %% When executing, the \texttt{etag->used} variable will underflow and condition
+% %% \texttt{0 < 4294967295} will be true. Therefore, the loop body will be
+% %% executed and access to \texttt{etag->ptr[0]} will result in segmentation
+% %% fault.
+
+% %% \begin{lstlisting}[label=lst:2437,caption={Original version of \texttt{etag\_mutate} function}]
+% %% int etag_mutate(buffer *mut, buffer *etag) {
+% %%   size_t i;
+% %%   uint32_t h;
+% %%   for (h=0, i=0; i < etag->used; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
+% %%   buffer_reset(mut);
+% %%   buffer_copy_string_len(mut, CONST_STR_LEN("\""));
+% %%   buffer_append_long(mut, h);
+% %%   buffer_append_string_len(mut, CONST_STR_LEN("\""));
+% %%   return 0;
+% %% }
+% %% \end{lstlisting}
+
+% %% \begin{lstlisting}[label=lst:2438,caption={Modified version of \texttt{etag\_mutate} function}]
+% %% int etag_mutate(buffer *mut, buffer *etag) {
+% %%   size_t i;
+% %%   uint32_t h;
+% %%   for (h=0, i=0; i < etag->used-1; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
+% %%   buffer_reset(mut);
+% %%   buffer_copy_string_len(mut, CONST_STR_LEN("\""));
+% %%   buffer_append_long(mut, h);
+% %%   buffer_append_string_len(mut, CONST_STR_LEN("\""));
+% %%   return 0;
+% %% }
+% %% \end{lstlisting}

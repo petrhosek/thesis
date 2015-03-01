@@ -77,7 +77,7 @@ requirements.
 % version $2.2.1$, released more than two months after the bug was
 % introduced.
 
-\subsection{\vim}
+\subsection{\vim double free on home path completion}
 
 \vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
 text editors. While trying to fix a memory leak, \vim developers introduced a
@@ -90,7 +90,7 @@ Unfortunately, when path contains the \lstinline`~` symbol used as an alias for
 user's home directory, this code path will be invoked twice leading to a crash.
 
 \begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:vim-bug,caption={First (incorrect) fix of \lstinline`ExpandOne` function in \vim.}]
-@@ -3543,0 +3548,4 ExpandOne(xp, str, orig, options, mode)
+@@ -3543,0 +3548,4 @@ ExpandOne(xp, str, orig, options, mode)
 +    /* Free "orig" if it wasn't stored in "orig_save". */
 +    if (orig != orig_save)
 +       vim_free(orig);
@@ -122,7 +122,7 @@ incorporating new changes except for critical security bug fixes. This meant
 that the \vim users affected by this bug had to build and install their own
 version of \vim from the source.
 
-\subsection{\lighttpd}
+\subsection{\lighttpd mod\_compress segfault with disabled ETag support}
 
 \lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular open-source 
 web-server used either alone or in conjunction with other web-servers
@@ -197,7 +197,7 @@ more than one year after it was introduced.
 %% executed and access to \texttt{etag->ptr[0]} will result in segmentation
 %% fault.
 
-\subsection{\redis}
+\subsection{\redis crash on wrong \textstt{HMGET} type}
 
 \begin{figure}[t]
 \begin{minipage}[b]{0.90\columnwidth}
