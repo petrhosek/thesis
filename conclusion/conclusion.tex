@@ -3,13 +3,10 @@
 
 Software updates are an integral part of the software development and
 maintenance process, but unfortunately they present a high risk, as new
-releases often introduce new bugs and security vulnerabilities.
-
-Software updates are an integral part of the software development and
-maintenance process. Unfortunately, they also present a high failure risk, and
-many users refuse to upgrade their software, relying instead on outdated
-versions, which often leave them exposed to known software bugs and security
-vulnerabilities.
+releases often introduce new bugs and security vulnerabilities; as a
+consequence, many users refuse to upgrade their software, relying instead on
+outdated versions, which often leave them exposed to known software bugs and
+security vulnerabilities.
 
 In this thesis we have proposed a novel multi-version execution approach, a
 variant of $N$-version execution, for improving the software update process.
@@ -18,10 +15,20 @@ software to the newest version, we run the new version in parallel with the old
 one, and carefully synchronise their execution to create a more reliable
 multi-version application.
 
+\todo{Describe the two different schemes for multi-version execution.}
+\todo{Mention the results of the empirical study.}
+
 We have also shown two different approaches for implementing the multi-version
-execution approach: \varan, focused on running large number of versions in
-parallel with minimal performance overhead; and \mx, focused on recovering from
-crashes caused by the faulty software updates.
+execution approach: \mx, focused on recovering from crashes caused by the
+faulty software updates; and \varan, focused on running large number of
+versions in parallel with minimal performance overhead.
+
+\mx uses static binary analysis, system call interposition, lightweight
+checkpointing and runtime state manipulation to implement a novel fault recovery
+mechanism, which allows for recovery of the crashing version using the code
+of the other, non-crashing version. We have shown how \mx can be applied
+successfully to several real applications, and recover from real crashes
+reported by their users.
 
 \varan combines selective binary rewriting with high-performance event
 streaming to significantly reduce performance overhead, without sacrificing the
@@ -30,9 +37,4 @@ experimental evaluation has demonstrated that \varan can run C10k network
 servers with low performance overhead, and can be used in various scenarios
 such as transparent failover and live sanitisation.
 
-\mx uses static binary analysis, system call interposition, lightweight
-checkpointing and runtime state manipulation to implement a novel fault recovery
-mechanism, which allows for recovery of the crashing version using the code
-of the other, non-crashing version. We have shown how \mx can be applied
-successfully to several real applications, and recover from real crashes
-reported by their users.
+\todo{Briefly talk about other applications and future work.}

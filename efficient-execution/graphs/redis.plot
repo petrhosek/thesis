@@ -21,9 +21,10 @@ set key outside center top horizontal autotitle columnheader reverse samplen 1 t
 set ylabel "Runtime Overhead (normalized)"
 #set xlabel "#Followers"
 
-plot 'redis.dat' using 2:xticlabels(1) linecolor rgb '#CCCCCC', \
-	            '' using 0:2:2 with labels left offset -11.0,0.5 rotate by 90 font "Myriad Pro,11" notitle, \
-              '' using 3:xticlabels(1) linecolor rgb '#999999', \
-	            '' using 0:3:3 with labels left offset -9.5,0.5 rotate by 90 font "Myriad Pro,11" notitle, \
-              '' using 4:xticlabels(1) linecolor rgb '#666666', \
-	            '' using 0:4:4 with labels left offset -7.75,0.5 rotate by 90 font "Myriad Pro,11" notitle
+plot 'redis.dat' using 2:xticlabels(1) linecolor rgb '#666666', \
+              '' using 3:xticlabels(1) linecolor rgb "#777777", \
+              '' using 4:xticlabels(1) linecolor rgb "#888888", \
+              '' using 5:xticlabels(1) linecolor rgb "#999999", \
+              '' using 6:xticlabels(1) linecolor rgb "#AAAAAA", \
+              '' using 7:xticlabels(1) linecolor rgb "#BBBBBB", \
+              '' using 8:xticlabels(1) linecolor rgb "#CCCCCC"
