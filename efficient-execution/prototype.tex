@@ -92,7 +92,8 @@ of the coordinator, zygote, and program versions.  When run with
 address spaces: the shared memory segment used for communication among
 versions (``shm'') and the \varan statically-linked library
 (``varan'').  Note that \varan does not prevent address-space layout
-randomisation schemes to be used by the operating system.
+randomisation schemes to be used by the operating system, because the
+\varan library is compiled as PIC.
 
 %% \varan is operates at the thin boundary between the operating system and
 %% the user-space application---\ie below the C library and the dynamic
@@ -227,10 +228,12 @@ also need to relocate some of the instructions surrounding the system
 call---\ie perform binary detouring via trampolines~\cite{detours}.
 On the rare occasions when this is not possible (\eg because the
 surrounding instructions are potential branch targets), we replace the
-system call with an interrupt (\lstinline`INT 0x0`).  This interrupt
-is handled by \varan through a signal handler installed during
-initialisation, which redirects the control flow to the system call
-entry point as for other system calls.
+system call with an interrupt (\ie \lstinline`INT 0x0`) which has the
+same size as system call instruction (\ie \lstinline`INT 0x80`) on
+x86-32 and \lstinline`SYSCALL` on x86-64).  This interrupt is handled by
+\varan through a signal handler installed during initialisation, which
+redirects the control flow to the system call entry point as for other
+system calls.
 
 The system call entry point first saves all registers, and then
 consults an internal system call table to check whether there is a
@@ -242,7 +245,7 @@ registers and returns to the original caller (using
 interrupt). The system call entry point also implements support for
 restarting system calls (\ie signaled by the \lstinline`-ERESTARTSYS`
 error code). This is used in certain scenarios supported by \varan
-such as transparent failover (\S\ref{sec:applications}).
+including transparent failover (\S\ref{sec:applications}).
 
 The internal system call table can be easily changed to accommodate
 various application scenarios.  In particular, the only difference

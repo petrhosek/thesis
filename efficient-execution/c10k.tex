@@ -22,15 +22,15 @@ was calculated as the median of the remaining five measurements.
 
 \begin{table}
 \begin{center}
-\caption{Server applications used in the evaluation.}
+\caption{C10k server applications used in the evaluation.}
 \label{tbl:apps}
 \begin{tabular}{lrl}
   \toprule
   \textsc{Application} & \textsc{Size} & \textsc{Threading} \\
   \midrule
-  \beanstalkd & 6365 & single-threaded\\
+  \beanstalkd & 6,365 & single-threaded\\
   \lighttpdtwo & 47,873 & multi-threaded\\
-  \memcached & 9779 &  multi-threaded\\
+  \memcached & 9,779 &  multi-threaded\\
   \nginx & 101,852 & multi-process\\
   \redis & 34,625 & multi-threaded\\
   \bottomrule
@@ -72,7 +72,7 @@ We give a short overview of each benchmark and the way in which we
 measure performance (namely throughput) in our experiments:
 
 \paragraph{\beanstalkd}\footnote{\url{http://kr.github.io/beanstalkd/}}
-is a simple and fast work queue, used by a number of websites to
+is a simple and fast work queue, used by many websites to
 distribute jobs among workers. We used revision \lstinline`157d88b` from the
 official \git repository, the latest revision at the time of
 writing.  To measure performance, we used
@@ -167,20 +167,20 @@ coordinator.
 
 The set of bars for 0 followers measure the interception overhead
 of \varan using binary rewriting.  This overhead is negligible for
-\lighttpd, \memcached and most \redis operations, \nginxIntercept for \nginx,
-and \beanstalkdIntercept for \beanstalkd.
+\lighttpdtwo, \memcached and most \redis operations, \nginxIntercept for
+\nginx, and \beanstalkdIntercept for \beanstalkd.
 
 For all benchmarks, we see that the performance overhead increases
 slightly with the number of followers.  For instance, the overhead for
 \beanstalkd increases from \beanstalkdOneFollower for one follower to
 \beanstalkdSixFollowers for six followers, while the overhead for
-\lighttpd increases from \lighttpdOneFollower to
-\lighttpdSixFollowers.
+\memcached increases from \memcachedOneFollower to
+\memcachedSixFollowers.
 
 The figure also shows that there is a significant difference across
 benchmarks: the worst performer is \beanstalkd, which sees performance
 degradations in the range of \SIrange{55}{81}{\percent}, while the best performers are
-\lighttpd, with only \SIrange{12}{15}{\percent} overhead and some operations in \redis
+\memcached, with only \SIrange{14}{32}{\percent} overhead and some operations in \redis
 (shown separately in Figure~\ref{fig:redis-ops})
 %such as \lstinline`LRANGE_300`, \lstinline`LRANGE_500` and \lstinline`LRANGE_600`
 with under \SI{3}{\percent} overhead.

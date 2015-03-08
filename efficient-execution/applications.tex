@@ -26,34 +26,31 @@ and to restart the last system call while discarding the old (crashed) leader.
 %supports running multiple different software versions in parallel.  We discuss
 %both of these scenarios in detail below.
 
-To demonstrate support for transparent failover, we reproduced a
-\redis
-bug\footnote{\url{https://code.google.com/p/redis/issues/detail?id=344}}
-described in Section~\ref{multi-version:scenarios}.  We ran in
-parallel eight consecutive revisions of \redis from the range
+To demonstrate support for transparent failover, we reproduced the
+\redis bug described in Section~\ref{multi-version:scenarios}.  We ran
+in parallel eight consecutive revisions of \redis from the range
 \lstinline`9a22de8` to \lstinline`7fb16ba`, where the last revision
 introduced a bug which crashes the server by causing a segmentation
-fault. We then set up a client to send an \lstinline`HMGET` command
-that triggers the bug, and measured the increase in latency for that
-command.  When the buggy version is a follower, we do not observe any
-increase in latency, as expected.  When the buggy version is the leader,
-the latency increases from \redisnormallatency to
-\redisfailoverlatency.  In both cases, we observed no extra
-degradation in throughput for the commands that follow.
+fault. We then set up a client to send an \lstinline`HMGET` command that
+triggers the bug, and measured the increase in latency for that command.
+When the buggy version is a follower, we do not observe any increase in
+latency, as expected.  When the buggy version is the leader, the latency
+increases from \redisnormallatency to \redisfailoverlatency.  In both
+cases, we observed no extra degradation in throughput for the commands
+that follow.
 
 This example also demonstrates the difference between \mx and \varan; while \mx
-can recover from the crash (\S\ref{sec:redis}) unlike \varan, which discards
-the crashing version, \mx can only run two versions in parallel while \varan
-can run arbitrary number of versions with significantly lower performance
-overhead as shown in Section~\ref{sec:comparison}.
+can recover from the crash (\S\ref{sec:redis}) unlike \varan, which
+discards the crashing version, \mx can only run two versions in parallel
+while \varan can run arbitrary number of versions with lower performance
+overhead as shown by the comparison in Section~\ref{sec:comparison}.
 
 As an additional experiment, we ran revisions \lstinline`2437` and
-\lstinline`2438` of \lighttpd (also used in the evaluation of \mx in
-Section~\ref{sec:lighttpd}), the latter of which introduced a crash bug.  We
-then set up a client that triggers the bug and measured the latency for that
-request. Both when the buggy version was the leader or a follower, there was no
-significant increase in latency, which remained at
-around~\lighttpdnormallatency.
+\lstinline`2438` of \lighttpd (also introduced earlier), the latter of
+which introduced a crash bug.  We then set up a client that triggers the
+bug and measured the latency for that request. Both when the buggy
+version was the leader or a follower, there was no significant increase
+in latency, which remained at around~\lighttpdnormallatency.
 %set up a client that triggers the bug and measured the increase in
 %latency for that command. As for the \redis scenario, there is no
 %increase in latency when the buggy version is a follower.  When it is
@@ -63,6 +60,8 @@ around~\lighttpdnormallatency.
 \subsection{Handling divergent behaviour}
 \label{sec:mv-execution}
 
+\begin{figure}[t]
+\begin{center}
 \begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:lighttpd-suid,caption={\lighttpd SUID bit detection patch}]
 @@ -66,0 +67,11 @@
 +#ifdef HAVE_GETUID
@@ -80,6 +79,8 @@ around~\lighttpdnormallatency.
 -       if (!i_am_root && (geteuid() == 0 || getegid() == 0)) {
 +       if (!i_am_root && issetugid()) {
 \end{lstlisting}
+\end{center}
+\end{figure}
 
 Multiple different software versions (revisions) can be run inside an NVX
 system as long as they all issue the same sequence of system calls. This
@@ -138,8 +139,8 @@ inspecting some system call arguments.
 
 % or more system calls preceding the divergence.
 
-
 \begin{figure}[t]
+\begin{center}
 \begin{lstlisting}[label={lst:lighttpd},language={[bpf]Assembler},caption={Example of a BPF rewriting rule.}]
 ld event[0] /*@\label{line:load-leader}@*/
 jeq #108, getegid       /* __NR_getegid *//*@\label{line:check-getegid}@*/
@@ -154,6 +155,7 @@ jeq #104, good          /* __NR_getgid *//*@\label{line:check-getgid}@*/
 bad: ret #0             /* SECCOMP_RET_KILL *//*@\label{line:kill}@*/
 good: ret #0x7fff0000   /* SECCOMP_RET_ALLOW *//*@\label{line:allow}@*/
 \end{lstlisting}
+\end{center}
 \end{figure}
 
 %% To translate the filter into bytecode, the user can use the provided

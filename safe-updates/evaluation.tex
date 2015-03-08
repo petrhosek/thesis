@@ -34,33 +34,33 @@ together utilities affected by the same or similar bugs.}
 \end{center}
 \end{table}
 
-As an initial evaluation of \mx's ability to survive crashes, we have used
-applications from the \gnu \coreutils utility
-suite,\footnote{\url{http://www.gnu.org/software/coreutils/}} which provides
-the core user-level environment on most UNIX systems.  We have selected a
-number of bugs reported on the \coreutils mailing list, all of which trigger
-segmentation faults.  The bugs are described in Table~\ref{tbl:cu-bugs},
-together with the utilities affected by each bug and the versions in which they
-were introduced and fixed.
+The \gnu \coreutils utility
+suite\footnote{\url{http://www.gnu.org/software/coreutils/}} provides
+the core user-level environment on most UNIX systems.  We have selected
+a number of bugs reported on the \coreutils mailing list, all of which
+trigger segmentation faults.  The bugs are described in
+Table~\ref{tbl:cu-bugs}, together with the utilities affected by each
+bug and the versions in which they were introduced and fixed.
 
-The bug affecting both \mdsum and \shasum utilities introduced in 5.1 and later
-fixed in 6.11 caused a crash due to buffer underflow when checking an invalid
-BSD-style input. Another bug we have considered affected \mkdir, \mkfifo and
-\mknod utilities; this bug, which was reported in 6.10 and fixed in 6.11
-resulted in crash when diagnosing invalid context.  Finally, the bug affecting
-\cut utility, introduced in 5.3 and later fixed in 8.11, resulted in segfault
-when using large unbounded range. 
+The bug affecting both \mdsum and \shasum utilities introduced in 5.1
+And later fixed in 6.11 caused a crash due to a buffer underflow when
+checking an invalid BSD-style input. Another bug we have considered
+affected \mkdir, \mkfifo and \mknod utilities; this bug, which was
+reported in 6.10 and fixed in 6.11 resulted in a crash when accessing
+an invalid context.  Finally, the bug affecting the \cut utility,
+introduced in 5.3 and later fixed in 8.11, resulted in segfault when
+using a large unbounded range. 
 
-For all these bugs, we configured \mx to run the version that fixed the bug
-together with the one just before.  (we could have also run the version that
-introduced the bug with the one just before, but we could not immediately tell
-where the bug was introduced, and we cannot build versions earlier than 6.10
-due to changes in GCC and GNU C library).  \mx successfully intercepted the
-crash and recovered the execution by using the strategy described in
-\sref{sec:rem}.
+For all these bugs, we configured \mx to run the version that fixed the
+bug together with the one just before. We could have also run the
+version that introduced the bug with the one just before, but we could
+not immediately tell where the bug was introduced, and we cannot build
+versions earlier than 6.10 due to changes in GCC and GNU C library. \mx
+successfully intercepted the crash and recovered the execution by using
+the strategy described in Section~\ref{sec:rem}.
 
-We discuss below the bug in the \cut utility (used to remove sections from each
-line of file), triggered by the following invocation:
+We discuss below the bug in the \cut utility (used to remove sections
+from each line of a file), triggered by the following invocation:
 
 \begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt,language=bash]
 cut -c1234567890- --output-d=: foo
@@ -76,8 +76,8 @@ if (output_delimiter_specified /*@\label{line:cond}@*/
 
 This code uses the lower bound of the size of the printable field
 vector; however, when calculating the size of this vector, ranges going
-to the end of line (\ie \lstinline`0-`) are not considered eventually
-resulting in invalid memory access. 
+to the end of line (\ie \lstinline`0-`) are not considered, eventually
+resulting in an invalid memory access. 
 % The bug is caused by a buffer overflow whose root cause is the
 % incorrect calculation of the size of a dynamically allocated buffer
 % used internally by \cut.
@@ -121,12 +121,13 @@ provided by \sea to rewrite the stack of the new version, as detailed
 in \sref{sec:rem}.  In particular, \rem replaces the return
 addresses of all functions in the new version with the corresponding
 addresses from the old version. The stack rewriting itself however is not
-enough. The newer version can still use function pointers, which are part of
-the replica state, to invoke the original code. To prevent this situation, \rem
-inserts breakpoints at the beginning of all the functions in the code of the
-new version (to intercept indirect calls via function pointers), and then
-finally restores the original processor registers of the checkpointed process
-and restarts the execution of the (modified) new version.
+enough. The newer version can still use function pointers, which are
+part of the replicated state, to invoke the original code. To prevent
+this situation, \rem inserts breakpoints at the beginning of all the
+functions in the code of the new version (to intercept indirect calls
+via function pointers), and then finally restores the original processor
+registers of the checkpointed process and restarts the execution of the
+(modified) new version.
 
 Since the checkpoint was performed right after the execution of the system
 call \textstt{epoll\_ctl}, the first thing that the code does is to
@@ -270,16 +271,16 @@ in which a pair of \textstt{geteuid()} and \textstt{getegid()} calls
 are replaced with a single call to \textstt{issetugid()} to
 allow \lighttpd to start for a non-root user with GID~0.  \mx 
 %cannot run this revision together with the one before it, because it 
-currently does not support changes to the order of system calls, but we believe
-this limitation could be overcome by using peephole-style
-optimisations~\cite{dragon-book}, which would allow \mx to recognise
-that the pair \textstt{geteuid()} and \textstt{getegid()} could be
-matched with the call to \textstt{issetugid()}.  The upper bound
-for \lighttpd issue \#2169 adds a \textstt{read} call to
-\textstt{/dev/[u]random}, in order to provide a better entropy
-source for generating HTTP cookies.  This additional \textstt{read}
-call changed the sequence of system calls, which \mx cannot
-handle. \looseness=-1
+currently does not support changes to the order of system calls, but
+this limitation could be overcome by using rewrite rules for system call
+sequences same as in \varan (\S\ref{sec:patternmatching}), which would
+allow \mx to recognise that the pair \textstt{geteuid()} and
+\textstt{getegid()} could be matched with the call to
+\textstt{issetugid()} (\S\ref{sec:applications}).  The upper bound for
+\lighttpd issue \#2169 adds a \textstt{read} call to
+\textstt{/dev/[u]random}, in order to provide a better entropy source
+for generating HTTP cookies.  This additional \textstt{read} call
+changed the sequence of system calls, which \mx cannot handle.
 
 For \lighttpd issue \#2140, both the lower and the upper bounds are
 caused by a change in a sequence of \textstt{read()} system calls.  We
@@ -315,25 +316,26 @@ system calls.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\textwidth]{safe-updates/graphs/spec2006}
-\caption{Normalised execution times for the \spec benchmark suite running under
-\mx.}
+\caption{Normalised execution times for the \speczerosix benchmark suite
+running under \mx.}
 \label{fig:spec}
 \end{figure}
 
 We ran our experiments on a four-core server with 3.50~GHz Intel
 Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 
-\paragraph{\spec}
-To measure the performance overhead of our prototype, we first used
-the standard \spec\footnote{\url{http://www.spec.org/cpu2006/}}
+\paragraph{\speczerosix}
+To measure the performance overhead of our prototype, we first used the
+standard \speczerosix\footnote{\url{http://www.spec.org/cpu2006/}}
 benchmark suite.  Figure~\ref{fig:spec} shows the performance of \mx
-running two instances of the same application in parallel, compared to
-a native system. The execution time overhead of \mx varies
-from \minOverSPEC to \maxOverSPEC compared to executing just a single
+running two instances of the same application in parallel, compared to a
+native system. The execution time overhead of \mx varies from
+\minOverSPEC to \maxOverSPEC compared to executing just a single
 version, with the geometric mean across all \numSPECbench benchmarks at
-\avgOverSPEC. This result is comparable with previous work using multi-variant
-execution that used SPEC CPU to measure performance~\cite{orchestra09} (even
-though this work used SPEC~CPU2000 which has already been retired).
+\avgOverSPEC. This result is comparable with previous work using
+multi-variant execution that used \speccpu to measure
+performance~\cite{orchestra09} (even though that work used \speczerozero
+which has already been retired).
 
 %% The overhead varies from \minRedisOver to \maxRedisOver depending
 %% on the operation being performed. This is the worst case overhead
@@ -402,11 +404,15 @@ been optimised for performance, and we believe its overhead can still
 be significantly reduced.  
 %% There are multiple strategies we plan to explore in future
 %% work. First,
-For example, we could synchronise versions at a coarser granularity,
-by using an epoch-based approach~\cite{compl-schedules11}, or we could
-improve our checkpointing mechanism by implementing it as a loadable
-kernel module that only stores the part of the state needed for
-recovery~\cite{flashback}.
+One possibility would be to replace \ptrace with more efficient system
+call interception mechanism such as binary rewriting as in case of
+\varan (\S\ref{sec:rewriting}) at the expense of increased
+implementation complexity of other components such as \rem. We could
+also combine \ptrace with \textsf{seccomp/bpf} to allow the system calls
+without side-effects to be executed directly without \mxm involvement.
+Other option is to improve our checkpointing mechanism by implementing
+it as a loadable kernel module that only stores the part of the state
+needed for recovery~\cite{flashback}.
 
 %% and only checkpoint at epoch boundaries.  To make this approach viable, we also
 %% need to record system calls in each epoch, so that they can be
@@ -437,23 +443,15 @@ recovery~\cite{flashback}.
 %external behaviour since the last checkpoint, so that it can be
 %successfully replayed during recovery (\eg as in Rx~\cite{rx}).
 
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[angle=270,width=\textwidth]{safe-updates/graphs/syscall}
-\caption{Number of system calls made on average each second during the
-execution of SPEC~CPU2006 benchmark suite, measured using \textstt{strace}
-tool.}
-\label{fig:syscall}
-\end{center}
-\end{figure}
-
-We also examined how frequency of system calls affects the performance
-overhead of application executed on top \mx. Figure~\ref{fig:syscall} shows
-the average number of system calls during the execution of SPEC~CPU2006.
-Rather surprising result is the fact that \textsf{452.libquantum}, even though having
-the largest run time overhead had the lowest average number of system calls.
-On the hand, the performance overhead of \textsf{400.perlbench}, despite having the
-highest average number system, was bellow average. \todo{What is the conclusion here?}
+%We also examined how the frequency of system calls affects the
+%performance overhead of application executed on top \mx.
+%Figure~\ref{fig:syscall} shows the average number of system calls during
+%the execution of SPEC~CPU2006.  Rather surprising result is the fact
+%that \textsf{452.libquantum}, even though having the largest run time
+%overhead had the lowest average number of system calls.  On the hand,
+%the performance overhead of \textsf{400.perlbench}, despite having the
+%highest average number system, was bellow average. \todo{What is the
+%conclusion here?}
 
 % For example, as we discuss in related work, our
 % monitor \mxm is very similar to the monitor used by

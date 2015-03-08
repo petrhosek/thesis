@@ -32,7 +32,8 @@ performed by each version, execution must switch to the monitor
 process, which has to perform several additional system calls in order
 %to be notified about system call entry and exit, 
 to copy buffers to and from the version being monitored, nullify the
-system call, \etc
+system call, \etc as shown earlier in
+Figure~\ref{fig:lockstep-execution}.
 
 For CPU-intensive applications which perform few system calls, this
 overhead will be amortised, translating into a modest overall
@@ -110,7 +111,7 @@ and \lstinline`fork` system calls) and exits (\ie \lstinline`exit` and
 \lstinline`exit_group` system calls).
 
 In general, any version can be the leader, although in some situations
-some may be a better choice than others--\eg when running multiple
+some may be a better choice than others, \eg when running multiple
 software revisions in parallel, one might prefer to designate the
 newest one as leader.  However, the leader can be easily replaced if
 necessary, \eg if it crashes (\S\ref{sec:leader-repl}).

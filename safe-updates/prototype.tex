@@ -10,12 +10,11 @@
 %% \end{figure}
 
 We have implemented our approach in a prototype system called \mx,
-targeted at multi-core processors running Linux.  Currently, \mx works
-with only two application versions, but we are adding support for
-arbitrarily many versions.  The system works directly on application
-binaries, making it easy to deploy it and possibly integrate it with
-existing software package managers such as \textstt{apt}
-or \textstt{yum}.
+targeted at multi-core processors running Linux.  Currently, \mx
+supports two versions run in parallel. The system works directly on
+application binaries, making it easy to deploy it and possibly integrate
+it with existing software package managers such as \textstt{apt} or
+\textstt{yum}.
 
 %Figure~\ref{fig:mx-platform} shows a platform running \mx, on which
 On a platform using \mx, conventional (\ie unmodified) applications
@@ -60,7 +59,7 @@ together to support safe software updates.
 
 \begin{figure}[t!]
 \begin{center}
-\includegraphics[width=0.75\columnwidth]{safe-updates/figures/architecture}
+\includegraphics[width=0.5\columnwidth]{safe-updates/figures/architecture}
 \caption{\mx system architecture.  
 %% The main components of \mx
 %%   are \sea (Static Executable Analyser), \mxm (Multi-eXecution
@@ -197,7 +196,7 @@ system call arguments
 \subsubsection{Multi-process and multi-threaded applications}
 
 Finally, a particular challenge arises in the context of multi-process and
-multithreaded applications.  Using a single monitor instance to intercept both
+multi-threaded applications.  Using a single monitor instance to intercept both
 versions and their child processes (or threads) would eliminate any advantage
 that these applications derive from using concurrency.  Therefore, \mxm uses a
 new monitor thread for each set of child processes (or threads) spawned by the
@@ -206,7 +205,7 @@ a child process, then \mxm will use two threads: one to monitor the parent
 processes, and one to monitor the child processes in each version.
 
 Due to limitations of the \ptrace interface (which was not designed to be used
-in a multi-process/multithreaded environment), handing the control of any
+in a multi-process/multi-threaded environment), handing the control of any
 child processes being spawned by the application over to a new monitoring
 thread is somewhat complicated.  In \mxm we adopt the solution similar to
 Orchestra~\cite{orchestra09}.  When a new child process is spawned, we let the
@@ -218,11 +217,10 @@ immediately reconnects to the new child process, restores its original system
 call, and resumes its execution.
 
 \mxm does not enforce deterministic execution across multiple versions of
-multithreaded programs (which may diverge if race conditions can lead
+multi-threaded programs (which may diverge if race conditions can lead
 to different external behaviour across executions), although we could
-overcome this limitation by combining it with recently proposed
-deterministic multithreading systems such
-as \textsc{Dthreads}~\cite{dthreads:sosp11}.
+overcome this limitation by adopting \varan's solution
+(\S\ref{sec:threading}).
 
 %% \mxm also performs a series of optimisations to decrease performance
 %% overhead, such as allowing certain files with read-only permissions
@@ -242,17 +240,17 @@ Whenever monitored process opens a file with read-only permissions, a
 new virtual file descriptor is assigned to this file together with the
 mapping to a real file descriptor for each version. This virtual file
 descriptor is then send to each version. When system call is made
-using this virtual file descriptor, the \mxm replaces it with real
+using this virtual file descriptor, \mxm replaces it with the real
 file descriptor before executing the system call. The actual file
 operation is then executed by the process itself avoiding any memory
-copying by the \mxm.
+copying by \mxm.
 
-The similar approach is also used for virtualisation of process,
-group, parent and child identifiers.  Whenever process tries to obtain
-the actual ID, the \mxm replaces this with a virtual ID and keeps the
-mapping between the real and the virtual ID. When process invokes a
+A similar approach is also used for virtualisation of process,
+group, parent and child identifiers.  Whenever a process tries to obtain
+the actual ID, \mxm replaces this with a virtual ID and keeps the
+mapping between the real and the virtual ID. When a process invokes a
 system call using this ID as an argument (\eg \texttt{kill}), the
-virtual ID is replaced with actual ID before executing the system
+virtual ID is replaced with the actual ID before executing the system
 call.
 
 %% \paragraph{Para-virtualisation interface and binary translation.}
@@ -342,13 +340,13 @@ after the divergence.
 %% bugs that happen in either the old or the new version (although of
 %% course, not in both).
 %%
-As discussed before, in \mx we focus our attention on surviving
-crash errors, so the key challenge is to allow the crashing version to
-survive the crash.  This is essential to the success of our approach,
-which relies on having both versions alive at all times, so that
-the overall application can survive any crash bugs that happen in
-either the old or the new version (although of course, not in both at
-the same time).
+As discussed in Section~\ref{multi-version:rationale}, in \mx we focus
+our attention on surviving crash errors, so the key challenge is to
+allow the crashing version to survive the crash.  This is essential to
+the success of our approach, which relies on having both versions alive
+at all times, so that the overall application can survive any crash bugs
+that happen in either the old or the new version (although of course,
+not in both at the same time).
 
 We emphasise that we apply our approach only to crash errors (those
 raising a \textstt{SIGSEGV} signal), and not to other types of program
@@ -413,7 +411,7 @@ buggy code in the crashing version.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\columnwidth]{safe-updates/figures/strategy}
+\includegraphics[width=0.5\columnwidth]{safe-updates/figures/strategy}
 \caption{\rem's recovery mechanism uses the code of the non-crashing
   version to run through the buggy code.}
 \label{fig:solution3}
@@ -585,10 +583,10 @@ version in an inconsistent state. However, \mx is able to discover
 most internal state inconsistencies by comparing whether the two
 versions have the same external behaviour. When the behaviour of the
 recovered version starts to differ, \mx will immediately discard it
-and continue with only one version to ensure correctness. The
-discarded version can be later restarted at a convenient
-synchronisation point.  This restarting functionality is not currently
-implemented in \mx, but we plan to add it as a future extension.
+and continue with only one version. The discarded version can be later
+restarted at a convenient synchronisation point.  This restarting
+functionality is not currently implemented in \mx, but we plan to add it
+as a future extension.
 
 %Our approach of using the code of the non-crashing version to survive
 %failures in the crashing one may leave the application in an

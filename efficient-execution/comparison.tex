@@ -1,20 +1,20 @@
 \subsection{Comparison with prior NVX systems}
 \label{sec:comparison}
 
-While Sections~\ref{sec:microbenchmarks} and \ref{sec:c10k} illustrate the
-worst-case synthetic and real-world scenarios for a system call monitor, in
-order to compare \varan directly with prior NVX systems, we have also run it on
-the same set of benchmarks used to evaluate prior systems.  In particular, we
-chose to compare against two state-of-the-art NVX systems:
-%\strata~\cite{cox2006}, \orchestra~\cite{orchestra09}, and
-\tachyon~\cite{tachyon12}.  These systems and their benchmarks are briefly
-described  in the first three columns of Table~\ref{tbl:systems}.  To our
-knowledge, we are the first to perform an extensive performance comparison of
-existing NVX systems.
+While Sections~\ref{sec:microbenchmarks} and \ref{sec:c10k} illustrate
+some of the worst-case synthetic and real-world scenarios for a system
+call monitor, in order to compare \varan directly with prior NVX
+systems, we have also run it on the same set of benchmarks used to
+evaluate prior systems.  In particular, we chose to compare against two
+state-of-the-art NVX systems---\orchestra~\cite{orchestra09} and
+\tachyon~\cite{tachyon12}---as well as \mx. These systems and their
+benchmarks are briefly described  in the first three columns of
+Table~\ref{tbl:systems}. To our knowledge, we are the first to perform
+an extensive performance comparison of existing NVX systems.
 
 \begin{table}[t]
 \begin{center}
-\caption{Existing systems we have compared \varan against.}
+\caption{Comparison with \mx, \orchestra and \tachyon on the benchmarks used to evaluate these systems.}
 \label{tbl:systems}
 \begin{tabular}{lllrr}
   \toprule
@@ -129,8 +129,26 @@ investigate these results in more detail in future work.
 was previously used to evaluate \mx. We used the latest version 1.2.  The
 overhead reported by \mx was \mxSpec, while \varan introduced only
 a \speczerosixOneFollower overhead.
-Individual results can be seen in Figure~\ref{fig:spec2006}.  
+Individual results can be seen in Figure~\ref{fig:spec2006}.
 
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[angle=270,width=\textwidth]{safe-updates/graphs/syscall}
+\caption{Number of system calls made on average each second during the
+execution of SPEC~CPU2006 benchmark suite, measured using \textstt{strace}
+tool.}
+\label{fig:syscall}
+\end{center}
+\end{figure}
+
+We also examined how the frequency of system calls affects the
+performance overhead of application executed on top \mx.
+Figure~\ref{fig:syscall} shows the average number of system calls during
+the execution of SPEC~CPU2006. Rather surprising result is the fact that
+\textsf{452.libquantum}, even though having the largest run time
+overhead had the lowest average number of system calls.  On the hand,
+the performance overhead of \textsf{400.perlbench}, despite having the
+highest average number system, was bellow average.
 
 %\begin{figure}[!t]
   %\centering
