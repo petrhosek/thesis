@@ -68,10 +68,17 @@ was calculated as the median of the remaining five measurements.
  \label{fig:servers}
 \end{figure}
 
+% Even though some of the servers used in our evaluation were already introduced
+% in previous chapters, for completeness we give a short overview of each server
+% including the benchmark used, and the way in which we measure performance
+% (namely throughput) in our experiments:
+
 We give a short overview of each benchmark and the way in which we
 measure performance (namely throughput) in our experiments:
 
-\paragraph{\beanstalkd}\footnote{\url{http://kr.github.io/beanstalkd/}}
+\begin{enumerate}
+
+\item[\beanstalkd\footnote{\url{http://kr.github.io/beanstalkd/}}]
 is a simple and fast work queue, used by many websites to
 distribute jobs among workers. We used revision \lstinline`157d88b` from the
 official \git repository, the latest revision at the time of
@@ -88,7 +95,7 @@ using \SI{256}{\byte} of data per operation.
 %We measured the performance of serving a \SI{4}{\kilo\byte} page using
 %\lstinline`wrk`, which was run for \SI{10}{\second} with \num{10} clients.
 
-\paragraph{\lighttpdtwo}\footnote{\url{https://github.com/lighttpd/lighttpd2}}
+\item[\lighttpdtwo\footnote{\url{https://github.com/lighttpd/lighttpd2}}]
 is a lightweight web server optimized for high performance environments,
 reimplemented entirely from the scratch in the version 2.0.  We used the
 revision \lstinline`93d04a3` from the official \git repository, the
@@ -97,7 +104,7 @@ a \SI{4}{\kilo\byte} page using
 \lstinline`wrk`,\footnote{\url{https://github.com/wg/wrk}}, which was run for
 \SI{10}{\second} with \num{10} clients.
 
-\paragraph{\memcached}\footnote{\url{http://memcached.org/}} 
+\item[\memcached\footnote{\url{http://memcached.org/}}]
 is a high-performance, distributed memory object caching system, used by
 many high-profile websites to alleviate database load. We used 
 revision 1.4.17, the latest at the time of writing. To measure the performance
@@ -110,7 +117,7 @@ part of the \emph{libMemcached} library. We used the default workload,
 %% tool for \memcached, which is a part of
 %% \lstinline`libmemcached`.\footnote{\url{http://libmemcached.org/}}
 
-\paragraph{\nginx}\footnote{\url{http://nginx.org/}}
+\item[\nginx\footnote{\url{http://nginx.org/}}]
 is a highly popular reverse proxy server often used as an HTTP web
 server, load balancer or cache. We used version 1.5.12, the
 latest at the time of writing.  We measured
@@ -121,7 +128,7 @@ performance using the same workload as for \lighttpdtwo.
 %% \lstinline`wrk`,\footnote{\url{https://github.com/wg/wrk}} which was run for
 %% \SI{10}{\second} with \num{10} clients.
 
-\paragraph{\redis}\footnote{\url{http://redis.io/}}
+\item[\redis\footnote{\url{http://redis.io/}}]
 is a high-performance in-memory, key-value data store, used by many
 well-known services. % such as Twitter, GitHub and StackOverflow.
 % Pinterest, Snapchat, Craigslist, Digg, Flickr 
@@ -133,6 +140,8 @@ of commands supported by Redis and measures both the throughput and
 the latency for each type. We used the default workload, \ie 50
 clients issuing \num{10000} requests and calculated the average overhead
 across all commands.
+
+\end{enumerate}
 
 \begin{figure}[!t]
  \centering

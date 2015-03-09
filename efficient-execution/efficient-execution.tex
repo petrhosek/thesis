@@ -54,23 +54,21 @@
 % must be virtualised in order to enable the multiple versions to act as
 % one to the outside world.
 
-The main challenge in implementing an NVX monitor at the system call
-level is the trade-off between performance, security, flexibility and
-ease of debugging.  Many
+The main challenge in implementing a system call monitor the trade-off between
+performance, security, flexibility and ease of debugging.  Many
 implementations~\cite{orchestra09,mx,process-replicae07} use the
-\lstinline`ptrace` mechanism offered by most UNIX-based operating
-systems. While \lstinline`ptrace` has its advantages as show in
-Chapter~\ref{chap:safe-updates}, namely ease-of-use and not requiring
-kernel modifications, \lstinline`ptrace` introduces large overhead, and
-these systems see performance degradations of up to two orders of
-magnitude.  A much faster approach is to implement the monitor in kernel
-space~\cite{cox2006}, but this requires kernel patches and/or new kernel
-modules, and the monitor must be run in privileged mode.  Furthermore,
-none of these approaches scales well with the number of variants (as the
-monitor is both a communication and synchronisation bottleneck), none
-are debug-friendly (\lstinline`ptrace` disallows the use of \gdb, while
-kernel debugging has its well-known set of limitations) and none of them
-have been designed to be flexible with respect to small variations in
+\lstinline`ptrace` mechanism offered by most UNIX-based operating systems.
+While \lstinline`ptrace` has its advantages as show in
+Chapter~\ref{chap:safe-updates}, namely ease-of-use and not requiring kernel
+modifications, \lstinline`ptrace` introduces large overhead, and these systems
+see performance degradations of up to two orders of magnitude.  A much faster
+approach is to implement the monitor in kernel space~\cite{cox2006}, but this
+requires kernel patches and/or new kernel modules, and the monitor must be run
+in privileged mode.  Furthermore, none of these approaches scales well with the
+number of variants (as the monitor is both a communication and synchronisation
+bottleneck), none are debug-friendly (\lstinline`ptrace` disallows the use of
+\gdb, while kernel debugging has its well-known set of limitations) and none of
+them have been designed to be flexible with respect to small variations in
 system call sequences (which can occur for certain diversification
 transformations and across program versions).
 
@@ -78,7 +76,7 @@ In this chapter, we propose \varan,\footnote{\varan's name comes from
   the scientific name \emph{Varanus}, commonly known as the
   \emph{monitor} lizard. Varan is also a name of the Kaiju monster
   that first appeared in the 1958 movie \emph{Varan the
-    Unbelievable}.} a novel architecture for implementing NVX
+    Unbelievable}.} a novel architecture for implementing multi-version
 monitors.  \varan monitors operate at the system call level, run in
 user space (and therefore in unprivileged mode), introduce a small
 performance overhead for popular C10k network servers and often a

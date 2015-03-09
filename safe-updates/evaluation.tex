@@ -324,18 +324,18 @@ running under \mx.}
 We ran our experiments on a four-core server with 3.50~GHz Intel
 Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 
-\paragraph{\speczerosix}
-To measure the performance overhead of our prototype, we first used the
-standard \speczerosix\footnote{\url{http://www.spec.org/cpu2006/}}
-benchmark suite.  Figure~\ref{fig:spec} shows the performance of \mx
-running two instances of the same application in parallel, compared to a
-native system. The execution time overhead of \mx varies from
-\minOverSPEC to \maxOverSPEC compared to executing just a single
-version, with the geometric mean across all \numSPECbench benchmarks at
-\avgOverSPEC. This result is comparable with previous work using
-multi-variant execution that used \speccpu to measure
-performance~\cite{orchestra09} (even though that work used \speczerozero
-which has already been retired).
+\begin{enumerate}
+\item[\speczerosix] To measure the performance overhead of our prototype, we
+  first used the standard
+  \speczerosix\footnote{\url{http://www.spec.org/cpu2006/}} benchmark suite.
+  Figure~\ref{fig:spec} shows the performance of \mx running two instances of
+  the same application in parallel, compared to a native system. The execution
+  time overhead of \mx varies from \minOverSPEC to \maxOverSPEC compared to
+  executing just a single version, with the geometric mean across all
+  \numSPECbench benchmarks at \avgOverSPEC. This result is comparable with
+  previous work using multi-variant execution that used \speccpu to measure
+  performance~\cite{orchestra09} (even though that work used \speczerozero
+  which has already been retired).
 
 %% The overhead varies from \minRedisOver to \maxRedisOver depending
 %% on the operation being performed. This is the worst case overhead
@@ -346,45 +346,47 @@ which has already been retired).
 %% $n$-fold slowdown, so the relatively high measure overhead is
 %% therefore unsurprising.
 
-\paragraph{\gnu~\coreutils} The six \coreutils applications discussed in 
-\sref{sec:coreutils} are mostly used in an interactive fashion via the
-command-line interface (CLI). For such applications, a high performance
-overhead is acceptable as long as it is not perceptible to the user;
-prior studies have shown that response times of less than 100ms
-typically feel instantaneous~\cite{card:human_proc}. In many common use
-cases (\eg creating a directory, or using \cut on a small text file),
-the overhead of \mx was imperceptible---\eg creating a directory takes
-around \avgMkdirNative natively and \avgMkdirMx with \mx. For the three
-utilities that process files, we calculated the maximum file size for
-which the response time with \mx stays under the 100ms threshold.  For
-\cut, the maximum file size is \cutCutoffSize (with an overhead of
-\cutCutoffOver), for \mdsum \mdsumCutoffSize (\mdsumCutoffOver
-overhead), and for \shasum \shasumCutoffSize (\shasumCutoffOver
-overhead).
+\item[\gnu~\coreutils] The six \coreutils applications discussed in
+  \sref{sec:coreutils} are mostly used in an interactive fashion via the
+  command-line interface (CLI). For such applications, a high performance
+  overhead is acceptable as long as it is not perceptible to the user; prior
+  studies have shown that response times of less than 100ms typically feel
+  instantaneous~\cite{card:human_proc}. In many common use cases (\eg creating
+  a directory, or using \cut on a small text file), the overhead of \mx was
+  imperceptible---\eg creating a directory takes around \avgMkdirNative
+  natively and \avgMkdirMx with \mx. For the three utilities that process
+  files, we calculated the maximum file size for which the response time with
+  \mx stays under the 100ms threshold.  For \cut, the maximum file size is
+  \cutCutoffSize (with an overhead of \cutCutoffOver), for \mdsum
+  \mdsumCutoffSize (\mdsumCutoffOver overhead), and for \shasum
+  \shasumCutoffSize (\shasumCutoffOver overhead).
 
-\paragraph{\lighttpd} For \lighttpd, we used the
-\httpload\footnote{\url{http://www.acme.com/software/http_load/}}
-multiprocessing test client that is also used by the \lighttpd developers. This
-benchmark measures the end-to-end time as perceived by users. As a result, we
-performed two sets of experiments: (1) with the client and server located on
-the same machine, which represents the worst case performance-wise for \mx; and
-(2) with the client and server located on different continents (one in England
-and the other in California), which represents the best case. The overhead for
-\lighttpd varies from \minLighttpdRemote to \maxLighttpdRemote in the remote
-scenario, and from \minLighttpdOver to \maxLighttpdOver in the local scenario.
-Despite the relatively large overhead in the local experiments, the remote
-overhead is negligible because times are dominated by the network latency
-(which in our case is over $150$ms).
+\item[\lighttpd] We used the
+  \httpload\footnote{\url{http://www.acme.com/software/http_load/}}
+  multiprocessing test client that is also used by the \lighttpd developers.
+  This benchmark measures the end-to-end time as perceived by users. As a
+  result, we performed two sets of experiments: (1) with the client and server
+  located on the same machine, which represents the worst case performance-wise
+  for \mx; and (2) with the client and server located on different continents
+  (one in England and the other in California), which represents the best case.
+  The overhead for \lighttpd varies from \minLighttpdRemote to
+  \maxLighttpdRemote in the remote scenario, and from \minLighttpdOver to
+  \maxLighttpdOver in the local scenario.  Despite the relatively large
+  overhead in the local experiments, the remote overhead is negligible because
+  times are dominated by the network latency (which in our case is over
+  \SI{150}{\milli\second}).
 
-\paragraph{\redis} To measure the performance overhead for \redis, we used the
-\redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}} utility,
-which is part of the standard \redis distribution and simulates
-\textstt{GET}/\textstt{SET} operations done by $N$ clients concurrently, with
-default workload. Same as in the case of \lighttpd, we performed two sets of
-experiments, one for the local scenario and one for the remote scenario. The
-overhead for \redis varies, depending on the operation being performed, from
-\minRedisRemote to \maxRedisRemote in the remote scenario, and from
-\minRedisOver to \maxRedisOver in the local scenario. 
+\item[\redis] To measure the performance overhead for \redis, we used the
+  \redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}} utility,
+  which is part of the standard \redis distribution and simulates
+  \textstt{GET}/\textstt{SET} operations done by $N$ clients concurrently, with
+  default workload. Same as in the case of \lighttpd, we performed two sets of
+  experiments, one for the local scenario and one for the remote scenario. The
+  overhead for \redis varies, depending on the operation being performed, from
+  \minRedisRemote to \maxRedisRemote in the remote scenario, and from
+  \minRedisOver to \maxRedisOver in the local scenario. 
+
+\end{enumerate}
 
 Given the results presented hereinbefore, we believe \mx is most suitable for
 scenarios for which its execution overhead does not degrade the performance of

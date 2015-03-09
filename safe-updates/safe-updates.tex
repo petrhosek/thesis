@@ -20,12 +20,12 @@
 
 Multi-version execution can be used to improve the reliability of updated
 software by running multiple different versions (revisions) in parallel,
-discarding one (or more) versions in case of failure. The potential problem
-of such approach is that we might run out of alive versions given multiple
-crash bugs located in different parts of the application. We tackle this
-problem by combining a multi-version execution with a failure recovery
-mechanism which takes an advantage of the similarity between consecutive
-software versions.
+discarding one (or more) versions in case of failure. The potential problem of
+such approach is that we might eventually run out versions given multiple crash
+bugs located at different points across versions. We tackle this problem by
+combining multi-version execution with a failure recovery mechanism, introduced
+in Section~\ref{multi-version:rationale}, which takes advantage of the
+similarity between consecutive software versions.
 
 % We tackle this problem using a simple but effective multi-version
 % based approach.  Whenever a new update becomes available, instead of
@@ -36,14 +36,13 @@ software versions.
 % application.
 
 We implemented this approach in a prototype system called \mx, which
-targets crash bugs in Linux applications
-%running on multi-core processors.
+targets crash bugs in Linux applications.
 \mx allows a new and an old version of an application to
 run concurrently, without requiring any
 modifications to the application itself or the operating system, nor any
 input from the user. To achieve this goal, \mx combines static and
 dynamic techniques: it uses static analysis at the binary-level to
-construct mappings between the old and the new versions, and synchronizes
+construct mappings between the old and the new versions, and synchronises the
 execution of the two versions at the system call level, using system call
 interposition and synchronisation.  When one of the versions crashes, \mx
 transparently restarts it via a lightweight checkpointing mechanism and often

@@ -55,7 +55,9 @@ architecture is that it can often handle multiple versions with minimum
 additional overhead, and below we also show how \varan performs on
 these benchmarks when more than two versions are used.
 
-\paragraph{\httpd} \footnote{\url{https://httpd.apache.org/}}
+\begin{enumerate}
+
+\item[\httpd\footnote{\url{https://httpd.apache.org/}}]
 was used by \orchestra.  We used version 1.3.29, the same as in the
 original work~\cite{orchestra09}.  The overhead reported for
 \orchestra is \orchestraHttpd using the \emph{ApacheBench}
@@ -74,7 +76,7 @@ well with increasing numbers of followers for these benchmarks.
 %using \emph{WebBench} and \httpdAbOneFollower overhead with
 %\emph{ApacheBench}, which is an improvement over previous work.
 
-\paragraph{\lighttpd} %\footnote{\url{http://www.lighttpd.net/}}
+\item[\lighttpd\footnote{\url{http://www.lighttpd.net/}}]
 has been used to evaluate both \mx and \tachyon.  We used version
 1.4.36. %(neither \mx nor \tachyon reported the version used). 
 \mx used the \emph{http\_load} benchmark and reported \mxLighttpd overhead
@@ -86,18 +88,17 @@ overhead. %\lighttpdAbOneFollower.
 In both
 cases, this marks a significant improvement over previous work.
 
-\paragraph{\thttpd}\footnote{\url{http://www.acme.com/software/thttpd/}}
+\item[\thttpd\footnote{\url{http://www.acme.com/software/thttpd/}}]
 was shown to introduce \tachyonThttpd overhead when run on top of
 \tachyon using the \emph{ApacheBench} benchmark. When run on top of
 \varan using the same settings as in \cite{tachyon12}, we have not
 measured any noticeable overhead.
 
-\paragraph{\redis} 1.3.8 \footnote{\url{http://redis.io/}}
-was used in the evaluation of \mx.  The performance
-overhead reported by \mx was \mxRedis using the \lstinline`redis-benchmark`
-utility. When run with \varan using the same benchmark and the same workload,
-the overhead we measured was \redisOneFollower, which is again a significant
-improvement over previous work.
+\item[\redis 1.3.8\footnote{\url{http://redis.io/}}]
+  was used in the evaluation of \mx (\S\ref{sec:performance}).  The performance
+  overhead incurred by \mx is \mxRedis using the \lstinline`redis-benchmark`
+  utility. When run with \varan using the same benchmark and the same workload,
+  the overhead we measured was \redisOneFollower.
 
 \begin{figure}[!t]
   \centering
@@ -106,17 +107,12 @@ improvement over previous work.
   \label{fig:spec2000}
 \end{figure}
 
-\paragraph{\speczerozero}\footnote{\url{http://www.spec.org/cpu2000/}} 
-was used to evaluate \orchestra.  We used the latest available version
-1.3.1.  \orchestra reported a \orchestraSpec overhead, while \varan
-introduced only a \speczerozeroOneFollower overhead. The results for
-the individual applications contained in the \speczerozero suite and
-for different numbers of followers can be seen in
-Figure~\ref{fig:spec2000}. The reason these applications scale poorly
-with the number of followers is likely due to memory pressure and
-caching effects~\cite{jaleel07}, and to the fact that our machine has
-only four physical cores (with two logical cores each).  We plan to
-investigate these results in more detail in future work.
+\item[\speczerozero\footnote{\url{http://www.spec.org/cpu2000/}}]
+was used to evaluate \orchestra.  We used the latest available version 1.3.1.
+\orchestra reported a \orchestraSpec overhead, while \varan introduced only a
+\speczerozeroOneFollower overhead. The results for the individual applications
+contained in the \speczerozero suite and for different numbers of followers can
+be seen in Figure~\ref{fig:spec2000}.
 
 \begin{figure}[!t]
   \centering
@@ -125,11 +121,13 @@ investigate these results in more detail in future work.
   \label{fig:spec2006}
 \end{figure}
 
-\paragraph{\speczerosix}\footnote{\url{http://www.spec.org/cpu2006/}}
-was previously used to evaluate \mx. We used the latest version 1.2.  The
-overhead reported by \mx was \mxSpec, while \varan introduced only
-a \speczerosixOneFollower overhead.
-Individual results can be seen in Figure~\ref{fig:spec2006}.
+\item[\speczerosix\footnote{\url{http://www.spec.org/cpu2006/}}]
+  was also used in the \mx evaluation (\S\ref{sec:performance}). We used the
+  same version in evaluation of both systems.  The overhead of \mx is \mxSpec,
+  while overhead of \varan is \speczerosixOneFollower.  Individual results can
+  be seen in Figure~\ref{fig:spec2006}.
+
+\end{enumerate}
 
 \begin{figure}[ht]
 \begin{center}
@@ -140,6 +138,12 @@ tool.}
 \label{fig:syscall}
 \end{center}
 \end{figure}
+
+The reason these applications scale
+poorly with the number of followers is likely due to memory pressure and
+caching effects~\cite{jaleel07}, and to the fact that our machine has only four
+physical cores (with two logical cores each).  We plan to investigate these
+results in more detail in future work.
 
 We also examined how the frequency of system calls affects the
 performance overhead of application executed on top \mx.

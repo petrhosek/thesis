@@ -103,57 +103,58 @@ randomisation schemes to be used by the operating system, because the
 % The rest of this section provides some extra details regarding the
 % role and implementation of the coordinator, monitor and zygote.
 
-\boldtext{Coordinator.}  To set up the address spaces of the versions,
-the coordinator acts as a specialized preloader, inspired by
-\emph{rtldi}.\footnote{\url{http://www.bitwagon.com/rtldi/rtldi.html}}
-However, the coordinator does not attempt to replace the existing
-dynamic linker, which would be unnecessarily complex and may affect
-compatibility with existing applications. Instead, it simply
-intercepts the system calls performed by the linker to enable the
-binary rewriter (\S\ref{sec:rewriting}) to rewrite the code of
-dynamically-linked shared libraries.  One important advantage of our
-interception mechanism is that we do not make use of \ptrace to
-intercept calls to the dynamic linker---instead, the binary rewriter
-is used to rewrite all the system calls done by the linker with jumps
-into the coordinator code.  As a result, \varan can be used in
-combination with existing \lstinline`ptrace`-based tools such as \gdb
-or \textit{strace}, which greatly simplifies debugging.
+\subsubsection{Coordinator}
 
-%% This also has an advantage of supporting arbitrary dynamic linkers,
-%% not just the one provided by GNU C library, albeit it is going to be
-%% the most common target.
+To set up the address spaces of the versions, the coordinator acts as a
+specialized preloader, inspired by
+\emph{rtldi}.\footnote{\url{http://www.bitwagon.com/rtldi/rtldi.html}} However,
+the coordinator does not attempt to replace the existing dynamic linker, which
+would be unnecessarily complex and may affect compatibility with existing
+applications. Instead, it simply intercepts the system calls performed by the
+linker to enable the binary rewriter (\S\ref{sec:rewriting}) to rewrite the
+code of dynamically-linked shared libraries.
 
-%% This architecture has several advantages over other commonly
-%% approaches. \varan does not require the use of dynamic linker, as
-%% required by \lstinline`LD\_PRELOAD`. 
+One important advantage of our interception mechanism is that we do not make
+use of \ptrace to intercept calls to the dynamic linker---instead, the binary
+rewriter is used to rewrite all the system calls done by the linker with jumps
+into the coordinator code.  As a result, \varan can be used in combination with
+existing \lstinline`ptrace`-based tools such as \gdb or \textit{strace}, which
+greatly simplifies debugging.
 
+This architecture has several advantages over other commonly approaches. \varan
+does not require the use of dynamic linker, as required by
+\lstinline`LD\_PRELOAD`, and supports even statically linked applications.
+This also has an advantage of supporting arbitrary dynamic linkers, not just
+the one provided by \gnu C library, albeit it is going to be the most common
+target.
 
+\subsubsection{Zygote}
 
-\boldtext{Zygote.} The role of the zygote is to spawn new processes on
-request from the coordinator.  Zygote processes are already used in
-systems such as \textit{Android} and
-\textit{Chrome}~\cite{linuxzygote}---in this paper, we use the term to
-refer to the architectural pattern rather than a particular implementation, as \varan
-provides its own clean-slate implementation.  While it would be
-technically possible for the coordinator to create the processes in
+The role of the zygote is to spawn new processes on request from the
+coordinator.  Zygote processes are already used in systems such as
+\textit{Android} and \textit{Chrome}~\cite{linuxzygote}---in this paper, we use
+the term to refer to the architectural pattern rather than a particular
+implementation, as \varan provides its own clean-slate implementation.  While
+it would be technically possible for the coordinator to create the processes in
 which versions run, this would bring some complications regarding the
-communication channels: for example, the second version spawned would
-inherit the communication channel between the first version and the
-coordinator, which would be undesirable.
+communication channels: for example, the second version spawned would inherit
+the communication channel between the first version and the coordinator, which
+would be undesirable.
 
-\boldtext{Monitor.} The monitor code is built as a statically-linked,
-position-independent library, to make sure it does not stand in the
-way of any segments which have to be loaded by the application at
-fixed addresses.  To ensure that the code can be compiled like this,
-we must avoid using any global variables (\ie those in the
-\lstinline`.data` section). One consequence is that \varan
-cannot use any of the existing C libraries such as \textit{GNU C
-  Library}, as these are not typically built to support this
-requirement.  Instead, \varan provides its own implementation of the
-necessary C library functions based on the \textit{Bionic C
-  library}.\footnote{\url{https://android.googlesource.com/platform/bionic}}
-To support the use of Linux system calls, \varan uses a modified
-version of the \lstinline`linux_syscall_support.h`
+\subsubsection{Monitor}
+
+The monitor code is built as a statically-linked, position-independent library,
+to make sure it does not stand in the way of any segments which have to be
+loaded by the application at fixed addresses.  To ensure that the code can be
+compiled like this, we must avoid using any global state (\ie any data that
+would be placed in the ELF \lstinline`.data` section). One consequence is that
+\varan cannot use any of the existing C libraries such as \textit{GNU C
+Library}, as these are not typically built to support this requirement.
+Instead, \varan provides its own implementation of the necessary C library
+functions based on the \textit{Bionic C
+library}.\footnote{\url{https://android.googlesource.com/platform/bionic}} To
+support the use of Linux system calls, \varan uses a modified version of the
+\lstinline`linux_syscall_support.h`
 header.\footnote{\url{https://code.google.com/p/linux-syscall-support/}}
 
 %% \varanlib provides its own entry point (\ie the \lstinline`\_start` function),
@@ -285,18 +286,26 @@ implementations. These \textit{virtual system calls} do not incur the
 context switch overhead between kernel and user space associated with
 standard system calls.
 
-The \emph{vsyscall} page was introduced first, but is being deprecated
-in favor of the \emph{vDSO} segment.
-%% limitations\footnote{We are referring to x86-64 version, on x86
-%%   systems the vDSO segment contains a function used to determine the
-%%   preferred method of making a system call}. 
-The main reason for this development is that the \emph{vsyscall} page
-is mapped to a fixed address, making it susceptible to return-oriented
-programming attacks~\cite{ROP:tissec12}. To address this issue, the
-vDSO segment is mapped to a random address. Since the segment is
-dynamically allocated, it can also support an arbitrary number of
-virtual system calls (currently \lstinline`clock_gettime`, \lstinline`getcpu`,
+The \emph{vsyscall} page was introduced first, but is being deprecated in favor
+of the \emph{vDSO} segment.\footnote{We are referring to x86-64 version, on x86
+systems the vDSO segment contains a function used to determine the preferred
+method of making a system call} The main reason for this development is that
+the \emph{vsyscall} page is mapped to a fixed address, making it susceptible to
+return-oriented programming attacks~\cite{ROP:tissec12}. To address this issue,
+the vDSO segment is mapped to a random address. Since the segment is
+dynamically allocated, it can also support an arbitrary number of virtual
+system calls (currently \lstinline`clock_gettime`, \lstinline`getcpu`,
 \lstinline`gettimeofday` and \lstinline`time`).
+
+On x86-64 system, Linux would map a vDSO segment into each process' address
+space. This segment contains a fully formed ELF image with function symbols
+prefixed with \lstinline`__vdso_`, one for each virtual system call.
+Applications can then call these functions and avoid performing a full context
+switch into kernel associated with a regular systems call. However, in practice
+applications are more likely to use a wrapper provided by their C library such
+as \gnu C library, which checks whether the vDSO page is available and if so
+uses the virtual system call, or alternatively falls back to the regular system
+call implementation.
 
 Virtual system calls represents one of the major limitations of
 \lstinline`ptrace`-based monitors. Since these system calls are entirely
@@ -308,8 +317,10 @@ is critical for any NVX system. %Despite this, previous systems either
 %omit discussion on virtual system call handling~\cite{mx,orchestra11}
 %or explicitly mention their inability to handle them~\cite{tachyon12}.
 
-To our knowledge, \varan is the first NVX system which handles virtual
-system calls, using binary rewriting. 
+To our knowledge, \varan is the first NVX system which handles virtual system
+calls, using binary rewriting.  Previous systems either omit discussion on
+virtual system call handling~\cite{orchestra11} or explicitly mention their
+inability to handle them~\cite{tachyon12}.
 %In \varan, binary rewriting is also used to intercept virtual system
 %calls.
 Handling calls made via the \textit{vsyscall} page is easier because
