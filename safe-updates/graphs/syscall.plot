@@ -1,4 +1,4 @@
-set term pdfcairo enhanced color solid font 'MyriadPro,12' size 9.0cm,17.0cm
+set term pdfcairo enhanced color solid font 'MyriadPro,12' size 7.0cm,17.0cm
 if (!exists("filename")) filename='syscall.pdf'
 set output filename
 
@@ -23,7 +23,7 @@ set y2tics nomirror rotate
 set yrange [0:350]
 set xrange[-0.5:11.5]
 
-set xlabel ''
+set xlabel 'Average number of system calls performed per second'
 set grid y2
 
 plot 'syscall.dat' using 2:xtic(1) linecolor rgb '#aaaaaa' notitle, \

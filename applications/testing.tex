@@ -1,0 +1,33 @@
+\section{Regression testing}
+\label{sec:testing}
+
+By default, whenever \mx detects a divergence between the two versions which
+are being run in parallel, it either discard one of the versions, or, if the
+divergence is cause by the segmentation fault, it tries to recover the failing
+version (\S\ref{sec:rem}). This mode of operation is suitable as a way for
+improving reliability of updated software, as shown in
+Section~\ref{sec:reliability-evaluation}.
+
+However, \mx can be also used in a different mode, when application is
+fail-stopped whenever the divergence is detected. This mode of operation is
+suitable for regression testing. When working on the new version of the
+application developers would typically use the regression suite to ensure that
+the new version does not break the existing functionality. When such situation
+occurs, the first step is typically to determine where the bug was introduced.
+While this may be easy for simple sequential application, such task could be
+challenging for application which use non-deterministic inputs such as network
+events or random number generators.
+
+One of the main goals of \mx is to intercept all sources of non-determinism and
+provide both versions with the same input. This allows developers to run both
+versions in parallel, and see whether the patch introduces any divergence by
+running both application in lockstep. When the divergence is detected, \mx can
+also provide developers with additional information such as stack trace
+obtained by the \rem component.
+
+While conceptually simple, we believe this mechanism could be helpful in many
+development scenarios. Furthermore, we believe this mechanism could be
+integrated with other mechanisms such as \lstinline`git bisect`, which normally
+relies on the regression testing suite, which might be too coarse grained in
+some scenarios, but when it combined with \mx it can also detect more subtle
+differences (\eg due to non-determinism).

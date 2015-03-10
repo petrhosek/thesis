@@ -19,6 +19,12 @@ number of versions, as in prior NVX systems.  This can lead to
 degradations in performance due to memory pressure and caching
 effects, as we have observed in Section~\ref{sec:comparison}.
 
+Furthermore, the CPU utilisation overhead is only relevant for the user space
+CPU time since the system call is only going to be executed by the leader. Many
+C10k server spent large amount of their execution time in the kernel, \ie as
+shown in~\cite{redisoverhead}, 84\% of a single-threaded 1KB write in \redis
+is spent in the kernel. This confirms our results where \redis had the lowest
+performance overhead.
 
 \paragraph{Memory-based communication.} As prior NVX systems, \varan
 does not support memory-based communication.  More exactly, \varan

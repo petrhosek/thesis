@@ -139,20 +139,19 @@ tool.}
 \end{center}
 \end{figure}
 
-The reason these applications scale
-poorly with the number of followers is likely due to memory pressure and
-caching effects~\cite{jaleel07}, and to the fact that our machine has only four
-physical cores (with two logical cores each).  We plan to investigate these
-results in more detail in future work.
-
-We also examined how the frequency of system calls affects the
-performance overhead of application executed on top \mx.
-Figure~\ref{fig:syscall} shows the average number of system calls during
-the execution of SPEC~CPU2006. Rather surprising result is the fact that
-\textsf{452.libquantum}, even though having the largest run time
-overhead had the lowest average number of system calls.  On the hand,
-the performance overhead of \textsf{400.perlbench}, despite having the
-highest average number system, was bellow average.
+The reason why some of the \speccpu applications scale poorly with the number
+of followers is likely due to memory pressure and caching
+effects~\cite{jaleel07}, and to the fact that our machine has only four
+physical cores (with two logical cores each). To get a better insight into this
+issue, we have also examined how the frequency of system calls affects the
+performance overhead. Figure~\ref{fig:syscall} shows the average number of
+system calls during the execution of \speczerosix. \textsf{452.libquantum},
+even though having the largest run time overhead had the lowest average number
+of system calls. On the hand, the performance overhead of
+\textsf{400.perlbench}, despite having the highest average number system, was
+bellow average. This confirms that the increased overhead is not caused by the
+system call handling mechanism and can be likely attributed due to memory
+effects.
 
 %\begin{figure}[!t]
   %\centering
