@@ -35,9 +35,9 @@ for increased availability and security (see \S\ref{sec:rem} for details
 regarding possible problems caused by \mx).  However, \mx alleviates this
 problem by using a previously correct piece of code to execute through the
 crash, and by discovering most potential problems by regularly checking if the
-two versions have the same external behaviour.  Finally, note that \mx always
-reverts to running a single version when a non-resolvable divergence is
-detected.
+two versions have the same external behaviour after recovery.  Finally, note
+that \mx always reverts to running a single version when a non-resolvable
+divergence is detected.
 
 %% is never worse than simply using one version of the software: if a
 %% non-crashing divergence is detected, \mx can simply continue execution
@@ -47,10 +47,11 @@ detected.
 \sref{sec:performance}.  In our experience, \mx is readily deployable to
 interactive applications such as command-line utilities, text editors and other
 office tools, where the performance degradation is not noticeable to the user.
-We believe it is also applicable to server applications where availability is
-more important than high performance.  \mx is not applicable to patches that
-fix performance bugs, as the system runs no faster than the slowest
-version.
+We believe it is also applicable to server scenarios where the end-to-end
+overhead is masked by network latency, and where availability is more important
+than high performance.  \mx is not applicable to servers requiring
+high-throughput and to patches that fix performance bugs, as the system runs no
+faster than the slowest version.
 
 Our approach of using idle CPU time to run additional versions also increases
 energy consumption.  However, it is interesting to note that idle CPUs are not
@@ -68,7 +69,7 @@ application---the number of versions that can be run in parallel is limited,
 being dictated by the number of available resources (\eg the number of
 available CPU cores).  As a result, we need a deployment strategy to decide
 what versions to use.  For example, we could always run the last $N$ released
-versions (where $X$ is the number of available resources), or we could always
-keep a one-year old version, etc.  This thesis focuses on techniques for
-allowing multiple versions to successfully coordinate their parallel execution,
-but in future work we plan to explore deployment strategies in more detail.
+versions (where $N$ is the number of available resources), or we could always
+keep a one-year old version, etc.  This thesis focuses on designing and
+implementing multi-version execution techniques, but in future work we plan to
+explore deployment strategies in more detail.

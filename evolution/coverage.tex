@@ -18,7 +18,7 @@ targeting architectures different from our machine.  One of the main
 reasons for which we have decided to measure ELOC rather than other
 similar metrics is that they can be easily related to the dynamic
 metrics, such as patch coverage, presented in
-Sections~\ref{sec:code-cov} and \ref{sec:pcoverage}.
+Sections~\ref{sec:code-cov}.
 
 %% Number of lines added or modified in the revision. These were split
 %% into lines executed, not executed and not executable,
@@ -60,13 +60,14 @@ for \lighttpdtwo.
 \end{figure}
 
 
-Figure~\ref{fig:tloc-evol} presents the evolution of the size of the
-test suite in each system, measured in textual lines of test code
-(TLOC).  For each system, we manually identified the files responsible
-for regression testing and recorded the number of lines contained in
-them at each revision. It can be seen that test evolution is less
-dynamic than code evolution, developers adding less test code than
-regular code.
+Figure~\ref{fig:tloc-evol} presents the evolution of the size of the test suite
+in each system, measured in textual lines of test code (TLOC).  For each
+system, we manually identified the files responsible for regression testing and
+recorded the number of lines contained in them at each revision. It can be seen
+that test evolution is less dynamic than code evolution, developers adding less
+test code than regular code. In some cases, developers even remove large parts
+of the test code. This is most obvious in case of \beanstalkd whose test suite
+has been rewritten from scratch several times over the analysed period.
 
 
 To better understand the co-evolution of executable and test code, we
@@ -180,32 +181,30 @@ the median number of ELOC ranging from \redisPatchMedian to \gitPatchMedian.
 %% metrics along with the number of {\em hunks}, discussed next, are a
 %% good measure of code churn.
 
-To understand the degree to which patches are spread out through the
-code, we also recorded the number of areas in the
-code---\textit{hunks} in \git terminology---and the number of files
-containing executable code which suffered changes.  More formally, a
-hunk groups together all the lines added or modified in a patch which
-are at a distance smaller than the \textit{context size}.  We used the
-default unified diff format with a context size of three lines when
-computing the
-hunks.\footnote{See \url{http://www.gnu.org/software/diffutils/manual/html_node/}
-for more details.}  The \textit{Hunks} column in
-Table~\ref{tbl:exec-patch} shows that the median number of hunks
-varies between \binutilseHunkThreeMedian and \zeromqeHunkThreeMedian.
+To understand the degree to which patches are spread out through the code, we
+also recorded the number of areas in the code---\textit{hunks} in \git
+terminology---and the number of files containing executable code which suffered
+changes.  More formally, a hunk groups together all the lines added or modified
+in a patch which are at a distance smaller than the \textit{context size}.  We
+used the default unified diff format with a context size of three lines when
+computing the hunks.\footnote{See
+\url{http://www.gnu.org/software/diffutils/manual/html_node/} for more
+details.}  The \textit{Hunks} column in Table~\ref{tbl:exec-patch} shows that
+the median number of hunks varies between \binutilseHunkThreeMedian and
+\zeromqeHunkThreeMedian.
 
-Finally, the median number of files modified by a patch is
-only \rediseFileMedian for all benchmarks with the exception
-of \zeromq, for which it is \zeromqeFileMedian. The fraction of
-patches that modify a single file is, in increasing
-order, \vimOneeFilePatches for \vim, \zeromqOneeFilePatches for \zeromq,
-\gitOneeFilePatches for \git, \beanstalkdOneeFilePatches in \beanstalkd,
-\lighttpdtwoOneeFilePatches for \lighttpdtwo, \memcachedOneeFilePatches for
-\memcached, \redisOneeFilePatches for \redis, and \binutilsOneeFilePatches for
-\binutils.
+Finally, the median number of files modified by a patch is only
+\rediseFileMedian for all benchmarks with the exception of \vim and \zeromq,
+for which it is \zeromqeFileMedian. The fraction of patches that modify a
+single file is, in increasing order, \vimOneeFilePatches for \vim,
+\zeromqOneeFilePatches for \zeromq, \gitOneeFilePatches for \git,
+\beanstalkdOneeFilePatches in \beanstalkd, \lighttpdtwoOneeFilePatches for
+\lighttpdtwo, \memcachedOneeFilePatches for \memcached, \redisOneeFilePatches
+for \redis, and \binutilsOneeFilePatches for \binutils.
 
 While these results are based on static analysis only, the fact that most
 patches are small and localized suggests that individual patches are likely to
-have only small impact on the external behaviour. This hypothesis is further
+have only a small impact on the external behaviour. This hypothesis is further
 confirmed in Section~\ref{evolution:external} which analyses the dynamic
 behaviour.
 
@@ -246,9 +245,9 @@ modify executable code is considered.}
 
 \begin{table}[t]
 \centering
-\caption{Number of revisions where the test suite nondeterministically 
+\caption{Number of revisions where the test suite non-deterministically 
 succeeds/fails, and the maximum, median and average number of lines
-which are nondeterministically executed in a revision.}
+which are non-deterministically executed in a revision.}
 \begin{tabular}{lrrrr}
 \toprule
 \multicolumn{1}{c}{}  & \textsc{Nondet.} & \multicolumn{3}{c}{\sc Nondet. ELOC} \\ 
@@ -275,24 +274,22 @@ which are nondeterministically executed in a revision.}
 %% available from \gcov). \todo{I don't think basic block coverage is
 %% used that much to make it worth mentioning. If line coverage is not
 %% enough people go to branch coverage}
-As a large part of our study focuses on coverage metrics, we first
-investigate whether code coverage is deterministic, \ie whether the
-regression test suite in a given revision achieves the same coverage
-every time it is executed. As we show, nondeterminism has
-implications in the reproducibility of test results---including the
-ones that we report--and the fault detection capability of the
-tests.
+As a part of our study focuses on coverage metrics, we first investigate
+whether code coverage is deterministic, \ie whether the regression test suite
+in a given revision achieves the same coverage every time it is executed. As we
+show, non-determinism has implications in the reproducibility of test results
+and the fault detection capability of the tests as well as for multi-version
+execution.
 
-We measured the overall coverage achieved by the regression test suite
-using \gcov.  Interestingly, we found that all the programs from our
-experiments except \binutils are nondeterministic, obtaining slightly
+We measured the overall coverage achieved by the regression test suite using
+\gcov.  Interestingly, we found that most programs from our experiments except
+\binutils, \lighttpd and \vim are non-deterministic, obtaining slightly
 different coverage in each run of the test suite.  Therefore, we first
-quantified this nondeterminism by running the test suite five times
-for each revision and measuring how many revisions obtained mixed
-results, \ie one run reported success while another reported failure.
-We were surprised to see a fair number of revisions displaying this
-behaviour, as listed in Table~\ref{tbl:nondet} under the column
-\textit{Nondet Result}.
+quantified this non-determinism by running the test suite five times for each
+revision and measuring how many revisions obtained mixed results, \ie one run
+reported success while another reported failure.  We were surprised to see a
+fair number of revisions displaying this behaviour, as listed in
+Table~\ref{tbl:nondet} under the column \textit{Nondet Result}.
 %We believe that many of these failures were
 %invluenced by the Docker environment, as some tests rely on custom timeouts
 %which make them more fragile in the environment with slightly different
@@ -305,16 +302,15 @@ a difference when one of the five runs never executes a line and
 another one executes it. We only did this for revisions in which the
 test suite completes successfully to avoid spurious results that would
 occur if we compare a run which completed with one that was
-prematurely terminated due to a failure.  As shown in
-Table~\ref{tbl:nondet}, \binutils seems to be completely deterministic
-with respect to its test suite, while \redis, for example, contains on
-average \redisNonDetAverage lines that are nondeterministically
-executed.
+prematurely terminated due to a failure.  As shown in Table~\ref{tbl:nondet},
+\binutils, \lighttpd and \vim seems to be completely deterministic with respect
+to its test suite, while \redis, for example, contains on average
+\redisNonDetAverage lines that are non-deterministically executed.
 
 When reporting the overall coverage numbers, we accumulated the
 coverage information across all five runs.\footnote{With the exception
 of \git, where for convenience we considered a single run, as the
-number of lines affected by nondeterminism represent less than
+number of lines affected by non-determinism represent less than
 $0.3\%$ of the total codebase.} Therefore, the results aim to count a
 line as covered if the test suite {\em may} execute it.  The blue
 (upper) lines in Figure~\ref{fig:coverage} plot the overall line
@@ -327,18 +323,18 @@ other achieving
 \zeromq~\zeromqCoverageAverage, and
 \memcached~\memcachedCoverageAverage.
 
-We manually investigated the nondeterminism and pinpointed three
+We manually investigated the non-determinism and pinpointed three
 sources:%
 \begin{inparaenum}[(1)]
 \item multi-threaded code,
 \item ordering of network events, and
-\item nondeterminism in the test harness.
+\item non-determinism in the test harness.
 \end{inparaenum} As an example from the first category, the test from \zeromq
 called \stt{test\_shutdown\_stress} creates 100 threads to check the connection
 shutdown sequence. In a small percentage of runs, this test was exposing a race
 condition.\footnote{\url{https://github.com/zeromq/zeromq4-x/commit/de239f3}}
 In the third category, some \redis tests generate and store random integers,
-nondeterministically executing the code implementing the internal database data
+non-deterministically executing the code implementing the internal database data
 structures.  The \memcached test \stt{expirations.t} is representative of tests
 that make assumptions based on hardcoded wall-clock time values, which cause
 failures under certain circumstances. The test timings were previously
@@ -347,42 +343,49 @@ in response to failures under Solaris' \stt{dtrace} and we believe that some of
 the failures that we encountered were influenced by the Docker environment.
 %\redis and \zeromq explicitly
 %use the \stt{pthreads} library, and are thus affected by scheduler
-%nondeterminism. \lighttpdtwo and \memcached are event-based servers,
+%non-determinism. \lighttpdtwo and \memcached are event-based servers,
 %through the use of \stt{libev} and \stt{libevent} respectively; \redis
 %uses its own implementation of event-loop. They are all affected by
-%nondeterminism because they can receive network events
+%non-determinism because they can receive network events
 %asynchronously.
 
-These results show that multi-version execution environment needs to sources of
-nondeterminism to be practical. \varan and \mx intercept and emulate accesses
-to environment values which are nondeterministic, such as time and date (\eg
-through file \lstinline`/etc/localtime` or system call
+These results show that a multi-version execution environment needs to account
+for sources of non-determinism to be practical. \varan and \mx intercept and
+emulate accesses to environment values which are non-deterministic, such as time
+and date (\eg through file \lstinline`/etc/localtime` or system call
 \lstinline`gettimeofday()`) or random number generators (\eg through file
 \lstinline`/dev/random` or system call \lstinline`getrandom()`). The strict
 system call ordering enforced across versions by both \varan and \mx ensures
 that all networking events are delivered in the same order in all versions.
 
-Deterministic multi-threading mechanisms (DMT) have been an active area of
-research for several years, and while there is no practical solution which
-could handle all possible cases with reasonable overhead, the existing
-solutions are already usable for many real-world
-applications~\cite{coredet:asplos10,dthreads:sosp11}. \varan uses logical
-clocks to enforce ordering across threads. While this approach provides weaker
-guarantees than those typically provided by other DMT systems, it can still
-handle most cases, as descibed in Section~\ref{sec:threading}).
+For non-determinism related to concurrency, deterministic multi-threading
+mechanisms (DMT) have been an active area of research for several years, and
+while there is no practical solution which could handle all possible cases with
+reasonable overhead, the existing solutions are already usable for many
+real-world applications~\cite{coredet:asplos10,dthreads:sosp11}. \varan uses
+logical clocks to enforce ordering across threads. While this approach provides
+weaker guarantees than those typically provided by other DMT systems, it can
+still handle most cases, as described in Section~\ref{sec:threading}).
 
-%The potential drawback of nondeterminism is the inability of coverage
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{evolution/graphs/coverage}
+\caption{Evolution of the overall line and branch coverage.}
+\label{fig:coverage}
+\end{figure}
+
+%The potential drawback of non-determinism is the inability of coverage
 %comparison across revisions, lack of reproducibility and consequent
 %difficulty in debugging. Developers and researchers relying on test
-%suite executions should take nondeterminism into account, by either
+%suite executions should take non-determinism into account, by either
 %quantifying its effects, or by using tools that enforce deterministic
 %execution across versions~\cite{mx}, as appropriate.
-%Tests with nondeterministic expectations---such as the
+%Tests with non-deterministic expectations---such as the
 %ones presented above---are fragile and should be rewritten. For
 %example, tests relying on wall-clock time could be rewritten as
 %event-based tests~\cite{imunit}.
 
-% One way of dealing with nondeterminism is through multi-version
+% One way of dealing with non-determinism is through multi-version
 % execution.  Our tool \mx~\cite{mx} allows both the old and the new revision to
 % be run in parallel during the test suite execution which eliminates any
 % non-determinism across the two versions allowing for straightforward
@@ -392,13 +395,6 @@ handle most cases, as descibed in Section~\ref{sec:threading}).
 % How does the overall code coverage evolve?  Is it stable over time?
 
 \subsection{Coverage evolution}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{evolution/graphs/coverage}
-\caption{Evolution of the overall line and branch coverage.}
-\label{fig:coverage}
-\end{figure}
 
 One interesting question is whether coverage stays constant over time.
 As evident from Figure~\ref{fig:coverage}, for \binutils, \git,
@@ -411,10 +407,13 @@ considered, with \lighttpdtwo increasing from only
 versions for which the regression suite fails), and \zeromq increasing
 from \zeromqInitialCoverage to \zeromqFinalCoverage. \beanstalkd is the only
 application whose coverage decreases over time, from \beanstalkdInitialCoverage
-to \beanstalkdFinalCoverage. An interesting observation is that coverage
-evolution is not strongly correlated to the co-evolution of executable and test
-code. Even when testing is a phased activity, coverage remains constant
-because the already existing tests execute part of the newly added code.
+to \beanstalkdFinalCoverage, as its test suite has been reimplemented several
+times over the project lifetime (as shown in Figure~\ref{fig:tloc-evol}) with
+each implementation achieving different coverage. An interesting observation is
+that coverage evolution is not strongly correlated to the co-evolution of
+executable and test code. Even when testing is a phased activity, coverage
+remains constant because the already existing tests execute part of the newly
+added code.
 
 % \binutils: \binutilsInitialCoverage to \binutilsFinalCoverage \\
 % \git: \gitInitialCoverage to \gitFinalCoverage \\
@@ -467,7 +466,7 @@ revisions improve coverage. The other 26 either do not affect coverage
 (18) or decrease it (8).  The revisions which do not affect coverage
 can be a sign of test driven development, \ie the tests are added
 before the code which they are intended to exercise. The revisions
-which decrease coverage are either a symptom of nondeterminism---six
+which decrease coverage are either a symptom of non-determinism---six
 of them, with small decreases in coverage---or expose bugs or bigger
 changes in the testing infrastructure (the other two).  These two
 revisions exhibit a drop in coverage of several thousands lines of
@@ -536,9 +535,9 @@ Table~\ref{tbl:patch-coverage-buckets} presents the same patch
 coverage statistics, but with the patches bucketed by their size into
 three categories: less than 10 ELOC, between 11 and 100 ELOC, and
 greater than 100 ELOC.  For all benchmarks, patches are distributed
-similarly across buckets, with the majority of patches having $\le$10
-ELOC and only a few exceeding 100 ELOC.  Across the board, the average
-coverage of patches with $\le$10 ELOC is higher than for those with
+similarly across buckets, with the majority of patches having $le$10
+ELOC and only a few exceeding 100 ELOC. Except for \beanstalkd and \vim, the
+average coverage of patches with $\le$10 ELOC is higher than for those with
 \textgreater100 ELOC, but the coverage of the middle-size category varies.
 
 Finally, the first column in Table~\ref{tbl:latent} shows the overall

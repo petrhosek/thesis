@@ -97,7 +97,7 @@ using \SI{256}{\byte} of data per operation.
 
 \item[\lighttpdtwo\footnote{\url{https://github.com/lighttpd/lighttpd2}}]
 is a lightweight web server optimized for high performance environments,
-reimplemented entirely from the scratch in the version 2.0.  We used the
+reimplemented entirely from scratch in the version 2.0.  We used
 revision \lstinline`93d04a3` from the official \git repository, the
 latest revision at the time of writing. We measured the performance of serving
 a \SI{4}{\kilo\byte} page using
@@ -108,7 +108,7 @@ a \SI{4}{\kilo\byte} page using
 is a high-performance, distributed memory object caching system, used by
 many high-profile websites to alleviate database load. We used 
 revision 1.4.17, the latest at the time of writing. To measure the performance
-overhead, we used the \emph{memslap} benchmark, \footnote{\url{http://libmemcached.org/}}
+overhead, we used the \emph{memslap} benchmark,\footnote{\url{http://libmemcached.org/}}
 part of the \emph{libMemcached} library. We used the default workload,
 \ie an initial load of \num{10000} key pairs and \num{10000} test executions.
 
@@ -129,7 +129,7 @@ performance using the same workload as for \lighttpdtwo.
 %% \SI{10}{\second} with \num{10} clients.
 
 \item[\redis\footnote{\url{http://redis.io/}}]
-is a high-performance in-memory, key-value data store, used by many
+is a high-performance in-memory key-value data store, used by many
 well-known services. % such as Twitter, GitHub and StackOverflow.
 % Pinterest, Snapchat, Craigslist, Digg, Flickr 
 We used version 2.9.11 in our experiments.  To measure
@@ -152,7 +152,8 @@ across all commands.
  \label{fig:redis-ops}
 \end{figure}
 
-Figure~\ref{fig:servers} shows the results for all servers. All
+Figure~\ref{fig:servers} shows the results for all servers and
+Figure~\ref{fig:redis-ops} for individual \redis operations. All
 performance numbers are obtained using the client-side tools presented
 above.  Since the client machine is located on the same rack as the
 server, these numbers represent a worst-case scenario, as the network
@@ -174,7 +175,7 @@ threads, and we also need one thread for the leader and one for the
 coordinator.  
 %For space reasons, for \redis we show results for only 0, 3 and 6 followers.
 
-The set of bars for 0 followers measure the interception overhead
+The set of bars for zero followers measure the interception overhead
 of \varan using binary rewriting.  This overhead is negligible for
 \lighttpdtwo, \memcached and most \redis operations, \nginxIntercept for
 \nginx, and \beanstalkdIntercept for \beanstalkd.
@@ -190,6 +191,5 @@ The figure also shows that there is a significant difference across
 benchmarks: the worst performer is \beanstalkd, which sees performance
 degradations in the range of \SIrange{55}{81}{\percent}, while the best performers are
 \memcached, with only \SIrange{14}{32}{\percent} overhead and some operations in \redis
-(shown separately in Figure~\ref{fig:redis-ops})
 %such as \lstinline`LRANGE_300`, \lstinline`LRANGE_500` and \lstinline`LRANGE_600`
 with under \SI{3}{\percent} overhead.

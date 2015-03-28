@@ -1,25 +1,31 @@
 \section{Future work}
 \label{sec:future-work}
 
-There are number of other ways in which both systems could be extended in the
-future. In general, we would like to increase the flexibility, to expand the
-range of versions we could run in parallel. This means both tolerance to a
-wider set of changes as well as ability to detect different type of
-divergences.
+There are a number of other ways in which both \mx and \varan could be extended
+in the future. In general, we would like to increase their flexibility, in
+order to expand the range of versions we could run in parallel. This means both
+tolerance to a wider set of changes as well as ability to detect different types
+of divergences.
 
 The recovery mechanism in \mx is based on the ability of restarting the crashed
 version using a lightweight checkpointing mechanism. In our current
 implementation, we only keep the latest checkpoint for performance reasons.
-However, this means that \mx cannot recover a fault caused by a change past the
-last checkpoint. We could raise this limitation by keeping more checkpoints and
-iteratively retry them if we fail to recover using more recent one. There is a
-trade-off involved: keeping more checkpoints incurs higher performance overhead
-and we would also need to keep the log of all the system calls between the
-checkpointed state and the point of failure, akin to \varan's record \& replay
-mechanism.
+However, this means that \mx cannot recover a fault caused by a change prior to
+the last checkpoint. We could raise this limitation by keeping more checkpoints
+and iteratively retrying them if we fail to recover using a more recent one.
+There is a trade-off involved: keeping more checkpoints incurs a higher
+performance overhead and we would also need to keep the log of all the system
+calls between the checkpointed state and the point of failure, akin to \varan's
+record \& replay mechanism. Other option is to improve our checkpointing
+mechanism by implementing it as a loadable kernel module that only stores the
+part of the state needed for recovery~\cite{flashback}.
 
-While \varan allows execution of large number of versions in parallel, the
-number of versions is currently set at start. We would like enhance our
+%To improve the performance overhead incurred by \mx, we could combine \ptrace
+%with \seccompbpf to allow the system calls without side-effects to be executed
+%directly without \mxm involvement~\cite{mbox}. 
+
+While \varan allows executing a large number of versions in parallel, the
+number of versions is currently set in the beginning. We would like enhance our
 prototype implementation with the ability to dynamically adjust the number of
 versions that are run concurrently. This will ensure that multi-version
 applications will be able to utilize all available resources (\ie idle
@@ -27,14 +33,16 @@ processor time) without affecting the overall system performance during peak
 load.
 
 While scaling down the number of versions is straightforward, to scale up we
-would an ability to start new versions and allow them to catch up with the
+would need the ability to start new versions and allow them to catch up with the
 leader. There are different ways in which such support could be implemented. For
 applications structured around a central dispatch loop (\eg network servers or
 applications with graphical user interface), we could infer the loop headers
 (either statically~\cite{DJgraphs,havlak} or dynamically~\cite{sato11}) and
-allow the new versions to "catch up" with the leader at the beginning of the
-dispatch loop. The same mechanism could be also used to replace the failing
-version in the transparent failover mode.
+allow the new versions to ``catch up'' with the leader at the beginning of the
+dispatch loop. Some DSU systems~\cite{kitsune} use a similar approach, but
+rather than inferring the loop headers, they require the programmer to annotate
+the application. We could combine \varan with one of these DSU systems to take
+advantage of these annotations.
 
 % Finally, we would like to be able to transparently run multi-version
 % applications on multiple underlying platforms, ranging from

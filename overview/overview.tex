@@ -1,25 +1,26 @@
 \chapter{Overview}
 \label{chap:overview}
 
-With the growing size of the modern computer software systems, the number of
-errors present in such systems has increased.  Moreover, with increasing size
-of the code base, the possibility of finding bugs, both manually and
-automatically, is decreasing very rapidly. On the other hand, increasing
-reliance on computers and computer software systems in every aspect of human
-life implies a strong need for reliable software systems.
+With the growing size of modern computer software systems, the number of errors
+present in such systems has increased. At the same time, increasing reliance on
+computers and computer software systems in every aspect of human life implies a
+strong need for reliable software systems.
 
 Software updates are an integral part of the software maintenance process, but
 unfortunately present a high risk, with many users and administrators refusing
 to upgrade their software and relying instead on outdated versions, which often
 leaves them and their systems exposed to software bugs and security
-vulnerabilities.
+vulnerabilities. For example, a recent survey of 50 system administrators has
+reported that 70\% of respondents refrain from performing a software upgrade,
+regardless of their experience level~\cite{crameri:updates}.
 
 The Hearbleed bug~\cite{heartbleed} is a prime example of this behaviour. A
 fixed version of OpenSSL was released on the same day the Heartbleed bug was
 publicly disclosed.  However, a month after the publication, despite the wide
 media coverage, 1.5\% (12,043) of the 800,000 most popular sites in the world
 were still using the vulnerable version of OpenSSL, making their servers
-susceptible to attacks~\cite{heartbleed-prevalent}.
+susceptible to attacks~\cite{heartbleed-prevalent}, as administratos of these
+sites failed or refused to update to a newer version.
 
 Nowadays, many services including large-scale ones such as Google, Facebook or
 Amazon employ \emph{continuous deployment}, whereby new versions are
@@ -36,14 +37,14 @@ failures affecting the majority of the user-base therefore occur even in these
 applications. Such outages might cause significant financial losses and
 frustration among users, and it is therefore critical to avoid them.
 
-The incident cause by the air traffic control failure in December 2014, which
+The incident caused by the air traffic control failure in December 2014, which
 disrupted hundreds of flights to and from London airports, is a prime example.
 According to the interim report published by the official enquiry
-panel~\cite{natsfailure}, this incident was caused by system update in November 2014,
-which changed the number of available ``Atomic Functions''. Due to a latent
-defect, present in the system since its original development in 1990, this
-update caused the failure of the entire system following the action of the air
-traffic control, despite existing safety mechanism.
+panel~\cite{natsfailure}, this incident was caused by a system update in
+November 2014, which changed the number of available ``Atomic Functions''. Due
+to a latent defect, present in the system since its original development in
+1990, this update caused the failure of the entire system following a specific
+action of the air traffic control, despite existing safety mechanisms.
 
 Another example of such disruption is the recent Verizon
 outage~\cite{verizon-outage2014} of the billing and activation system,
@@ -64,16 +65,16 @@ show the possible consequences of failed software updates.
 
 The problems caused by failed software updates are not restricted to services.
 \lighttpd,\footnote{\url{http://www.lighttpd.net/}} a popular web server used
-by numerous popular websites such as xkcd\footnote{\url{http://xkcd.com/}},
-introduced a bug, while trying to fix another bug in the implementation of HTTP
-ETags functionality, which caused the server crash on some configurations.
-This bug remained undetected for nine months, affecting number of users, and it
-took another three months to diagnose and fix the underlying
+by numerous popular websites such as xkcd,\footnote{\url{http://xkcd.com/}}
+introduced a bug while trying to fix another bug in the implementation of HTTP
+ETags functionality, which caused the server to crash on some configurations.
+This bug remained undetected for nine months, despite affecting a number of
+users, and it took another three months to diagnose and fix the underlying
 issue.\footnote{\url{http://redmine.lighttpd.net/issues/2169}}
 
-The desktop applications are affected by failed software updates as well.
+Desktop applications are affected by failed software updates as well.
 \vim,\footnote{\url{http://www.vim.org/}} arguably one of the most popular text
-editors, shipped with the popular Ubuntu Linux distribution has been also
+editors, shipped with the popular Ubuntu Linux distribution, has been also
 affected by failed software updates in the past. In version 7.1.127, while
 trying to fix a memory leak, \vim developers introduced a double \textstt{free}
 bug that caused \vim to crash whenever the user tried to use a path completion

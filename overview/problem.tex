@@ -1,25 +1,24 @@
 \section{Problem statement}
 \label{overview:problem}
 
-Faults introduced by software updates pose an important problem. We aim to
-tackle this problem using a simple yet effective \emph{multi-version execution}
-approach: instead of running only of the software versions, we run multiple
-versions in parallel; by carefully coordinating their executions and selecting
-the behaviour of the more reliable version when they diverge, we create a more
-secure and dependable multi-version application.
+We tackle th problem of faulty software updates using a simple but effective
+\emph{multi-version execution} based approach. Whenever a new update becomes
+available, instead of upgrading the software to the new version, we run the new
+version in parallel with the old one; by carefully coordinating their
+executions and selecting the behaviour of the more reliable version when they
+diverge, we create a more secure and dependable multi-version application.
 
-In this thesis, we present two different schemes for implementing the
+In this thesis, we present two different schemes for implementing this
 multi-version execution technique. The first is a \emph{failure recovery scheme},
-which allows program to survive errors introduced by software patches. The
+which allows program to survive errors introduced by software updates. The
 mechanism is completely autonomous and operates on the off-the-shelf-binaries
 making it easy to use and deploy. This scheme is limited to two versions run in
-parallel, with spare cores available, the overall performance overhead can be
-kept within acceptable limits. The second is a \emph{transparent failover
-scheme}, which allows $N$ versions to be run in parallel; if one these versions
-fail, the mechanism transparently switches to another version without any
-disruption in service. This scheme is designed to have minimal performance
-overhead enabling the use of large number of versions, but offers limited
-guarantees in case of a failure.
+parallel. The second is a \emph{transparent failover scheme}, which allows $N$
+versions to be run in parallel; if the primary version fail, the mechanism
+transparently switches to another version without any disruption in service.
+This scheme is designed to have minimal performance overhead enabling the use
+of a large number of versions, but offers limited guarantees in case of a
+failure.
 
 % To tackle the software update problem, we propose \emph{multi-version
 % execution}, a novel technique, which fits within the overall theme of
@@ -37,20 +36,17 @@ guarantees in case of a failure.
 % can either discard the very oldest versions, or we can use more sophisticated
 % replacement strategies.
 
-The multi-version execution technique fits within the overall theme of
-$N$-version programming~\cite{avizienis:nvp,chen1995}. The goal of this
-technique is to improve the software update process to increase software
-availability and reliability by exploiting the abundance of resources (\eg idle
-processor time) made available by modern highly parallel platforms.  We believe
-that multi-version execution updates is a timely solution in the context of
-today's computing platforms~\cite{multiplicity}. The last decade has seen the
-emergence of new hardware platforms, ranging from multi-core processors to
-large-scale data centres, which provide an abundance of computational resources
-and a high degree of parallelism. These platforms already benefit applications
-with a great amount of inherent concurrency.  However, there has been
-relatively little progress in exploiting this abundance of resources to improve
-software reliability and availability, especially in the context of software
-updates.
+The goal of this technique is to increase availability and reliability of
+updated software by exploiting the abundance of resources (\eg idle processor
+time) made available by modern highly parallel platforms.  We believe that
+multi-version execution updates is a timely solution in the context of today's
+computing platforms~\cite{multiplicity}. The last decade has seen the emergence
+of new hardware platforms, ranging from multi-core processors to large-scale
+data centres, which provide an abundance of computational resources and a high
+degree of parallelism. These platforms already benefit applications with a
+great amount of inherent concurrency.  However, there has been relatively
+little progress in exploiting this abundance of resources to improve software
+reliability and availability, especially in the context of software updates.
 
 Typical data centres are designed for peak load to ensure service-level
 agreements are met. Servers are rarely completely idle but they do not operate
@@ -62,16 +58,10 @@ instead of dynamically switching off unused servers which is not effective, we
 aim to use the abundance of these resources (\ie processing power) to increase
 software availability and reliability.
 
-Our approach aims to improve the reliability of the software update process by
-taking advantage of idle resources---such as idle cores on a CPU and idle
-servers in a data center---to run multiple versions of an application in
-parallel, with the goal of improving the overall reliability and security of
-the software being upgraded.  Our current focus is on multi-core processors,
-but we believe this solution could be adapted to work on other parallel
-platforms as well.  Furthermore, this update mechanism could be extended to
-work with a large number of versions running in parallel and configured to
-balance conflicting requirements such as performance, reliability and energy
-consumption.
+Our current focus is on multi-core processors, but we believe this solution
+could be adapted to work on other parallel platforms as well.  Furthermore,
+this update mechanism could be extended to balance conflicting requirements
+such as performance, reliability and energy consumption.
 
 There are three main challenges that we need to address to make this approach
 viable. First, we need to implement mechanisms for effectively coordinating the

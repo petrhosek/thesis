@@ -77,7 +77,7 @@ requirements.
 % version $2.2.1$, released more than two months after the bug was
 % introduced.
 
-\subsection{\vim double free on home path completion}
+\subsection{\vim double free error on home path completion}
 
 \vim\footnote{\url{http://www.vim.org/}} is arguably one of the most popular
 text editors. While trying to fix a memory leak, \vim developers introduced a
@@ -86,7 +86,7 @@ use a path completion feature. This bug was introduced in version 7.1.127,
 released in September 2007. The incorrectly fixed version of the
 \lstinline`ExpandOne` function is shown in Listing~\ref{lst:vim-bug}. The newly
 introduced code frees up the memory used to store the expanded path.
-Unfortunately, when path contains the \lstinline`~` symbol used as an alias for
+Unfortunately, when the path contains the \lstinline`~` symbol used as an alias for
 user's home directory, this code path will be invoked twice leading to a crash.
 
 \begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:vim-bug,caption={First (incorrect) fix of \lstinline`ExpandOne` function in \vim.}]
@@ -262,11 +262,11 @@ version (Listing~\ref{lst:refactored}), the \textstt{return} statement is
 missing, and after reporting an incorrect type (line~\ref{line:report-error2}),
 the function continues execution and causes segmentation fault inside the
 \textstt{hashGet} function invoked on line~\ref{line:hashGet}. This is a
-critical bug, which may result in losing some or even all of the stored data
-in case when Append Only File (AOF) persistence log is corrupted due to issue
+critical bug, which may result in losing some or even all of the stored data in
+case when the Append Only File (AOF) persistence log is corrupted due to issue
 620\footnote{\url{http://code.google.com/p/redis/issues/detail?id=620}}.
 
 The bug was introduced in April 2010, diagnosed and reported only half a year
 later in October 2010 and then fixed after fifteen days.  As in the case of the
-\lighttpd bug, this means that for several months, any \redis instance has been
+\lighttpd bug, this means that for several months, any \redis instance was
 susceptible to a crash and vulnerable to a possible attack.

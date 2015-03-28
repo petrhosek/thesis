@@ -8,22 +8,23 @@
 %%   \label{fig:differences}
 %% \end{figure}
 
-Another major part of our study is the analysis of the external behaviour of
-the application. In the context of Linux applications, we define the external
-behaviour of an application as its sequence of system calls, which are the
-primary mechanism for an application to change the state of its environment.
-Note that the key insight here is that we are only concerned with
-\emph{externally observable behaviour}, and are oblivious to the way the
-external behaviour is generated.
+Another major part of our study is the analysis of the \emph{external
+behaviour} of the application. In the context of Linux applications, we define
+the external behaviour of an application as its sequence of system calls, which
+are the primary mechanism for an application to change the state of its
+environment.  Note that the key insight here is that we are only concerned with
+externally observable behaviour, and are oblivious to the way the external
+behaviour is generated.
 
 Our assumption is that the changes to the external behaviour of an application
 are relatively small. To verify this assumption, we used our infrastructure to
-trace the external behavior of two applications from our set across the
+trace the external behaviour of two applications from our set across the
 selected range of revisions: \lighttpd and \lighttpdtwo. This choice is
 pragmatic, other applications either ran excessively long when the system call
 tracing was enabled, their traces contained a lot of non-determinism which made
-the comparison imposible, or their test suite required extensive modifications
-to allow for tracing.
+the comparison impossible (this would not be a problem in the multi-version
+execution context as shown in~\S\ref{sec:mxm} and~\S\ref{sec:threading}), or
+their test suite required extensive modifications to allow for tracing.
 
 % \paragraph{Selection of revisions} The revision intervals for both applications
 % were selected to contain the two known bugs---in particular, for \vim the bug
@@ -47,25 +48,24 @@ to allow for tracing.
 The infrastructure used for system call tracing is conceptually similar to the
 one used for collecting coverage information, but there are some notable
 differences. We used \lxc containers directly rather than through \docker to
-allow the use of the Linux \textstt{perf}
+allow the use of the Linux \perf
 tool,\footnote{\url{https://perf.wiki.kernel.org/index.php/Main_Page}} which
 was used for recording the application's execution and obtaining the system
 call traces. These containers were controlled by an Ansible
-framework~\footnote{\url{http://www.ansible.com/}} using a custom \lxc
+framework\footnote{\url{http://www.ansible.com/}} using a custom \lxc
 connector.
 
 To collect the external behaviour information, we built each revision and
-recorded its execution while running the standard test suite. The use of
-\textstt{perf} has some advantages compared to other similar tools such as
-\textstt{strace},\footnote{\url{http://sourceforge.net/projects/strace/}} most
-notably the performance overhead, which is significantly lower as
-\textstt{perf} is implemented largely in the kernel while \textstt{strace} uses
-the \ptrace interface. This minimises the potential side-effects of the tracing
-infrastructure on the test suite execution.  The downside is the size of the
-recorded data which can be considerable, especially for I/O intensive
-applications such as \redis, as the \textstt{perf} tool uses a custom binary
-format which contains a large number of additional information compared to the
-simple textual output of \textstt{strace}.
+recorded its execution while running the standard test suite. The use of \perf
+has some advantages compared to other similar tools such as
+\strace,\footnote{\url{http://sourceforge.net/projects/strace/}} most notably
+the performance overhead, which is significantly lower as \perf is implemented
+largely in the kernel while \strace uses the \ptrace interface. This minimises
+the potential side-effects of the tracing infrastructure on the test suite
+execution.  The downside is the size of the recorded data which can be
+considerable, especially for I/O intensive applications such as \redis, as the
+\perf tool uses a custom binary format which contains a large number of
+additional information compared to the simple textual output of \strace.
 
 % while running all the tests from the \lighttpd regression suite targeting the
 % core functionality (a total of seven tests, but each test contains a large
@@ -91,12 +91,12 @@ simple textual output of \textstt{strace}.
 
 All tests were executed in an \lxc container based on the Ubuntu 12.04
 template.  To eliminate the possible sources of non-determinism, we have
-disabled the address-space layout randomisation while running the tests. To
+disabled address-space layout randomisation while running the tests. To
 account for the remaining non-determinism, we have repeated the tracing five
 times for each revision, as we did in the code coverage
 study (\S\ref{sec:code-cov}).
 
-System call traces generated by \textstt{perf} were normalised and
+System call traces generated by \perf were normalised and
 post-processed. We first split the original trace on a per-process basis so
 that the trace for each process ended up stored in a separate file.
 Moreover, we used the order in which processes were started as a basis for the
@@ -128,6 +128,8 @@ different reasons:%
   resource usage (\eg number of running processes and threads, amount of
   available memory) which could differ from one run to another.
 \end{inparaenum}
+However, this sort of non-determinism would not show up in a multi-version
+execution context as explained in~\S\ref{sec:mxm}.
 
 We then compared the post-processed traces of consecutive revisions using the
 edit distance. To distinguish the differences in the external behaviour
@@ -135,27 +137,27 @@ introduced by the changes in the code from differences introduced by changes in
 the test suite, we have only compared consecutive revisions which do not modify
 tests. To determine the differences between the two revisions, we calculated
 the edit distance for every pair of traces between the two revisions. Since we
-traced each revision five times, this gives us twenty five edit distance values
+traced each revision five times, this gives us 25 edit distance values
 for every pair of revisions.
 
 The next step was to determine whether the observed differences are caused by
-actual changes in the code or by non-determinism. To do so, we
-calculated the mean and the variance for each vector of edit distance values;
-these were used to calculate the \emph{index of dispersion}, which is defined
-as a ratio of the variance to the mean and is often used as a normalized
-measure of the dispersion of a probability distribution. The value of index
-greater than one is an indicator of over-dispersion meaning that the
-variability present in the given data set is greater than what would be
-expected based on a given statistical model. Since the frequencies of each
-sequence of system calls in all possible traces are not known a priori, we must
-choose a frequency distribution for abnormal sequences. There are several
-possibilities for choosing this distribution, the simplest of which is to
-assume that the abnormal distribution is uniform~\cite{helman97}. We then
-interpret the presence of over-dispersion as ``noise'' due to non-determinism,
-and as such we discard that measurement. Otherwise, we use the mean value as
-the actual value for the set. Through this process, for each pair of revisions
-considered, we obtain a vector of edit distances where individual elements are
-edit distances of individual processes.
+actual changes in the code or by non-determinism. To do so, we calculated the
+mean and the variance for each vector of edit distance values; these were used
+to calculate the \emph{index of dispersion}, which is defined as a ratio of the
+variance to the mean and is often used as a normalized measure of the
+dispersion of a probability distribution. Obtaining an index value greater than
+one is an indicator of over-dispersion meaning that the variability present in
+the given data set is greater than what would be expected based on a given
+statistical model. Since the frequencies of each sequence of system calls in
+all possible traces are not known a priori, we must choose a frequency
+distribution for abnormal sequences. There are several possibilities for
+choosing this distribution, the simplest of which is to assume that the
+abnormal distribution is uniform~\cite{helman97}. We then interpret the
+presence of over-dispersion as ``noise'' due to non-determinism, and as such we
+discard that measurement. Otherwise, we use the mean value as the actual value
+for the set. Through this process, for each pair of revisions considered, we
+obtain a vector of edit distances where individual elements are edit distances
+of individual processes.
 
 \subsection{Trace differences}
 
@@ -173,7 +175,7 @@ differences in post-processed system call traces with the source code changes.
 Out of 274 \lighttpd revisions considered, 199 introduced no changes in
 external behaviour, which accounts for 72.6\% of revisions considered. In case
 of \lighttpdtwo, this number is even higher, with 180 out 209 revisions
-introducing no changes accounting for 86.1\% of revisions. Finally, in case of
+introducing no changes accounting for 86.1\% of revisions. %Finally, in case of
 %\vim, there was \ldots, out of \ldots revisions, which introduced no changes
 %accounting for \ldots\%.
 
@@ -195,15 +197,15 @@ for critical crash bugs.
   \end{center}
 \end{figure}
 
-To get more data points, we also did a manual analysis on the subset of revisions
+To get more data points, we also did a manual analysis on a subset of revisions
 for two applications---\lighttpd and \vim.
 
-In case of \lighttpd, we compared 164 successive revisions, namely revisions in
+In the case of \lighttpd, we compared 164 successive revisions, namely revisions in
 the range 2379--2635 of branch \textstt{lighttpd-1.4.x}, which were developed
 and released over a span of approximately ten months, from January to October
-2009. In case of \vim, we compared 330 successive versions; in particular
-versions 7.1--7.1.330, which were developed and released in slightly-over one
-year time-frame, from May 2007 to June 2008.
+2009. In the case of \vim, we compared 330 successive versions, namely versions
+7.1--7.1.330, which were developed and released in approximately 13 months,
+from May 2007 to June 2008.
 
 %To understand the amount of code changes in these versions, we 
 %computed the number of lines of code (LOC) that have changed from
@@ -217,9 +219,8 @@ year time-frame, from May 2007 to June 2008.
 %\lighttpdMedPatch~LOC.
 
 For the manual analysis, we traced the system calls made by these revisions
-using the
-\textstt{strace}\footnote{\url{http://sourceforge.net/projects/strace/}} tool,
-while running subset of the tests from the \lighttpd regression suite targeting
+using the \strace\footnote{\url{http://sourceforge.net/projects/strace/}} tool,
+while running a subset of the tests from the \lighttpd regression suite targeting
 the core functionality (a total of seven tests, but each test contains a large
 number of test cases issuing HTTP requests).
 
@@ -228,17 +229,20 @@ number of test cases issuing HTTP requests).
 %% For the purpose of our experiment, we have selected a subset of 7 core
 %% test files excluding those targeting standalone modules.
 
-Same as in the case of the automated analysis, the recorded system call traces
+As in the case of the automated analysis, the recorded system call traces
 were normalised and post-processed. We split the traces on a per-process basis,
 and normalised all differences caused by timing, \eg we collapsed all sequences
 of \lstinline`accept`--\lstinline`poll` and
 \lstinline`select`--\lstinline`wait` system calls, which represent repeated
 polling operations. We have also eliminated any \lstinline`brk` system calls
 from traces, as these calls are usually used for managing heap memory and their
-occurence is often dependent on process scheduling.  Finally, for the manual
+occurrence is often dependent on process scheduling.  Finally, for the manual
 analysis, we also eliminated individual system call arguments and return
 values. This post-processing step might reduce the precision of our comparison,
-but we performed to make the manual analysis actually feasible.
+but we performed to make the manual analysis actually feasible. This would not
+be an issue in the multi-version execution context as the multi-version
+execution environment would intercept all sources of non-determinism
+(\S\ref{sec:mxm}).
 
 Our results are shown in Figure~\ref{fig:coanalysis}, which correlates the
 differences in post-processed system call traces with the source code changes.

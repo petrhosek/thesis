@@ -64,20 +64,20 @@ reliability of the software. There are multiple ways to implement this
 approach. We propose two different schemes in this thesis:%
 \begin{description}
 \item[failure recovery] This scheme, depicted in
-  Figure~\ref{fig:failrecovery-scheme}, uses two versions ran in parallel, and
-  allows program to survive certain class of errors introduced by software
-  patches in either of the two versions, as long as the patched regions do not
-  overlap. The trade-off is a larger perfomance penalty making this scheme more
-  suitable for interactive applications or applications with less stringent
-  performance requirements.
+  Figure~\ref{fig:failrecovery-scheme}, uses two versions run in parallel, and
+  allows the program to survive certain classes of errors introduced by
+  software patches in either of the two versions, as long as the patched
+  regions do not overlap. The trade-off is a large perfomance penalty, making
+  this scheme more suitable for applications with less stringent performance
+  requirements, such interactive applications.
 \item[transparent failover] This scheme, shown in
-  Figure~\ref{fig:failover-scheme}, uses $N$ versions ran in parallel, with one
-  of the versions designated as a leader and other as followers. When one of
-  the versions fail, we transparently discard it, and if necessary re-elect the
-  new leader, without any disruption in service. This scheme offers minimal
-  performance overhead enabling the use of large number of versions, making it
-  particularly suitable for high-performance servers with strict reliability
-  requirements.
+  Figure~\ref{fig:failover-scheme}, uses $N$ versions run in parallel, with one
+  of the versions designated as a leader and the others as followers. When one
+  of the versions fails, we transparently discard it, and if necessary re-elect
+  the new leader, without any disruption in service. This scheme cannot recover
+  crashing versions, but offers minimal performance overhead enabling the use
+  of a large number of versions, making it particularly suitable for
+  high-performance servers with strict reliability requirements.
 \end{description}
 
 The goal of both schemes is to run multiple versions of an application in
@@ -93,9 +93,9 @@ While the first goal applies equally to both schemes, there are differences
 with respect to the second and third goal. For the failure recovery scheme, we
 sacrifice some of the performance being more lenient with respect to the third
 goal, but we can make the second goal more stringent requiring the
-multi-version application to be as reliable as any of the two versions ran in
-parallel. The transparent failover scheme has minimal performance overhead, but
-offers limited guarantees in case of failure.
+multi-version application to be as reliable as \emph{any} of the two versions
+ran in parallel. The transparent failover scheme has minimal performance
+overhead, but offers limited guarantees in case of failure.
 
 % The goal of our approach is to run multiple versions of an application in
 % parallel, and synchronize their executions so that%
@@ -124,7 +124,7 @@ offers limited guarantees in case of failure.
 \end{figure}
 
 To satisfy the first goal, both schemes require a form of virtualization
-framework, typically denoted as execution \emph{monitor}, that would coordinate
+framework, typically called an \emph{execution monitor}, that would coordinate
 the execution of multiple application versions, and mediate their interaction
 with the external environment, as shown in Figure~\ref{fig:mx-platform}.
 Various such frameworks have been designed in the past in the context of
@@ -146,16 +146,16 @@ could even run different implementations, as in \cite{cocktail}), but the main
 downside is that it is not applicable in the general case, when the
 input-output specification is not available.
 
-A more flexible approach, which we adopted in our approach, is to synchronize
-the different versions at the level of system calls.  System calls represent
-the \emph{external behaviour} of an application, as they are the only way in
-which an application can interact with the surrounding environment.  While this
-option allows fewer changes between different application versions, it does
-not require any a priori knowledge of the application's input/output behaviour,
-and is particularly suitable in the context of software updates, where the
-external application behaviour usually remains unchanged.  In fact, an empirical
-study presented in Chapter~\ref{chap:evolution}, that we conducted on several
-real applications, has shown that while the source code of these applications
+A more flexible approach, which we adopted, is to synchronize the different
+versions at the level of system calls.  System calls represent the
+\emph{external behaviour} of an application, as they are the only way in which
+an application can interact with the surrounding environment.  While this
+option allows fewer changes between different application versions, it does not
+require any a priori knowledge of the application's input/output behaviour, and
+is particularly suitable in the context of software updates, where the external
+application behaviour usually remains unchanged.  In fact, an empirical study
+presented in Chapter~\ref{chap:evolution}, which we conducted on several real
+applications, has shown that while the source code of these applications
 changes on a regular basis, the external behaviour changes sporadically, often
 remaining stable when security and bug fixes are introduced.
 
@@ -181,7 +181,7 @@ remaining stable when security and bug fixes are introduced.
 There are several different ways to implement an effective system call monitor,
 each with its own set of trade-offs. Solutions targeting binaries are
 significantly easier to use, but compared to solutions operating at source code
-level, they give up some of the precision while typically require more
+level, they give up some of the precision while typically requiring more
 engineering effort. The most common ways for implementing monitors operating on
 binaries are dynamic linking, \ptrace, kernel extensions and binary
 instrumentation, while solutions targeting source code typically rely on source
@@ -190,17 +190,17 @@ code instrumentation.
 System calls are rarely performed directly by the application, which rather use
 the wrapper functions provided by the C library. By linking to a custom
 library, which provides a custom version of these functions, we could intercept
-system calls performed by the application. This could be done either statically
-at link time~\cite{plash}, or dynamically at runtime~\cite{shepherding:pldi14}
-(\eg using \lstinline`LD_PRELOAD` or \lstinline`DYLD_INSERT_LIBRARIES`
-variables). The major benefit of this approach is efficiency and relative ease
-of implementation. However, the mechanism could be easily bypassed (\eg by
-invoking system calls directly); also the C library ABI has significantly
-larger surface compared to the system call interface, requiring more
-engineering effort.
+the system calls performed by the application. This could be done either
+statically at link time~\cite{plash}, or dynamically at
+runtime~\cite{shepherding:pldi14} (\eg using \lstinline`LD_PRELOAD` or
+\lstinline`DYLD_INSERT_LIBRARIES` environment variables). The major benefit of
+this approach is efficiency and relative ease of implementation. However, the
+mechanism could be easily bypassed (\eg by invoking system calls directly);
+also the C library ABI has a significantly larger surface compared to the
+system call interface, requiring more engineering effort.
 
 \ptrace is an interface provided by most UNIX-like operating systems, including
-Linux, providing means by which a process might observe and control another
+Linux, providing the means by which a process might observe and control another
 process. The primary use of \ptrace interface is for debugging, but the ease of
 use makes \ptrace a popular choice for implementing system call
 monitors~\cite{wily-hacker,orchestra09,tachyon12}. \ptrace-based solutions
@@ -216,8 +216,8 @@ more difficult to debug as the use of \ptrace disallows the use of
 \ptrace-based debuggers such as \gdb. The performance overhead could be
 partially improved by the use of more efficient mechanism for copying memory
 from/to the monitored process, such as shared memory~\cite{orchestra09}, or
-cross memory attach (\S\ref{sec:mxm}). The lack of filtering mechanism could be
-addressed by combining \ptrace with \textsf{seccomp/bpf} mechanism~\cite{mbox}.
+cross memory attach (\S\ref{sec:mxm}). The lack of a filtering mechanism could
+be addressed by combining \ptrace with the \seccompbpf mechanism~\cite{mbox}.
 
 An alternative to \ptrace is to implement the system call monitor
 entirely~\cite{provos2002,cox2006} or partially in kernel space~\cite{ostia}.
@@ -226,10 +226,11 @@ as minimal performance overhead and direct access to the application's
 execution context and address space, there are several drawbacks.  First, this
 approach requires kernel patches and/or new kernel modules which complicates
 the development, limits portability across different operating systems or even
-different kernel versions, and hinders maintainability. Second, the monitor
-must be run in privileged mode, which means that bugs in the implementation may
-compromise the system stability. Furthermore, it also makes it difficult for
-regular users to deploy and use such monitors.
+different kernel versions, and hinders maintainability. Second, the part of the
+monitor that resides in the kernel (\ie kernel module) must be run in
+privileged mode, which means that bugs in the implementation may compromise the
+system stability. Furthermore, it also makes it difficult for regular users to
+deploy and use such monitors.
 
 Binary rewriting techniques allow transforming the executable (either statically
 or dynamically) altering its functionality; as such, they can be used to
@@ -239,9 +240,9 @@ control flow transfer instructions (\eg
 built either on top of existing binary rewriting
 systems~\cite{onlinevalidation}, or using a purpose-built binary translation
 mechanism~\cite{vx32}. The advantage of binary rewriting-based monitors is
-relatively low performance overhead, especially in the case of purpose built
-rewriting mechanism. The main disadvantage is the complexity of implementation
-which requires significant development effort.
+relatively low performance overhead, especially in the case of a purposely
+built rewriting mechanism. The main disadvantage is the complexity of the
+implementation which requires significant development effort.
 
 \subsection{Surviving software errors}
 
@@ -277,12 +278,12 @@ internal state in an ``incompatible'' way. Our solution is based upon the
 observation that errors in programs are usually located at particular places
 (\ie specific instructions) in the program's code. Therefore, when one of the
 versions crashes, we can use the code of the other, non-crashing version to
-execute over this critical point in program's code. This approach may not work
-when memory layout of the two versions differs, as the code of one version may
-fail to locate the memory structures necessary for its execution in the memory
-of the other version.  Nevertheless, the described approach might still work in
-many cases when memory layout of the two versions does not differ
-significantly.
+execute over this critical point in that version's code. This approach may not
+work when the memory layout of the two versions differs, as the code of one
+version may fail to locate the memory structures necessary for its execution in
+the memory of the other version.  Nevertheless, the described approach still
+works in many cases when the memory layout of the two versions does not differ
+significantly (\S\ref{sec:reliability-evaluation}).
 
 % Given this assumption,  we can recover its internal state from the last
 % checkpoint, and then use the code of the other, non-crashing version, to
@@ -313,42 +314,38 @@ significantly.
   \end{center}
 \end{figure}
 
-We run the two versions in parallel, monitoring their execution and taking
-frequent checkpoints at every synchronization point, which in our case are
-system calls. When either of the versions fail, there are three possible
-solutions to synchronize the divergent versions:%
+In our failure recovery approach, we run the two versions in parallel,
+monitoring their execution and taking frequent checkpoints at every
+synchronization point, which in our case are system calls. When either of the
+versions fails, there are three possible solutions to synchronize the divergent
+versions:%
 \begin{enumerate}
 \item\label{s1} Clone the correctly executing version to duplicate its state
-  (\eg memory content, memory mappings) after the crash and replace its
+  (\eg memory continents, memory mappings) after the crash and replace its
   code with the code of the failed version. Then restart both versions and
   continue their execution (Figure~\ref{fig:recovery-solution1}).
-\item\label{s2} Clone the correctly executing version to duplicate its state
-  (\eg memory content, memory mappings) at the last synchronization point (\ie
-  creating checkpoint). After the crash, replace the code of this cloned
-  version with the code of the failed version. Then restart this cloned
-  version, execute over the \emph{critical section}, and continue execution of
-  both versions (Figure~\ref{fig:recovery-solution2}).
-\item\label{s3} Clone the failing version to duplicate its state (\eg memory
-  content, memory mappings) at the last synchronization point (\ie creating
-  checkpoint). After the crash, replace the code of this cloned version with
-  the code of the correctly executing version. Then restart this cloned
-  version; after the application successfully executes over the \emph{critical
-  section}, replace the code of the cloned version again with the original
-  code, and continue its execution (Figure~\ref{fig:recovery-solution3}).
+\item\label{s2} Clone the correctly executing version to duplicate its state at
+  the last synchronization point (\ie creating checkpoint). After the crash,
+  replace the code of this cloned version with the code of the failed version.
+  Then restart this cloned version, execute over the \emph{critical section},
+  and continue execution of both versions
+  (Figure~\ref{fig:recovery-solution2}).
+\item\label{s3} Clone the failing version to duplicate its state at the last
+  synchronization point. After the crash, replace the code of this cloned
+  version with the code of the correctly executing version. Then restart this
+  cloned version; after the application successfully executes over the
+  \emph{critical section}, replace the code of the cloned version again with
+  the original code, and continue its execution
+  (Figure~\ref{fig:recovery-solution3}).
 \end{enumerate}
 
-While all three solutions can recover the crashing version, only the third
-solution has the key property of \emph{having the different versions be alive
-at all times}. This ensures that applications can survive crashes that occur at
-different points in different versions, but adds the extra challenge of
-restarting crashed versions. Despite this challenge, we believe this key
-property is crucial for the practical application of the multi-version
-execution technique. %and as such we have opted for the third solution in our
-%implementation of the failure recovery scheme.
-
-%Note that one key aspect on which our approach relies is.  
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+While all three solutions can recover the crashing version, in our
+implementation we use the third solution as it has the key property of fully
+recovering both the code and the state of the crashing version.  This ensures
+that applications can survive crashes that occur at different points in
+different versions, but adds the extra challenge of restarting crashed
+versions. Despite this challenge, we believe this key property is crucial for
+the practical application of the multi-version execution technique.
 
 % Our approach aims to provide users with a third choice; when a new version
 % arrives, instead of replacing the old version, we run both versions in

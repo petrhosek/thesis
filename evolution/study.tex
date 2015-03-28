@@ -103,20 +103,21 @@ while to measure the number of TLOC we did a simple line count of the test
 files (using \texttt{cloc}, or \texttt{wc~-l} when \texttt{cloc} cannot detect
 the file types).
 
-The code size for these applications varies from only \memcachedSize ELOC for
-\memcached to \gitSize ELOC for \git.  The test code is written in a variety of
-languages and ranges from \lighttpdtwoTsize lines of Python code for
-\lighttpdtwo to \gitTsize lines of C and shell code for \git.  The test code is
+The code size for these applications varies from only \beanstalkdSize ELOC for
+\beanstalkd to \gitSize ELOC for \git.  The test code is written in a variety
+of languages and ranges from \beanstalkdTsize lines of Python code for
+\beanstalkd to \gitTsize lines of C and shell code for \git.  The test code is
 36\% larger than the application code in the case of \git, approximately as
-large as the application code for \memcached, around 40\% of the application
-code for \redis and \zeromq, and only around 10\% and 19\% of the application
-code for \lighttpdtwo, \vim and \binutils respectively.  Running the test suite
-on the last version takes only a few seconds for \binutils, \lighttpdtwo, \vim
-and \zeromq, \memcachedTestTime seconds for \memcached, \redisTestTime seconds
-for \redis, and 30 minutes for \git, using a four-core Intel Xeon E3-1280
-machine with 16 GB of RAM.
+large as the application code for \beanstalkd and \memcached, around 40\% of
+the application code for \redis and \zeromq, around 19\% and 17\% of the
+application code for \binutils and \lighttpd respectively, and only around 10\%
+of the application code for \lighttpdtwo and \vim.  Running the test suite on
+the last version takes only a few seconds for \binutils, \lighttpd,
+\lighttpdtwo, \vim and \zeromq, \memcachedTestTime seconds for \memcached,
+\redisTestTime seconds for \redis, and 30 minutes for \git, using a four-core
+Intel Xeon E3-1280 machine with 16 GB of RAM.
 
-The version control system used by majority of these applications is \git.
+The version control system used by the majority of these applications is \git.
 Four of these projects---\git, \memcached, \redis, and \zeromq ---are hosted on
 the \github\footnote{\url{https://github.com/}} online project site.  The other
 two---\binutils and \lighttpdtwo---use their own \git hosting. \lighttpd uses
@@ -232,12 +233,11 @@ enough to allow a correct revision to complete all tests. As shown in the
 table, timeouts were a rare occurrence, with at most one occurrence per
 application.
 
-Table~\ref{tbl:revisions} also shows the development time span
-considered, which ranges from only 5-6 months for \git and \redis,
-which had a fast-paced development during this period, to almost 4
-years for \memcached. The age of the projects at the first version
-that we analysed ranges from a little over 2 years for \lighttpdtwo,
-to 11 years for \binutils.
+Table~\ref{tbl:revisions} also shows the development time span considered,
+which ranges from only 5-6 months for \git and \redis, which had a fast-paced
+development during this period, to almost five and a half years for \memcached.
+The age of the projects at the first version that we analysed ranges from a
+little over 2 years for \lighttpdtwo, to 11 years for \binutils.
 %6 years memcached, 4 years redis, 2yr 9mo zeromq, 8 years git
 
 \subsection{Revision setup}

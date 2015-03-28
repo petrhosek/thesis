@@ -83,7 +83,7 @@
 
 \newcommand*\circl[1]{%
   \begin{tikzpicture}[baseline=(C.base)]
-    \node[draw,circle,inner sep=0.25pt](C) {#1};
+    \node[draw,circle,inner sep=0.25pt](C) {\small\textsf{#1}};
   \end{tikzpicture}}
 
 \newcommand{\boldtext}[1]{\vspace{0.05in}\noindent\textbf{#1}}
@@ -187,9 +187,14 @@
 \newcommand{\xen}{Xen\xspace}
 \newcommand{\kvm}{KVM\xspace}
 
+\newcommand{\seccompbpf}{\textsf{seccomp/bpf}\xspace}
+\newcommand{\strace}{\textsf{strace}\xspace}
+\newcommand{\perf}{\textsf{perf}\xspace}
+
 \newcommand{\apache}[0]{\textit{Apache httpd}\xspace}
 \newcommand{\httpd}[0]{\textit{Apache httpd}\xspace}
 \newcommand{\beanstalkd}[0]{\textit{Beanstalkd}\xspace}
+\newcommand{\lighttpdgen}[0]{\textit{Lighttpd}\xspace}
 \newcommand{\lighttpd}[0]{\textit{Lighttpd~1.4}\xspace}
 \newcommand{\lighttpdtwo}[0]{\textit{Lighttpd~2.0}\xspace}
 \newcommand{\memcached}[0]{\textit{Memcached}\xspace}
@@ -258,20 +263,34 @@ dependable multi-version application.
 
 With the widespread availability of multi-core processors, the multi-version
 execution might become a viable approach for increasing the reliability and
-security of software systems. The key component of such $N$-version execution
-(NVX) systems is a runtime monitor that enables the execution of multiple
-versions in parallel.
+availability of updated software systems.
 
+In this thesis, we propose two different schemes for implementing the
+multi-version execution technique. The first is a failure recovery scheme,
+which allows programs to survive errors introduced by software updates. The
+second is a transparent failover scheme, which allows $N$ versions to be run in
+parallel; if one these versions fail, the mechanism transparently switches to
+another version without any disruption in service.
+
+The key component of such $N$-version execution (NVX) systems is a runtime
+monitor that enables the execution of multiple versions in parallel.
 Unfortunately, existing monitors impose either a large performance overhead or
 rely on intrusive kernel-level changes.  Moreover, none of the existing
 solutions scales well with the number of versions, since the runtime monitor
 acts as a performance bottleneck. Finally, none of the existing monitors is
-suited for executing mutliple different versions in parallel.
+suited for executing multiple different versions in parallel.
 
 In this thesis, we present two different designs for building such monitors;
-one, called \varan, aimed at running a large number of versions side-by-side
-with low overhead, and second, called \mx, focused on surviving crashes caused
-by bugs introduced in software updates.
+one, called \mx is focused on surviving crashes caused by bugs introduced in
+software updates and a second, called \varan is aimed at running a large number
+of versions side-by-side with low overhead.
+
+\mx is a system targeting application updates which might introduce potential
+crash bugs. We show how \mx can be applied successfully to several real
+applications such as \coreutils, a set of user-level UNIX applications;
+\lighttpdgen, a popular web server used by several high-traffic websites; and
+\redis, an advanced key-value data structure server used by many well-known
+services.
 
 \varan is an NVX framework that combines binary rewriting with a novel
 event-streaming architecture to significantly reduce performance overhead and
@@ -280,13 +299,6 @@ modifications. Our evaluation shows that \varan can run NVX systems based on
 popular C10k network servers with only a modest performance overhead, and can
 be effectively used to increase software reliability.% using techniques such as
 %transparent failover, live sanitisation and multi-version execution.
-
-\mx is a system targeting application updates which might introduce potential
-crash bugs. We show how \mx can be applied successfully to several real
-applications such as \coreutils, a set of user-level UNIX applications;
-\lighttpd, a popular web server used by several high-traffic websites; and
-\redis, an advanced key-value data structure server used by many well-known
-services.
 \end{abstract}
 
 \makededication

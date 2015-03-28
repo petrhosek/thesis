@@ -14,20 +14,20 @@ leaving cores idle has a cost as well~\cite{barroso2007} and in many
 cases idle cores can be profitably used to increase software reliability
 and security~\cite{cox2006,multiplicity,orchestra09,diehard06,mvupdates12}.
 
+Furthermore, the CPU utilisation overhead is only relevant for the user space
+CPU time since the system call is only going to be executed by the leader. Many
+C10k servers spend a large amount of their execution time in the kernel, \ie as
+shown in~\cite{redisoverhead}, 84\% of a single-threaded 1KB write in \redis
+is spent in the kernel. %This confirms our results where \redis had the lowest
+%performance overhead.
+
 Similarly, the memory overhead imposed by \varan is linear in the
 number of versions, as in prior NVX systems.  This can lead to
 degradations in performance due to memory pressure and caching
 effects, as we have observed in Section~\ref{sec:comparison}.
 
-Furthermore, the CPU utilisation overhead is only relevant for the user space
-CPU time since the system call is only going to be executed by the leader. Many
-C10k server spent large amount of their execution time in the kernel, \ie as
-shown in~\cite{redisoverhead}, 84\% of a single-threaded 1KB write in \redis
-is spent in the kernel. This confirms our results where \redis had the lowest
-performance overhead.
-
 \paragraph{Memory-based communication.} As prior NVX systems, \varan
-does not support memory-based communication.  More exactly, \varan
+does not support memory-based communication.  In particular, \varan
 only allows files to be mapped into memory as read-only---if the file
 would be mapped as read-write, any writes by the leader would likely
 lead to divergences in followers, as they would read the value written

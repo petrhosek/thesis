@@ -54,11 +54,11 @@
 % must be virtualised in order to enable the multiple versions to act as
 % one to the outside world.
 
-The main challenge in implementing a system call monitor the trade-off between
-performance, security, flexibility and ease of debugging.  Many
-implementations, including \mx, use the \lstinline`ptrace` mechanism offered by
-most UNIX-based operating systems~\cite{orchestra09,mx,process-replicae07}.
-While \lstinline`ptrace` has its advantages as show in
+The main challenges in implementing a system call monitor relate to
+performance, flexibility and ease of debugging.  Many implementations,
+including \mx, use the \lstinline`ptrace` mechanism offered by most UNIX-based
+operating systems~\cite{orchestra09,mx,process-replicae07}.  While
+\lstinline`ptrace` has its advantages as shown in
 Chapter~\ref{chap:safe-updates}, namely ease-of-use and not requiring kernel
 modifications, \lstinline`ptrace` introduces large overhead, and these systems
 see performance degradations of up to two orders of magnitude.  A much faster
@@ -69,12 +69,12 @@ number of variants (as the monitor is both a communication and synchronisation
 bottleneck), none are debug-friendly (\lstinline`ptrace` disallows the use of
 \gdb, while kernel debugging has its well-known set of limitations) and none of
 them have been designed to be flexible with respect to small variations in
-system call sequences (which can occur for certain diversification
-transformations and across program versions).
+system call sequences (which sometimes occur across program versions as shown
+in Section~\ref{evolution:external}).
 
 In this chapter, we propose \varan,\footnote{\varan's name comes from
   the scientific name \emph{Varanus}, commonly known as the
-  \emph{monitor} lizard. Varan is also a name of the Kaiju monster
+  \emph{monitor} lizard. Varan is also the name of a Kaiju monster
   that first appeared in the 1958 movie \emph{Varan the
     Unbelievable}.} a novel architecture for implementing multi-version
 monitors.  \varan monitors operate at the system call level, run in

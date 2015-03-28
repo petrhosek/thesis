@@ -118,13 +118,13 @@ One important advantage of our interception mechanism is that we do not make
 use of \ptrace to intercept calls to the dynamic linker---instead, the binary
 rewriter is used to rewrite all the system calls done by the linker with jumps
 into the coordinator code.  As a result, \varan can be used in combination with
-existing \lstinline`ptrace`-based tools such as \gdb or \textit{strace}, which
-greatly simplifies debugging.
+existing \lstinline`ptrace`-based tools such as \gdb or \strace, which greatly
+simplifies debugging.
 
-This architecture has several advantages over other commonly approaches. \varan
+This architecture has several advantages over other possible approaches. \varan
 does not require the use of dynamic linker, as required by
-\lstinline`LD_PRELOAD`, and supports even statically linked applications.
-This also has an advantage of supporting arbitrary dynamic linkers, not just
+\lstinline`LD_PRELOAD`, and supports even statically-linked applications.
+This also has the advantage of supporting arbitrary dynamic linkers, not just
 the one provided by \gnu C library, albeit it is going to be the most common
 target.
 
@@ -189,7 +189,7 @@ header.\footnote{\url{https://code.google.com/p/linux-syscall-support/}}
 %% \end{structure}
 
 
-\subsection{Binary Rewriting}
+\subsection{Selective binary rewriting}
 \label{sec:rewriting}
 
 %% \begin{structure}
@@ -276,7 +276,7 @@ segments are not marked as both writable and executable at the same
 time.
 
 
-\subsubsection{Virtual System Calls}
+\subsubsection{Virtual system calls}
 \label{sec:vsyscall}
 
 Certain Linux system calls are accelerated through the \emph{vsyscall}
@@ -287,9 +287,9 @@ context switch overhead between kernel and user space associated with
 standard system calls.
 
 The \emph{vsyscall} page was introduced first, but is being deprecated in favor
-of the \emph{vDSO} segment.\footnote{We are referring to x86-64 version, on x86
+of the \emph{vDSO} segment.\footnote{We are referring to the x86-64 version, on x86
 systems the vDSO segment contains a function used to determine the preferred
-method of making a system call} The main reason for this development is that
+method of making a system call.} The main reason for this development is that
 the \emph{vsyscall} page is mapped to a fixed address, making it susceptible to
 return-oriented programming attacks~\cite{ROP:tissec12}. To address this issue,
 the vDSO segment is mapped to a random address. Since the segment is
@@ -352,7 +352,7 @@ improve performance.
 
 
 
-\subsection{Event Streaming}
+\subsection{Event streaming}
 \label{sec:streaming}
 
 %% \begin{structure}
@@ -375,13 +375,12 @@ interacting with the environment, \ie executing the system calls, with
 the exception of system calls which are local to the process (\eg
 \lstinline`mmap`). % or \lstinline`sigaction`).
 
-As in any NVX system operating at the level of system calls, \varan
-has to be aware of the system call semantics, in order to transfer the
-arguments and results of each system call.  \varan currently
-implements \syscallsHandlers system calls, which were all the system
-calls encountered across our benchmarks.\footnote{We configured \varan
-  to emit an error message when an unhandled system call is
-  encountered, and have implemented system call handlers on demand.}
+As in \mx (\S\ref{sec:mxm}), \varan has to be aware of the system call
+semantics, in order to transfer the arguments and results of each system call.
+\varan currently implements \syscallsHandlers system calls, which were all the
+system calls encountered across our benchmarks.\footnote{We configured \varan
+to emit an error message when an unhandled system call is encountered, and have
+implemented system call handlers on demand.}
 
 %% All application instances running in parallel under \varan are assigned
 %% ranks, similarly to OpenMPI~\cite{OpenMPI}. The instance\footnote{We
@@ -469,7 +468,7 @@ versions.
 
 The use of a shared memory buffer may result in a waste of system
 resources when the leader process performs a system call which blocks
-for a long period of time, as the followers use busy waiting to check
+for a long period of time, if the followers used busy waiting to check
 for new events. To address this problem, we have introduced the
 concept of a \emph{waitlock}. Whenever a follower makes a blocking
 system call, it acquires the waitlock. If there is no event available,
@@ -512,17 +511,15 @@ Handling processes and threads is crucial in supporting many modern
 applications.  
 %The discussion below refers to processes, but threads are handled in a
 %similar way.
-In our design, we have opted to have separate ring buffers for each
-tuple of processes or threads in the system: for instance, when a
-process forks, the parent processes in the leader and all followers
-form one tuple, and the child processes another, with a process in
-each tuple acting as the leader.  More exactly, when a new process is
-forked, a new socket pair is established between the process and the
-coordinator and a new ring buffer is allocated.  The leader then
-continues execution, but the coordinator waits until all followers
-fork a new process, establishing appropriate socket pairs for
-communication, and setting the child processes to read events from the
-newly-allocated ring buffer.
+We have opted to have separate ring buffers for each tuple of processes or
+threads in the system: for instance, when a process forks, the parent processes
+in the leader and all followers form one tuple, and the child processes
+another, with a process in each tuple acting as the leader.  More exactly, when
+a new process is forked, a new socket pair is established between the process
+and the coordinator and a new ring buffer is allocated.  The leader then
+continues execution, but the coordinator waits until all followers fork a new
+process, establishing appropriate socket pairs for communication, and setting
+the child processes to read events from the newly-allocated ring buffer.
 
 To alleviate non-determinism issues due to scheduling, \varan enforces
 system call ordering across all tuples using Lamport's
@@ -675,17 +672,16 @@ language for writing rules and an interpreter shipped with many UNIX
 implementations, including Linux and BSD.  BPF filters have been
 traditionally used to filter network packets, but recently also for
 system call filtering as a part of seccomp ``mode 2'' (also known as
-seccomp-bpf).
+\seccompbpf).
 
 We have integrated a BPF interpreter in \varan to allow for system
 call rewrite rules. Our implementation is based on the Linux kernel
 code which was ported to user space and extended for NVX
-execution. \varan provides BPF extensions on top of the instruction
-set used by seccomp-bpf.\footnote{\url{https://www.kernel.org/doc/Documentation/networking/filter.txt}}
-The \lstinline[language={[bpf]Assembler}]`event` extension allows
-access to the event stream, which can be used to compare the system
-calls executed across versions, as we will show in
-Section~\ref{sec:mv-execution}.
+execution. \varan provides BPF extensions on top of the instruction set used by
+\seccompbpf.\footnote{\url{https://www.kernel.org/doc/Documentation/networking/filter.txt}}
+The \lstinline[language={[bpf]Assembler}]`event` extension allows access to the
+event stream, which can be used to compare the system calls executed across
+versions, as we will show in Section~\ref{sec:mv-execution}.
 
 %We have also made the offset, used to access the \lstinline`struct seccomp_data` content writable.
 

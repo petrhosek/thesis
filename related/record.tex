@@ -1,9 +1,9 @@
 \section{Record \& replay}
 \label{related:record}
 
-Event streaming in \varan can be seen as a variant of record-replay. Record and
-replay technique has been an active research topic for more than forty years
-and different approaches were developed over this period. However, unlike
+Event streaming in \varan can be seen as a variant of record \& replay. Record
+\& replay technique has been an active research topic for more than forty years
+and different approaches have been developed over this period. However, unlike
 traditional record-replay systems that require a persistent log, \varan keeps
 the shared ring buffer in memory, and deallocates events as soon as they are
 not needed, which minimises performance overhead and space requirements in the
@@ -15,15 +15,15 @@ NVX context.
 
 BugNet~\cite{bugnet}, Jockey~\cite{jockey}, liblog~\cite{geels06}, and
 R2~\cite{r2} use a library approach where the replay tool is provided as a
-library which is inserted into a target application to allow for record and
+library which is inserted into a target application to allow for record \&
 replay. Jockey and liblog try to minimize the interference with the application
 being recorded to ensure that the application behaves the same with and without
 the tool, and rely solely on intercepting of a set of C library calls. BugNet
-provides a special API applications must use to support record and replay while
+provides a special API applications must use to support record \& replay while
 R2 requires developers to annonate functions which can be recorded and replayed
 correctly. RecPlay~\cite{recplay} also uses a library approach, but focuses on
-debugging of nondeterministic parallel programs. The approach combines
-record-replay mechanism with automatic data race detection implemented using
+debugging of nondeterministic parallel programs. The approach combines the
+record \& replay mechanism with automatic data race detection implemented using
 vector clocks.
 
 Flashback~\cite{flashback} has a similar focus, enabling deterministic
@@ -32,31 +32,30 @@ The key concept is the use of shadow processes, which duplicate the state of a
 process in memory allowing fast rollback of the debugged program with small
 overhead. Scribe~\cite{scribe} is another kernel-based solution focused on
 transparent, low-overhead record-replay with the ability to switch from
-replayed to live execution. Same as in case of Flashback, while the
-kernel-based implementation results in lower performance overhead, it makes
-these systems less easy to develop and debug, and less safe to use compared to
-library based approaches.
+replayed to live execution. While the kernel-based implementation results in
+lower performance overhead, it makes these systems less easy to develop and
+debug, and less safe to use compared to library based approaches.
 
 RR~\cite{rr} is similar to \varan by replicating an application into multiple
-instances for fault tolerance. Same as \varan, it also uses a variant of
-record-replay to synchronize the primary replica with others. Compared
-to \varan, RR is focused on fail-stop scenarios and does not support
-running different versions of the same application. The preliminary prototype
-has been implemented as a Linux kernel extension, with all the associated
-limitations as discussed above, and evaluated using only a single benchmark.
+instances for fault tolerance. As \varan, it also uses a variant of
+record-replay to synchronize the primary replica with others. Unlike \varan, RR
+is focused on fail-stop scenarios and does not support running different
+versions of the same application. The preliminary prototype has been
+implemented as a Linux kernel extension, with all the associated limitations
+discussed above, and evaluated using only a single benchmark.
 
 ReVirt~\cite{revirt}, SMP-ReVirt~\cite{smp-revirt} and iDNA~\cite{idna}
-implement record/replay mechanism as a part of virtual machine hypervisor,
+implement record \& replay mechanism as part of a virtual machine hypervisor,
 allowing to record and replay the entire system, including the operating system
-and the target applications. ReVirt is built on top of UML, which lacks the
-support for multiprocessor virtual machines. This limitations has been addressed
-in SMP-ReVirt which builts on top of Xen. iDNA uses a custom virtualization
-engine called Nirvana. The virtualization-based record-replay mechanism allow
-faithful replay of every aspect of the application's environment, including
-scheduling decisions of the operating system, with small performance overhead.
-On the other hand, these systems are more difficult to deploy and their use is
-more expensive as they require an entire operating system to record a single
-application.
+and the target applications. ReVirt is built on top of UML, which lacks support
+for multiprocessor virtual machines. This limitation has been addressed in
+SMP-ReVirt which builds on top of Xen. iDNA uses a custom virtualization engine
+called Nirvana. The virtualization-based record-replay mechanism allow faithful
+replay of every aspect of the application's environment, including the
+scheduling decisions of the operating system, with a small performance
+overhead.  On the other hand, these systems are more difficult to deploy and
+their use is more expensive as they require an entire operating system to
+record a single application.
 
 There are numerous record-replay tools focused on restricted programming models
 such as distributed shared memory~\cite{russinovich96}, MPI~\cite{rrmpi} and

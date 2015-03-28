@@ -10,16 +10,16 @@
 
 The primary application of \varan is \emph{transparent failover}, \ie the
 ability to transparently switch over to the non-crashing version in the event
-of failure without any disruption in the service.
-\varan makes it easy to implement transparent failover.  When one of the
-versions crashes, the \lstinline`SIGSEGV` signal handler installed in each
-version notifies the coordinator, which decides what restart strategy to use.
-When one of the followers crashes, the coordinator unsubscribes it from the
-list of currently-running followers, and discards it without affecting other
-followers.  When the leader crashes, it designates one of the followers as the
-new leader (currently the one with the smallest internal ID), and notifies it
-to switch its system call table (\S\ref{sec:rewriting}) to that of the leader,
-and to restart the last system call while discarding the old (crashed) leader.
+of failure without any disruption in service.  \varan makes it easy to
+implement transparent failover.  When one of the versions crashes, the
+\lstinline`SIGSEGV` signal handler installed in each version notifies the
+coordinator, which decides what restart strategy to use.  When one of the
+followers crashes, the coordinator unsubscribes it from the list of
+currently-running followers, and discards it without affecting other followers.
+When the leader crashes, it designates one of the followers as the new leader
+(currently the one with the smallest internal ID), and notifies it to switch
+its system call table (\S\ref{sec:rewriting}) to that of the leader, and to
+restart the last system call while discarding the old (crashed) leader.
 
 %Furthermore, as an execution
 %runtime targeted towards multi-version execution applications, \varan also
@@ -39,18 +39,20 @@ increases from \redisnormallatency to \redisfailoverlatency.  In both
 cases, we observed no extra degradation in throughput for the commands
 that follow.
 
-This example also demonstrates the difference between \mx and \varan; while \mx
-can recover from the crash (\S\ref{sec:redis}) unlike \varan, which
-discards the crashing version, \mx can only run two versions in parallel
-while \varan can run arbitrary number of versions with lower performance
-overhead as shown by the comparison in Section~\ref{sec:comparison}.
-
 As an additional experiment, we ran revisions \lstinline`2437` and
 \lstinline`2438` of \lighttpd (also introduced earlier), the latter of
 which introduced a crash bug.  We then set up a client that triggers the
 bug and measured the latency for that request. Both when the buggy
 version was the leader or a follower, there was no significant increase
 in latency, which remained at around~\lighttpdnormallatency.
+
+These examples demonstrate the difference between \mx and \varan. Unlike
+\varan, which discards the crashing version, \mx can recover from the crash
+(\S\ref{sec:redis}). On the other hand, \mx can only run two versions in
+parallel and incurs relatively high performance overhead, while \varan can run
+an arbitrary number of versions with low performance overhead as shown by the
+comparison in Section~\ref{sec:comparison}.
+
 %set up a client that triggers the bug and measured the increase in
 %latency for that command. As for the \redis scenario, there is no
 %increase in latency when the buggy version is a follower.  When it is
@@ -62,7 +64,7 @@ in latency, which remained at around~\lighttpdnormallatency.
 
 \begin{figure}[t]
 \begin{center}
-\begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:lighttpd-suid,caption={\lighttpd SUID bit detection patch}]
+\begin{lstlisting}[alsolanguage=diff,numbers=none,label=lst:lighttpd-suid,caption={\lighttpd SUID bit detection patch.}]
 @@ -66,0 +67,11 @@
 +#ifdef HAVE_GETUID
 +# ifndef HAVE_ISSETUGID
@@ -83,9 +85,9 @@ in latency, which remained at around~\lighttpdnormallatency.
 \end{figure}
 
 Multiple different software versions (revisions) can be run inside an NVX
-system as long as they all issue the same sequence of system calls. This
-limitation is due to the fact that prior NVX systems run versions in lockstep
-(\S\ref{sec:rw}).
+system only as long as they all issue the same sequence of system calls. This
+limitation is due to the fact that prior NVX systems, including \mx, run
+versions in lockstep (\S\ref{sec:rw}).
 
 Because \varan does not run the versions in lockstep and can use system call
 rewrite rules, it can often overcome this limitation. To illustrate, we used

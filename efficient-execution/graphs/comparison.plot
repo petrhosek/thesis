@@ -1,4 +1,4 @@
-set term pdfcairo noenhanced color solid font 'Myriad Pro,12' size 17.0cm,8.5cm
+set term pdfcairo noenhanced color solid font 'Myriad Pro,12' size 17.0cm,9.5cm
 if (!exists("filename")) filename='comparison.pdf'
 set output filename
 
@@ -16,7 +16,7 @@ set xtics 1000 nomirror rotate by -60 scale 0
 set ytics nomirror
 set grid y
 
-set bmargin 8.0
+set bmargin 9.5
 
 set yrange [0.0:1.4]
 

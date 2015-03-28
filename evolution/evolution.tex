@@ -2,12 +2,12 @@
 \label{chap:evolution}
 
 The multi-version execution approach is based on two key assumptions.  First,
-that new bugs are being introduced during software evolution and maintenance
-process even to a well tested code. Second, that during software evolution,
-the externally observable behaviour of the applications remains relatively
-stable, especially between minor revisions (\ie security and bug fixes).  While
-there is a lot of first hand and anecdotal evidence in support of these
-assumptions, despite the key role that software evolution plays in the
+that new bugs are being introduced during the software evolution and
+maintenance process even in well-tested code. Second, that during software
+evolution, the externally observable behaviour of the applications remains
+relatively stable, especially between minor revisions (\ie security and bug
+fixes).  While there is a lot of first hand and anecdotal evidence in support
+of these assumptions, despite the key role that software evolution plays in the
 application life cycle, it is surprising how few empirical studies one can find
 in the research literature regarding the evolution of the \emph{execution} of
 real systems.
@@ -26,105 +26,14 @@ can be used to run each version of a system in isolation and collect static and
 dynamic software metrics from the test suite execution. We consider the tests
 to be an (imperfect) proxy for a real-world execution.
 
-%, using a lightweight virtualization environment based on software
-%containers, that can be deployed on a cluster of local or cloud machines.
-
 We have used this infrastructure to examine how code and tests co-evolve in
 \numSystems popular open-source systems. We report the main characteristics of
-software patches, analyse the evolution of program from both the source code
+software patches, and analyse the program evolution from both the source code
 and the external behaviour perspective. We assess the impact of non-determinism
 on the execution of test suites. We also analyse the code and patch coverage,
 and investigate whether the coverage of code containing bugs and bug fixes is
-lower or higher than average; the latter of the two would provide an evidence
-that even well tested code still has bugs, in support of our technique.
-
-% While static metrics can provide useful insights into the construction and
-% evolution of software, there are many software engineering aspects which
-% require information about software executions.  For example, the research
-% community has invested a lot of effort in designing techniques for improving
-% the testing of software patches, ranging from test suite prioritisation and
-% selection
-% algorithms~\cite{harrold:test-redundancy,test-pri,Rothermel96analyzingregression}
-% to program analysis techniques for test case generation and bug
-% finding~\cite{diff-symex,directed-test-augmen:09,express,directed-symex11,babic11,directed-incr-symex11,patch:spin12,interaction-changes13}.
-
-% Many of these techniques depend on the existence of a manual test suite,
-% sometimes requiring the availability of a test exercising the
-% patch~\cite{onlinevalidation,tachyon12}, sometimes making assumptions about the
-% stability of program coverage or external behaviour over
-% time~\cite{cov_regr97,mx}, other times using it as a starting point for
-% exploration~\cite{zesti,pretex,sage,test-augmentation:genetic-vs-concolic}, and
-% often times employing it as a baseline for
-% comparison~\cite{klee,dotnet-random-test08,semantic-fp-testing12,mutation-tests-oracle12}.
-% However, despite the key role that test suites play in software testing, it is
-% surprising how few empirical studies one can find in the research literature
-% regarding the co-evolution of test suites and code and their impact on the
-% \emph{execution} of real systems.
-
-% In this chapter, we present \covrig, a flexible infrastructure that can be used
-% to run each version of a system in isolation and collect static and dynamic
-% software metrics, using a lightweight virtual machine environment that can be
-% deployed on a cluster of local or cloud machines.
-
-% We use \covrig to conduct an empirical study examining how code and tests
-% co-evolve in \numSystems popular open-source systems.  We report the main
-% characteristics of software patches, analyse the evolution of program and patch
-% coverage, assess the impact of non-determinism on the execution of test suites,
-% and investigate whether the coverage of code containing bugs and bug fixes is
-% higher than average.
-
-% We use \covrig to conduct an empirical study examining how programs evolve in
-% terms of code, tests and coverage.  More precisely, we have analysed the
-% evolution of \numSystems popular software systems with a rich development
-% history over a combined period of \numYears years, with the goal of answering
-% the following list of research questions (RQs):
-
-% \begin{itemize}
-% \item[\textssc{RQ1}] \textit{\rqone}
-%             Are coding and testing continuous, closely linked
-%             activities?  Or do periods of intense development
-%             alternate with periods of testing?
-
-% \item[\textssc{RQ2}] \textit{\rqtwo}
-%             Are most code
-%             patches accompanied by a new or modified test case?  How
-%             many patches modify neither executable code nor tests?
-           
-% \item[\textssc{RQ3}] \textit{\rqthree}
-%             Are most patches small?  
-%             How many different parts of the code does a patch touch?
-%             What is the median number of lines, hunks and
-%             files affected by a patch?
-
-% \item[\textssc{RQ4}] \textit{\rqfour}  Do tests fail non-deterministically?
-%             Does running the test suite multiple times cover different
-%             lines of code?
-
-% \item[\textssc{RQ5}] \textit{\rqfive}
-%             Does the overall coverage increase steadily over time, or
-%             does it remain constant?  Are there revisions that
-%             significantly increase or decrease coverage?
-
-% \item[\textssc{RQ6}] \textit{\rqsix}
-%             What fraction of a patch is covered by the regression test
-%             suite?  Does patch coverage depend on the size of the
-%             patch?
-
-% \item[\textssc{RQ7}] \textit{\rqseven}  Are
-%             tests exercising recent patches added shortly after the
-%             patch was submitted?  If so, how significant is this
-%             latent patch coverage?
-
-% \item[\textssc{RQ8}] \textit{\rqeight}
-%             Are most fixes thoroughly exercised by the regression
-%             suite?  How many fixes are entirely executed?
-
-% \item[\textssc{RQ9}] \textit{\rqnine}
-%             Is code that contains bugs exercised less than other changes?
-%             Is coverage a reasonable indicator of code quality? 
-
-% %\item[\bf RQ10:] \textbf{Does buggy code have lower than average coverage?}
-% \end{itemize}
+lower or higher than average; the latter of the two would provide evidence that
+even well tested code still has bugs, in support of our technique.
 
 \input{evolution/design}
 \input{evolution/study}

@@ -139,20 +139,20 @@ string into the other. We use edit distance to measure the similarity of the
 system call traces (\S\ref{evolution:external}). However, these traces are
 not strings, rather sequences of strings. To allow the use of edit distance on
 these sequences, we use a hashing scheme, which assigns each string in the
-sequence a 32-bit number. The algorithm then calculates edit distance between
+sequence a 32-bit number. The algorithm then calculates the edit distance between
 the integer strings.
 
 Another problem is the efficiency of the implementation. The sequences we are
 comparing in our study are hundreds of millions entries long. We have
 implemented the Levenshtein algorithm as a native C Python extension and used
-OpenMP to parallelize this implementation to take advantage of all available
+OpenMP to parallelise this implementation to take advantage of all available
 cores. This implementation only keeps one line of the computation matrix, and
 divides this line into strides which are then processed by different cores.
 
-\paragraph{Cloud deployment.} Since compilation and execution of a large number
-of revisions can be very time-consuming, especially for larger projects, we
+\paragraph{Cloud deployment.} Since compiling and executing a large number of
+revisions can be very time-consuming, especially for larger projects, we
 deployed the infrastructure to our private cloud and used multiple machines to
-run the analysis in parallel on diifferent subset of revisions (\ie
+run the analysis in parallel on different subset of revisions (\ie
 \emph{sharding}). We have built our system around a standard set of tools:
 \packer for building custom \docker-enabled machine images, \vagrant for
 controlling and provisioning the virtual machines based on these images, a

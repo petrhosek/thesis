@@ -13,27 +13,21 @@ even small changes in the code can lead to large differences in program
 coverage, relative to a given test suite.  This is a different finding from
 previous work, such as that by Rosenblum and Weyuker~\cite{cov_regr97}, which
 has found that coverage remains stable over time for the KornShell benchmark.
-In this paper, we have looked at a related question, of whether overall
+In this thesis, we have looked at a related question, of whether overall
 coverage remains stable over time, taking into consideration the changes to the
 evolving test suite as well.
 
-Zaidman et al.~\cite{coevol:emse11} have examined the co-evolution of
+Zaidman \etal~\cite{coevol:emse11} have examined the co-evolution of
 code and tests on two open-source and one industrial Java
 applications.  The study looks at the evolution of program coverage
 over time, but only computes coverage for the major and minor releases
 of each system, providing around ten data points for each system.  By
-looking at the co-evolution of code and tests, the analysis can infer
-the development style employed by each project: one key finding is
-that code and tests co-evolve either \textit{synchronously}, as when
-agile methods are used; or \textit{phased}, with periods of intense
-coding followed by periods of intense testing.  For our
-benchmarks, we have observed both development styles.
-
-There is a rich literature on predicting software bugs by mining
-software repositories~\cite{bug-feature:icse13,genealogies:issre13};
-however, prior work has focused almost exclusively on static metrics,
-while in this work we propose using dynamic metrics such as patch
-coverage to aid the task.
+looking at the co-evolution of code and tests, the analysis can infer the
+development style employed by each project: one key finding is that code and
+tests co-evolve either \emph{synchronously}, as when agile methods are used; or
+\emph{phased}, with periods of intense coding followed by periods of intense
+testing. In our experiments presented in Chapter~\ref{chap:evolution}, we have
+observed both development styles.
 
 % Our ongoing effort is to develop \covrig into a flexible platform for
 % mining static and dynamic metrics from software repositories.  In

@@ -32,8 +32,7 @@ performed by each version, execution must switch to the monitor
 process, which has to perform several additional system calls in order
 %to be notified about system call entry and exit, 
 to copy buffers to and from the version being monitored, nullify the
-system call, \etc as shown earlier in
-Figure~\ref{fig:lockstep-execution}.
+system call, \etc as shown earlier in Section~\ref{sec:mxm}.
 
 For CPU-intensive applications which perform few system calls, this
 overhead will be amortised, translating into a modest overall
@@ -67,15 +66,14 @@ discussed in detail in Section~\ref{sec:streaming}.
 \subsection{Event-streaming architecture}
 \label{sec:coordination}
 
-In prior NVX systems, versions are typically run in lockstep, with a
+In prior NVX systems like \mx, versions are typically run in lockstep, with a
 centralised monitor coordinating and virtualising their execution.
-Essentially, at each system call, the versions pass control to the
-monitor, which waits until all versions reach the same system call.
-Once this happens, the monitor executes the system call and
-communicates the result to each individual version.  If two or more
-versions try to break the lockstep by executing different system
-calls, the monitor needs to either terminate the entire application or
-continue executing a subset of the versions in lockstep.
+Essentially, at each system call, the versions pass control to the monitor,
+which waits until all versions reach the same system call.  Once this happens,
+the monitor executes the system call and communicates the result to each
+individual version.  If two or more versions try to break the lockstep by
+executing different system calls, the monitor needs to either terminate the
+entire application or continue executing a subset of the versions in lockstep.
 
 This approach has two key disadvantages.  First, the centralised
 monitor is a bottleneck, which can have a significant impact on
@@ -85,10 +83,8 @@ speed of the slowest individual version.
 
 Second, this approach is totally inflexible to any divergence in the
 sequence of system calls executed across versions.  This is an issue
-both when running automatically-diversified variants, where certain
-transformations may affect the external behaviour, and when running
-existing software revisions, where changes in the sequences of
-system calls can occur between revisions. 
+when running different software versions, where changes in the sequences of
+system calls can occur between versions. 
 
 \begin{figure}[t]
   \begin{center}
@@ -154,10 +150,10 @@ special handlers and then starts executing the variants
 
 In addition to eliminating the central monitor bottleneck, our
 event-streaming architecture also supports (small) divergences between
-the system call sequences of different variants.  For example,
-different software revisions can be run inside a classical NVX
-system only as long as they all issue the same sequence of system
-calls~\cite{mx}.  However, software patches sometimes change the
+the system call sequences of different variants.  In particular,
+different software versions can be run inside a
+system like \mx only as long as they all issue the same sequence of system
+calls as we showed in Section~\ref{sec:bounds}. However, software patches sometimes change the
 external behavior of an application.  In particular, many divergences
 in system call traces fall into the following two categories:
 \begin{inparaenum}[(i)]

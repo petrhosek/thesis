@@ -13,13 +13,13 @@ significant impact on current software engineering practices, by allowing
 frequent software updates without sacrificing the stability and security of
 older versions.
 
-We proposed two different multi-version execution schemes: transparent failover
-and failure recovery, targeting different scenarios with different trade-offs.
+We proposed two different multi-version execution schemes: failure recovery and
+transparent failover, targeting different scenarios with different trade-offs.
 We also presented two different designs for building monitors suitable for
-multi-version execution implementing these schemes. The first one, called
-\varan described in Chapter~\ref{chap:efficient-execution}, is aimed towards
-running large number of versions side-by-side with low performance overhead,
-and uses selective binary rewriting to achieve this goal. The second one,
-called \mx described in Chapter~\ref{chap:safe-updates}, is focused on
-surviving crashes caused by bugs introduced in software updates, with the
-prototype implementation built using the \ptrace mechanism.
+multi-version execution implementing these schemes. The first one, called \mx
+described in Chapter~\ref{chap:safe-updates}, is focused on surviving crashes
+caused by bugs introduced in software updates, with the prototype
+implementation built using the \ptrace mechanism. The second one, called \varan
+described in Chapter~\ref{chap:efficient-execution}, is aimed towards running a
+large number of versions side-by-side with low performance overhead, and uses
+selective binary rewriting to achieve this goal. 

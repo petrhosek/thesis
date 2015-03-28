@@ -2,7 +2,7 @@
 \label{related:sandboxing}
 
 $N$-version execution environment typically uses some form of application
-sandboxing. The goal is to isolate the running application from underlying
+sandboxing. The goal is to isolate the running application from the underlying
 system and especially, to prevent software failures in any of the versions
 being executed from affecting the rest of the system including other versions.
 
@@ -10,23 +10,41 @@ Prior sandbox architectures include both kernel-based
 mechanisms~\cite{tron,remus,subdomain,cots-hardening} and system call
 interposition monitors~\cite{wily-hacker,mapbox,jain1999,provos2002,mbox}.
 Other mechanisms have been also used to build sandboxes, such as binary
-rewriting~\cite{vx32,true:sp12}, system transactions~\cite{txbox} or virtual
+rewriting~\cite{vx32,true:sp12}, system transactions~\cite{txbox} and virtual
 machine introspection~\cite{garfinkel:vmi}.
 
 \subsection{System call interposition}
 \label{related:syscalls}
 
+% Recent NVX systems that synchronize versions at the level of system
+% calls use either the \ptrace interface~\cite{orchestra09,tachyon12}
+% or kernel modifications~\cite{cox2006} to implement monitors.  As
+% discussed, \ptrace-based systems incur an unacceptable overhead
+% on I/O-bound applications---for instance, \tachyon~\cite{tachyon12}
+% reports an overhead of \tachyonLighttpd on \lighttpd and \mx~\cite{mx}
+% achieved an overhead of up to \mxRedis in one of the Redis
+% experiments.  By contrast, kernel-based systems~\cite{cox2006} achieve
+% overheads competitive to \varan~\footnote{Although we were not able to compare
+% directly with \cite{cox2006}, as they use a different benchmark and a
+% single-core machine.}---but the major downside of kernel-level approaches are
+% the increase in the size of the trusted computing base (TCB), the additional
+% privileges required for deployment, and the difficulty of maintaining the
+% kernel patches.  Finally, all existing NVX systems operating at the level of
+% system calls, both user- and kernel-level, require lockstep execution, which
+% introduces significant limitations both in terms of performance and
+% flexibility, as discussed in detail in Sections~\ref{sec:coordination} and
+% \ref{sec:patternmatching}.
+
 Regardless of the application, most operating system resources such as files
 and sockets can only be accessed through the system call interface.  Therefore,
 this interface is often a target for monitoring and regulation. Both \varan and
-\mx operate at the system call interface layer synchronizing system calls
+\mx operate at the system call interface layer, synchronizing system calls
 performed by different application versions. \varan draws inspiration from the
 Ostia delegating architecture~\cite{ostia}, and from the selective binary
 rewriting approach implemented by \emph{BIRD}~\cite{bird} and
 \textsf{seccompsandbox}.\footnote{\url{https://code.google.com/p/seccompsandbox/}}
-\mx on the other hand uses the \textsf{ptrace} interface same as many of the
-existing monitors such as Orchestra~\cite{orchestra09} or
-Tachyon~\cite{tachyon12}.
+\mx on the other hand uses the \ptrace interface same as many of the existing
+monitors such as Orchestra~\cite{orchestra09} or Tachyon~\cite{tachyon12}.
 
 System call interposition has been an active area of research and there are
 there many different ways in which the system call interception mechanism can
@@ -34,45 +52,48 @@ be implemented, including dynamic libraries loaded through the preloading
 mechanism (\ie using \lstinline`LD_PRELOAD` or
 \lstinline`DYLD_INSERT_LIBRARIES` variables) and custom C
 libraries~\cite{plash}, facilities provided by the operating system (\ie
-\ptrace interface or \lstinline`/proc` subsystem), kernel extensions and binary
+\ptrace interface or the \lstinline`/proc` subsystem), kernel extensions and binary
 rewriting.
 
 Janus~\cite{wily-hacker} was one of the first systems to implement a confinement
 mechanism by interposing on the system calls made by the application via the
-standard tracing mechanisms, in particular \ptrace. The similar architecture
+standard tracing mechanisms, in particular \ptrace. A similar architecture
 has been later adopted by MAPbox~\cite{mapbox} and Consh~\cite{consh}. However,
 all of these systems suffered from numerous limitations posed by the \ptrace
 interface~\cite{janus}. Jain and Sekar~\cite{jain1999} tried to address some of
 these issues to build a more efficient user-space confinement mechanism.  A
 later Janus~\cite{janus} evolution implemented a tracing mechanism for Solaris
-using \lstinline`/proc` subsystem. To address some of the \ptrace shortcomings,
-Systrace~\cite{provos2002} used a loadable kernel module.  Some system call
-interpositon mechanisms were implemented entirely in
+using the \lstinline`/proc` subsystem. To address some of the \ptrace shortcomings,
+Systrace~\cite{provos2002} used a loadable kernel module.
+
+Some system call interposition mechanisms were implemented entirely in
 kernel~\cite{subdomain,cots-hardening}. Ostia~\cite{ostia} has shown how to
 implement a secure and efficient system call interposition mechanism by combing
-kernel extension with a custom user-space binary rewriting mechanism avoiding.
-More recently, \textsc{Mbox}~\cite{mbox} implemented sandboxing mechanism by
-combining \ptrace and \textsf{seccomp/bpf} to allow for selective system call
-filtering.
-
-Numerous intrusion detection mechanisms rely on analysis of system call
-sequences looking for potential
-anomalies~\cite{syscall-seq,wespi00,sekar01,gao04,sandeep06}. These systems
-rely on system call tracing, which is similar to system call interposition,
-although there is no need for modyfing or denying system calls.
+a kernel extension with a custom user-space binary rewriting mechanism avoiding
+the use of \ptrace achieving lower performance overhead compared to
+\ptrace-based sandboxing mechanisms. More recently, \textsc{Mbox}~\cite{mbox}
+implemented a sandboxing mechanism by combining \ptrace and \seccompbpf to
+allow for selective system call filtering.
 
 Orchestra~\cite{orchestra09} and Tachyon~\cite{tachyon12} used system call
 interposition through \ptrace interface to implement $N$-version runtimes.  To
-improve the performance overhead, one of the \ptrace shortcomings when reading,
-Orchestra uses shared memory injected into the application's address space to
-read the values of indirect system call arguments, while Tachyon uses cross
-memory attach, same as \mx (\S\ref{sec:mxm}), for the same purpose.
+improve the performance overhead when reading tracee memory, one of the \ptrace
+shortcomings, Orchestra uses shared memory injected into the application's
+address space to read the values of indirect system call arguments, while
+Tachyon uses cross memory attach, same as \mx (\S\ref{sec:mxm}), for the same
+purpose.
 
 Due to their importance, especially when used for application sandboxing,
 system call monitors themselves can also become targets for attackers.
 Garfinkel~\cite{garfinkel:traps} and Watson~\cite{watson07} described common
 vulnerabilities in system call monitors and the ways in which these could be
 exploited.
+
+Numerous intrusion detection mechanisms rely on the analysis of system call
+sequences looking for potential
+anomalies~\cite{syscall-seq,wespi00,sekar01,gao04,sandeep06}. These systems
+rely on system call tracing, which is similar to system call interposition,
+although there is no need for modifying or denying system calls.
 
 %User-mode Linux~\cite{dike:uml}, a mechanism which allows running multiple
 %virtual Linux systems on a Linux host has been also implemented using the
@@ -174,22 +195,21 @@ exploited.
 \label{related:sfi}
 
 The use of software-based fault isolation for executing untrusted code has been
-first described in~\cite{sfi:sosp93} for the RISC machines with simple
-instruction set. However, the first effective implementation of software fault
-isolation for the CISC architecture has been shown only much later
-in~\cite{cisc-sfi:usenix-sec06}.
+first described in~\cite{sfi:sosp93} for RISC machines. However, the first
+effective implementation of software fault isolation for the CISC architecture
+has been shown only much later in~\cite{cisc-sfi:usenix-sec06}.
 
 These concepts have been later used by several sandboxes designed for isolation
 of plugins on the web. Xax~\cite{douceur08} uses system call interposition
 together with address space isolation to leverage existing libraries and
 programs on the web. Native Client~\cite{nacl} requires the code to be
 recompiled to a restricted subset of the x86/ARM ISA which can be checked prior
-running and confines the application using segmentation and memory protection.
-The problem of protecting trusted code from the untrusted code addressed by
-both of these sandboxes is orthogonal to traditional system-level sandboxing
-and these systems rely on separate sandboxing mechanism for that purpose (\eg
-Native Client uses either \textsf{seccomp} or \textsf{seccomp-bpf} as an
-"outer" sandbox layer).
+to running and confines the application using segmentation and memory
+protection.  The problem of protecting trusted code from the untrusted code
+addressed by both of these sandboxes is orthogonal to traditional system-level
+sandboxing and these systems rely on separate sandboxing mechanism for that
+purpose (\eg Native Client uses either \textsf{seccompsandbox} or \seccompbpf
+as an "outer" sandbox layer).
 
 % MAPbox~\cite{mapbox}, Systrace~\cite{provos2002} and BlueBoX~\cite{bluebox}
 % implement Linux system call monitors for intrusion detection and application

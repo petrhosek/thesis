@@ -1,8 +1,8 @@
-\section{Failure recovery}
+\section{Evaluation}
 \label{sec:reliability-evaluation}
 
 To evaluate our approach, we show that \mx can survive crash bugs in several
-real applications. %(\S\ref{sec:surviving}). We then examine the question of how
+applications. %(\S\ref{sec:surviving}). We then examine the question of how
 %far apart can be the versions run by \mx (\S\ref{sec:bounds}), and discuss
 %\mx's performance overhead (\S\ref{sec:performance}).
 We have evaluated \mx using a set of bugs in three applications: \gnu
@@ -42,14 +42,13 @@ trigger segmentation faults.  The bugs are described in
 Table~\ref{tbl:cu-bugs}, together with the utilities affected by each
 bug and the versions in which they were introduced and fixed.
 
-The bug affecting both \mdsum and \shasum utilities introduced in 5.1
-And later fixed in 6.11 caused a crash due to a buffer underflow when
-checking an invalid BSD-style input. Another bug we have considered
-affected \mkdir, \mkfifo and \mknod utilities; this bug, which was
-reported in 6.10 and fixed in 6.11 resulted in a crash when accessing
-an invalid context.  Finally, the bug affecting the \cut utility,
-introduced in 5.3 and later fixed in 8.11, resulted in segfault when
-using a large unbounded range. 
+The bug affecting both \mdsum and \shasum utilities, introduced in version 5.1
+and later fixed in version 6.11, caused a crash due to a buffer underflow when
+checking an invalid BSD-style input. Another bug we have considered affected
+\mkdir, \mkfifo and \mknod utilities; this bug, which was reported in 6.10 and
+fixed in 6.11 resulted in a crash when accessing an invalid context.  Finally,
+the bug affecting the \cut utility, introduced in 5.3 and later fixed in 8.11,
+resulted in a segmentation fault when using a large unbounded range. 
 
 For all these bugs, we configured \mx to run the version that fixed the
 bug together with the one just before. We could have also run the
@@ -77,44 +76,46 @@ if (output_delimiter_specified /*@\label{line:cond}@*/
 This code uses the lower bound of the size of the printable field
 vector; however, when calculating the size of this vector, ranges going
 to the end of line (\ie \lstinline`0-`) are not considered, eventually
-resulting in an invalid memory access. 
-% The bug is caused by a buffer overflow whose root cause is the
-% incorrect calculation of the size of a dynamically allocated buffer
-% used internally by \cut.
-When \mx intercepts this bug, it uses the
-last checkpoint to recover the execution of the crashing version. This
-checkpoint is taken after the \textstt{brk} system call triggered by
-the \textstt{malloc} call that allocates the buffer. 
-% in function \textstt{bindtextdomain} on line~\ref{line:bind}.
-% \begin{lstlisting}[firstnumber=767]
-% bindtextdomain (PACKAGE, LOCALEDIR); /*@\label{line:bind}@*/
-% \end{lstlisting}
+resulting in an invalid memory access. The cause of this bug is an incorrectly
+calculated size of a dynamically allocated buffer, which is later used by the
+program, leading to a buffer overflow. When \mx intercepts this bug, it uses
+the last checkpoint to recover the execution of the crashing version. This
+checkpoint is taken after the \lstinline`brk` system call triggered by the
+\lstinline`malloc` call that allocates the buffer in function
+\lstinline`bindtextdomain` on line~\ref{line:bind}.
+
+\begin{lstlisting}[firstnumber=767]
+bindtextdomain (PACKAGE, LOCALEDIR); /*@\label{line:bind}@*/
+\end{lstlisting}
+
 The recovered process uses the code of the other version to correctly
 calculate the size of the field vector and switches back to the original
-code during the allocation of this buffer as
+code during the allocation of this buffer, as
 %code during the allocation of this buffer on line~\ref{line:alloc} as
-function \textstt{xzalloc} triggers \textstt{mmap64} system call, just
+function \lstinline`xzalloc` triggers a \lstinline`mmap64` system call just
 before executing the conditional statement on line~\ref{line:cond},
 which originally triggered the bug.
 
 \subsubsection{\redis}
 \label{sec:redis}
 
-Below, we describe how \mx can survive the \redis bug described in
-Section~\ref{multi-version:scenarios} while running in parallel the \redis
-revision \textstt{a71f072f} (\textit{the old version}, just before the bug was
-introduced) with revision \textstt{7fb16bac} (\textit{the new version}, just
-after the bug).  \mx first invokes \sea to perform a static analysis of the two
-binaries and construct the mappings described in \sref{sec:sea}.  Then, \mx
-invokes the \mxm monitor, which executes both versions as child processes and
-intercepts their system calls.
+Below, we describe how \mx can survive the \redis bug presented in
+Section~\ref{multi-version:scenarios}; this bug, introduced during a code
+refactoring, causes \redis to crash when the \lstinline`HMGET` command is used
+with the wrong type. We are running in parallel the revision \textstt{a71f072f}
+(\textit{the old version}, just before the bug was introduced) with revision
+\textstt{7fb16bac} (\textit{the new version}, which contains the bug).  \mx
+first invokes \sea to perform a static analysis of the two binaries and
+construct the mappings described in \sref{sec:sea}.  Then, \mx invokes the \mxm
+monitor, which executes both versions as child processes and intercepts their
+system calls.
 
 When the new version crashes after issuing the problematic
 \textstt{HMGET} command, \mxm intercepts the \textstt{SIGSEGV} signal
 which is sent to the application by the operating system.  At
 this point, \rem starts the recovery procedure.  First, \rem sends a
 \textstt{SIGKILL} signal to the new version to terminate it.  It then
-takes the last checkpoint of the new version, which was taken at the
+restores the last checkpoint of the new version, which was taken at the
 point of the last invoked system call, which in this case is an
 \textstt{epoll\_ctl} system call.  Then, \rem uses the information
 provided by \sea to rewrite the stack of the new version, as detailed
@@ -148,14 +149,13 @@ the two versions.
 \subsubsection{\lighttpd}
 \label{sec:lighttpd}
 
-To evaluate \mx on \lighttpd, we have used two different crash bugs.
-The first bug is the one described in detail in
-Section \ref{multi-version:scenarios}, related to the ETag and compression
-functionalities.  As previously discussed, the crash is triggered by a
-very small change, which decrements the upper bound of a \textstt{for}
-loop by one.  \mx successfully protects the application against this
-crash, and allows the new version to survive it by using the code of
-the old version.
+To evaluate \mx on \lighttpd, we have used two different crash bugs, \#1601 and
+\#2140.  The first bug is the one described in detail in Section
+\ref{multi-version:scenarios}, related to the ETag and compression
+functionalities.  As previously discussed, the crash is triggered by a very
+small change, which decrements the upper bound of a \textstt{for} loop by one.
+\mx successfully protects the application against this crash, and allows the
+new version to survive it by using the code of the old version.
 
 The other crash bug we reproduced affects the URL rewrite
 functionality.\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/issues/2140}}
@@ -207,10 +207,10 @@ in parallel, and help the old version survive the crash bug.
 %}
 %\end{lstlisting}
 
-Both \lighttpd bugs \#1601 and \#2140 are very simple---their fix
-consist of a single character---yet still they made \lighttpd server
-vulnerable to a potential attack. \mx can not only handle the crash,
-but also successfully recover the failing version in both cases.
+Both \lighttpd bugs \#1601 and \#2140 are very simple---their fix consist of a
+single character---yet still they made the \lighttpd server vulnerable to a
+potential attack. \mx can not only handle the crash, but also successfully
+recover the failing version in both cases.
 
 \subsection{Ability to run distant versions}
 \label{sec:bounds}
@@ -267,20 +267,21 @@ very distant versions).
 %% upper-bound for 
 %
 For \lighttpd issue \#2169, the lower bound is defined by a revision
-in which a pair of \textstt{geteuid()} and \textstt{getegid()} calls
-are replaced with a single call to \textstt{issetugid()} to
-allow \lighttpd to start for a non-root user with GID~0.  \mx 
-%cannot run this revision together with the one before it, because it 
+in which a pair of \lstinline`geteuid` and \lstinline`getegid` calls
+are replaced with a single call to \lstinline`issetugid` to
+allow \lighttpd to start for a non-root user with GID~\lstinline`0`. \mx 
 currently does not support changes to the order of system calls, but
-this limitation could be overcome by using rewrite rules for system call
-sequences same as in \varan (\S\ref{sec:patternmatching}), which would
+this limitation could be overcome by using the rewrite rules for system call
+sequences supported  by \varan (\S\ref{sec:patternmatching}). This would
 allow \mx to recognise that the pair \textstt{geteuid()} and
 \textstt{getegid()} could be matched with the call to
-\textstt{issetugid()} (\S\ref{sec:applications}).  The upper bound for
-\lighttpd issue \#2169 adds a \textstt{read} call to
-\textstt{/dev/[u]random}, in order to provide a better entropy source
-for generating HTTP cookies.  This additional \textstt{read} call
-changed the sequence of system calls, which \mx cannot handle.
+\textstt{issetugid()} (\S\ref{sec:applications}).
+
+The upper bound for \lighttpd issue \#2169 adds a \textstt{read} call to
+\textstt{/dev/[u]random}, in order to provide a better entropy source for
+generating HTTP cookies.  This additional \textstt{read} call changed the
+sequence of system calls, which \mx cannot handle, but which again could be
+handled by \varan's rewriting rules.
 
 For \lighttpd issue \#2140, both the lower and the upper bounds are
 caused by a change in a sequence of \textstt{read()} system calls.  We
@@ -334,8 +335,7 @@ Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
   executing just a single version, with the geometric mean across all
   \numSPECbench benchmarks at \avgOverSPEC. This result is comparable with
   previous work using multi-variant execution that used \speccpu to measure
-  performance~\cite{orchestra09} (even though that work used \speczerozero
-  which has already been retired).
+  performance~\cite{orchestra09} (even though that work used \speczerozero).
 
 %% The overhead varies from \minRedisOver to \maxRedisOver depending
 %% on the operation being performed. This is the worst case overhead
@@ -348,7 +348,7 @@ Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 
 \item[\gnu~\coreutils] The six \coreutils applications discussed in
   \sref{sec:coreutils} are mostly used in an interactive fashion via the
-  command-line interface (CLI). For such applications, a high performance
+  command-line interface (CLI). In this context, a high performance
   overhead is acceptable as long as it is not perceptible to the user; prior
   studies have shown that response times of less than 100ms typically feel
   instantaneous~\cite{card:human_proc}. In many common use cases (\eg creating
@@ -380,7 +380,7 @@ Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
   \redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}} utility,
   which is part of the standard \redis distribution and simulates
   \textstt{GET}/\textstt{SET} operations done by $N$ clients concurrently, with
-  default workload. Same as in the case of \lighttpd, we performed two sets of
+  default workload. As in the case of \lighttpd, we performed two sets of
   experiments, one for the local scenario and one for the remote scenario. The
   overhead for \redis varies, depending on the operation being performed, from
   \minRedisRemote to \maxRedisRemote in the remote scenario, and from
@@ -393,28 +393,15 @@ scenarios for which its execution overhead does not degrade the performance of
 the end-to-end task, such as the remote \redis and \lighttpd scenarios
 discussed above, or interactive tasks such as those performed using
 command-line utilities, where users would not notice the overhead as long as
-the response time stays within a certain range.
+the response time stays within a certain range. On the other hand, it is
+clearly not suitable for applications requiring high-throughput, which is what
+motivated us design the high-performance mechanism of \varan.
 
 %% \mx's performance overhead is strongly correlated with the frequency of
 %% system calls that have to be intercepted.  Therefore, we could also
 %% imagine \mx being automatically turned on and off during execution,
 %% depending on the frequency of system calls experienced by the
 %% application.
-
-Finally, we would like to emphasise that our current prototype has not
-been optimised for performance, and we believe its overhead can still
-be significantly reduced.  
-%% There are multiple strategies we plan to explore in future
-%% work. First,
-One possibility would be to replace \ptrace with more efficient system
-call interception mechanism such as binary rewriting as in case of
-\varan (\S\ref{sec:rewriting}) at the expense of increased
-implementation complexity of other components such as \rem. We could
-also combine \ptrace with \textsf{seccomp/bpf} to allow the system calls
-without side-effects to be executed directly without \mxm involvement.
-Other option is to improve our checkpointing mechanism by implementing
-it as a loadable kernel module that only stores the part of the state
-needed for recovery~\cite{flashback}.
 
 %% and only checkpoint at epoch boundaries.  To make this approach viable, we also
 %% need to record system calls in each epoch, so that they can be

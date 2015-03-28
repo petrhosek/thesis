@@ -82,16 +82,15 @@ by each application version, and manipulating them to ensure that the
 two versions are executed in a synchronised fashion and act as one to
 the outside world.
 
-\mxm provides functionality similar to conventional virtual machine
-monitors.  Whenever the MV application is executed, the \mxm connects
-to all application versions running in parallel, intercepting their
-kernel system calls.  \mxm ensures that the two versions act as one to
-the outside world by mediating access to the underlying operating
-system to achieve complete isolation of the running application from
-other application instances as well as from the external environment,
-making sure the combined application versions act as one to the
-outside world.  The environment controlled by the monitor consists
-mainly of a restricted file system access, socket interceptors and
+\mxm provides functionality similar to conventional virtual machine monitors.
+Whenever the MV application is executed, the \mxm connects to the two
+application versions running in parallel, intercepting their kernel system
+calls.  \mxm ensures that the two versions act as one to the outside world by
+mediating access to the underlying operating system to achieve complete
+isolation of the running application from other application instances as well
+as from the external environment, making sure the combined application versions
+act as one to the outside world.  The environment controlled by the monitor
+consists mainly of a restricted file system access, socket interceptors and
 signal handlers.
 
 \subsubsection{System call interception}
@@ -102,8 +101,8 @@ simple deployment (without any need for compile-time instrumentation)
 and makes the monitor itself lightweight since it is running as a
 regular unprivileged process.  \mxm is similar in operation to previous
 monitors whose goal is to synchronise applications at the level of system
-calls such as Orchestra~\cite{orchestra09}, PLR~\cite{shye2009} or
-Tachyon~\cite{tachyon12}.
+calls such as \orchestra~\cite{orchestra09}, PLR~\cite{shye2009} or
+\tachyon~\cite{tachyon12}.
 
 \mxm runs each version in a separate child process, intercepting all
 their system calls.  When a system call is intercepted in one version,
@@ -117,7 +116,7 @@ Otherwise, if the two versions perform the same system call with the
 same arguments, \mxm virtualises their interaction with the
 environment.  If the operation performed by the system call has no
 side effects and does not involve virtualised state (\eg
-\textstt{sysinfo}), \mxm allows both processes to execute it
+\lstinline`sysinfo`), \mxm allows both processes to execute it
 independently.  Otherwise, it executes the system call on their
 behalf and copies its results into the address spaces of both
 versions.
@@ -126,16 +125,16 @@ versions.
 consists mainly of intercepting instructions that may produce
 non-deterministic results, and returning the same result in both
 versions.  Examples of such non-deterministic operations include
-random number generators (\eg read calls to \textstt{/dev/[u]random}),
-date and time (\eg read calls to \textstt{/etc/localtime}), and access
+random number generators (\eg read calls to \lstinline`/dev/[u]random`),
+date and time (\eg read calls to \lstinline`/etc/localtime`), and access
 to files and network (\eg file descriptor consistency).  Note that
 non-deterministic effects resulting from allocating memory objects at
 different addresses in memory or randomly arranging memory areas via
 address space layout randomisation (ASLR) do not pose any
-problems: \mxm understand the semantics of individual system calls and
+problems: \mxm understands the semantics of individual system calls and
 rather than directly comparing memory addresses (which might be
 different in each executed version), it compares the actual values
-stored at those memory locations. \mxm support both memory buffers (by
+stored at those memory locations. \mxm supports both memory buffers (by
 comparing the actual buffer content) as well as data structures
 referenced by pointers (including nested ones).
  
@@ -150,14 +149,14 @@ the monitor is notified as well.  Due to internal limitations of the
 \ptrace interface, once the system call has been made, it cannot be
 skipped, so when \mxm wants to execute the call on behalf of its child
 processes, it simply replaces it with a system call that does not
-change the system state (\texttt{getpid} in our case).
+change the system state (\lstinline`getpid` in our case).
 
 There are several challenges that we encountered while implementing
 \mxm.  First, \mxm must partly understand the semantics of 
 system calls.  For example, many system call parameters use complex
 (often nested) structures with complicated semantics to pass values to
-the operating system kernel, as in the case of \textstt{ioctl} or
-\textstt{futex}.  To be able to compare the parameters of
+the operating system kernel, as in the case of \lstinline`ioctl` or
+\lstinline`futex`.  To be able to compare the parameters of
 these system calls and copy back their results, \mxm needs to
 understand the semantics of these structures.  However, there are only
 a relatively small number of system calls in Linux, and once the support
@@ -165,7 +164,7 @@ for handling them is implemented, it can be reused across applications.
 \mxm currently implements \syscallsImplemented system calls (out of the
 \syscallsTotal provided by Linux x86-64 3.1.9), which was enough to
 allow us to run \mx on our benchmarks
-(\S\ref{sec:evaluation}).
+(\S\ref{sec:reliability-evaluation}).
 
 Second, the arguments of a system call are often passed through pointers,
 which are only valid in the application address space, which is not directly
@@ -178,19 +177,19 @@ memory with custom shellcode, or a modified kernel~\cite{tachyon12} to
 overcome this limitation. Instead, \mxm uses \emph{cross memory attach}, a new
 mechanism for fast interprocess communication which has been recently added to
 the Linux kernel~\cite{crossmemoryattach}.  This mechanism provides two new
-system calls---\textstt{process\_vm\_readv} and
-\textstt{process\_vm\_writev}---which allows tracer to directly access the
-memory space of tracee using an interface similar to \textstt{readv} and
-\textstt{writev} system calls without any additional overhead.
+system calls---\lstinline`process_vm_readv` and
+\lstinline`process_vm_writev`---which allows the tracer to directly access the
+memory space of the tracee using an interface similar to the \lstinline`readv`
+and \lstinline`writev` system calls without any additional overhead.
 
 Third, because the structures passed as arguments to system calls often have
-variable-size, \mxm also needs a fast way to allocate and deallocate memory
+variable size, \mxm also needs a fast way to allocate and deallocate memory
 for them in order to minimise the overall overhead imposed by our system.  For
 this purpose, \mxm uses a region-based memory allocator~\cite{memory-pools},
-namely the \textstt{obstack}
-library\footnote{\url{http://www.gnu.org/software/hello/manual/libc/Obstacks.html}}.
-which is part of the GNU C Library.  Each monitored process has its own
-obstack, which is used for allocating memory to store the copy of the process'
+namely the \textsf{obstack}
+library,\footnote{\url{http://www.gnu.org/software/hello/manual/libc/Obstacks.html}}
+which is part of the \gnu C Library.  Each monitored process has its own
+region, which is used for allocating memory to store the copy of the process'
 system call arguments
 
 \subsubsection{Multi-process and multi-threaded applications}
@@ -207,7 +206,7 @@ processes, and one to monitor the child processes in each version.
 Due to limitations of the \ptrace interface (which was not designed to be used
 in a multi-process/multi-threaded environment), handing the control of any
 child processes being spawned by the application over to a new monitoring
-thread is somewhat complicated.  In \mxm we adopt the solution similar to
+thread is somewhat complicated.  In \mxm we adopt a solution similar to
 Orchestra~\cite{orchestra09}.  When a new child process is spawned, we let the
 parent monitoring thread to supervise its execution until the first system
 call.  Then, we replace this system call with a \textstt{pause} system call,
@@ -233,13 +232,13 @@ processes are allowed to open files with read-only permissions
 directly, while files with write permissions are opened by the monitor
 itself.  This imposes another problem as file descriptors assigned to
 these files are not necessarily the same in each version (\eg due to
-scheduling non-determinism). Therefore, the \mxm needs to virtualise
+scheduling non-determinism). Therefore, \mxm needs to virtualise
 these file descriptors.
 
-Whenever monitored process opens a file with read-only permissions, a
+Whenever the monitored process opens a file with read-only permissions, a
 new virtual file descriptor is assigned to this file together with the
 mapping to a real file descriptor for each version. This virtual file
-descriptor is then send to each version. When system call is made
+descriptor is then sent to each version. When a system call is made
 using this virtual file descriptor, \mxm replaces it with the real
 file descriptor before executing the system call. The actual file
 operation is then executed by the process itself avoiding any memory
@@ -249,7 +248,7 @@ A similar approach is also used for virtualisation of process,
 group, parent and child identifiers.  Whenever a process tries to obtain
 the actual ID, \mxm replaces this with a virtual ID and keeps the
 mapping between the real and the virtual ID. When a process invokes a
-system call using this ID as an argument (\eg \texttt{kill}), the
+system call using this ID as an argument (\eg \lstinline`kill`), the
 virtual ID is replaced with the actual ID before executing the system
 call.
 
@@ -349,17 +348,16 @@ that happen in either the old or the new version (although of course,
 not in both at the same time).
 
 We emphasise that we apply our approach only to crash errors (those
-raising a \textstt{SIGSEGV} signal), and not to other types of program
-termination, such as \textstt{abort}s.  This is important from a
+raising a \lstinline`SIGSEGV` signal), and not to other types of program
+termination, such as \lstinline`abort`.  This is important from a
 security perspective, because
 %% many patches turn potential compromises into
 %% run-time {\small{\texttt{abort}s}}, \eg using assertions for input
 %% sanitisation.  For example, 
 when a vulnerability is discovered, but a proper solution is not yet
-known, developers often
-\footnote{For example, see the patch in json-cpp \url{http://jsoncpp.svn.sourceforge.net/viewvc/jsoncpp/trunk/jsoncpp/include/json/assertions.h?r1=247&r2=246&pathrev=247}}
+known, developers often\footnote{For example, see the patch in \texttt{json-cpp}~\url{http://jsoncpp.svn.sourceforge.net/viewvc/jsoncpp/trunk/jsoncpp/include/json/assertions.h?r1=247&r2=246&pathrev=247}}
 fail-stop the program rather than letting it continue and allowing
-the attacker to compromise the system.\looseness=-1
+the attacker to compromise the system.
 %
 %% Such situations can be easily distinguished since failed assertions
 %% result in program abortion (\ie
@@ -471,15 +469,15 @@ copy-on-write strategy.
 %% calls that can be replayed safely from the last checkpoint, such
 %% as \textstt{read}.
 
-As shown in Figure~\ref{fig:solution3}, suppose that the crash happens
-in version $v_2$, between system calls $s_1$ and $s_2$.  Then, \rem
-first restores $v_2$ at point $s_1$, copies $v_1$'s code into $v_2$'s
-code segment, executes over the buggy code using $v_1$'s code (but
-note that we are still using $v_2$'s memory state), and then restore
-$v_2$'s code at point $s_2$.
+As shown in Figure~\ref{fig:solution3}, suppose that the crash happens in
+version $v_2$, between system calls $s_1$ and $s_2$.  Then, \rem first restores
+$v_2$ at point $s_1$ (\circl{A}), copies $v_1$'s code into $v_2$'s code segment
+(\circl{B}), executes over the buggy code using $v_1$'s code (\circl{C}, note
+that we are still using $v_2$'s memory state), and then restore $v_2$'s code at
+point $s_2$ (\circl{D}).
 
 There are several challenges in implementing this functionality.
-First, \rem needs the ability to read and write the application code
+First, \rem needs the ability to read and write the application's code
 segment.  In the current implementation, we bypass this by linking
 together the two application versions after renaming all the symbols
 in one of the versions using a modified version of
@@ -577,16 +575,15 @@ structure changes at the binary-level~\cite{data-struct-digging}.
 %% (e.g., via clone detection techniques~\cite{cp-miner06,deckard07}),
 
 
-Our approach of using the code of the non-crashing version to survive
-failures in the crashing one may potentially leave the recovered
-version in an inconsistent state. However, \mx is able to discover
-most internal state inconsistencies by comparing whether the two
-versions have the same external behaviour. When the behaviour of the
-recovered version starts to differ, \mx will immediately discard it
-and continue with only one version. The discarded version can be later
-restarted at a convenient synchronisation point.  This restarting
-functionality is not currently implemented in \mx, but we plan to add it
-as a future extension.
+Our approach of using the code of the non-crashing version to survive failures
+in the crashing version may potentially leave the recovered version in an
+inconsistent state. However, \mx is able to discover most internal state
+inconsistencies by checking whether the two versions have the same external
+behaviour after recovery. When the behaviour of the recovered version starts to
+differ, \mx will immediately discard it and continue with only one version. The
+discarded version can be later restarted at a convenient synchronisation point.
+This restarting functionality is not currently implemented in \mx, but we plan
+to add it as a future extension.
 
 %Our approach of using the code of the non-crashing version to survive
 %failures in the crashing one may leave the application in an
@@ -619,8 +616,8 @@ as a future extension.
 %% \end{table*}
 
 The \sea component statically analyses the binaries of the two
-versions to obtain information needed at runtime by the \mxm and \rem
-components.  \sea is invoked only once, when the multi-version
+versions to obtain information needed at runtime by the \rem
+component.  \sea is invoked only once, when the multi-version
 application is assembled from its component versions.
 %% As mentioned in \sref{sec:rem}, we currently link together the
 %% two application versions after renaming all the symbols in one of them

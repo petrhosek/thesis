@@ -20,15 +20,14 @@ multi-version application.
 
 We have also shown two different approaches for implementing the multi-version
 execution approach: \mx, focused on recovering from crashes caused by the
-faulty software updates; and \varan, focused on running large number of
+faulty software updates; and \varan, focused on running a large number of
 versions in parallel with minimal performance overhead.
 
 \mx uses static binary analysis, system call interposition, lightweight
 checkpointing and runtime state manipulation to implement a novel fault recovery
-mechanism, which allows for recovery of the crashing version using the code
+mechanism, which enables the recovery of the crashing version using the code
 of the other, non-crashing version. We have shown how \mx can be applied
-successfully to several real applications, and recover from real crashes
-reported by their users.
+successfully to recover from real crashes in several real applications.
 
 \varan combines selective binary rewriting with high-performance event
 streaming to significantly reduce performance overhead, without sacrificing the
