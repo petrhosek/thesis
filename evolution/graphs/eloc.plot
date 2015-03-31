@@ -11,7 +11,7 @@ set xlabel ""
 set ylabel "ELOC"
 set xrange [0:]
 set noxtics
-set style line 1 lc rgb '#00B5E5' lt 1 lw 1 pt 1 ps 0.6
+set style line 1 lc rgb '#666666' lt 1 lw 1 pt 1 ps 0.6
 
 #filenames = "binutils git lighttpd memcached redis zeromq"
 #plot for [file in filenames] file.'.dat' using 2 w points ls 1 notitle

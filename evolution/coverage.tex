@@ -510,7 +510,7 @@ covered.
 
 \begin{table}[t]
 \centering
-\caption{Overall patch coverage bucketed by the size of the patch in ELOC. \textsc{NP} is the number of patches in the bucket and {\bf C} is their overall coverage.  Only patches which add or modify executable code are considered.}
+\caption{Overall patch coverage bucketed by the size of the patch in ELOC. \textsc{NP} is the number of patches in the bucket and \textsc{C} is their overall coverage.  Only patches which add or modify executable code are considered.}
 \begin{tabular}{lrcrcrc}
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{2}{c}{\sc $\le$10} & \multicolumn{2}{c}{\sc 11-100} & \multicolumn{2}{c}{\sc >100}  \\
@@ -629,9 +629,9 @@ coverage is small but non-negligible.
 %To answer these RQs, we collected bug data according to the
 For this part of our study, we collected bug data according to the
 methodology presented in Section~\ref{sec:design} and we limited our
-analysis to the three systems which lend themselves to automatic
+analysis to the four systems which lend themselves to automatic
 identification of bug fixes based on commit messages:
-\memcached, \redis and \zeromq.  The other three systems
+\lighttpd, \memcached, \redis and \zeromq.  The other five systems
 use non-specific commit messages for bug fixes, requiring an extensive
 manual analysis or more complex algorithms such as machine learning
 and natural language processing to understand the contents of a
@@ -641,8 +641,8 @@ infrastructure or the documentation and then manually confirmed
 that the remaining revisions are indeed bug
 fixes~\cite{bug-feature:icse13} and further removed fixes which modify
 only non-executable lines (e.g. variable declarations). We thus
-obtained \memcachedFixes fixes in \memcached and \redisFixes fixes each in \redis
-and \zeromq. %\zeromqFixes in \zeromq.
+obtained \lighttpdFixes fixes in \lighttpd, \memcachedFixes fixes in \memcached
+and \redisFixes fixes each in \redis and \zeromq.
 
 %% \begin{table*}[t]
 %% \caption{Bug fix--coverage correlation analysis. Only fixes which contain executable lines are considered.}
@@ -670,6 +670,7 @@ are included for comparison.}
 \cmidrule{2-3}\cmidrule{4-5}
 \textsc{Application} & \textsc{Overall} & \textsc{Fix} & \textsc{Overall} & \textsc{Fix}      \\
 \midrule
+\lighttpd    & \lighttpdPatchCovMedian   & \lighttpdFixLineCoverageMedian   & \lighttpdFullyCoveredPercent   & \lighttpdFixesFullyLineCoveredPercent  \\
 \memcached   & \memcachedPatchCovMedian  & \memcachedFixLineCoverageMedian  & \memcachedFullyCoveredPercent  & \memcachedFixesFullyLineCoveredPercent  \\
 \redis       & \redisPatchCovMedian      & \redisFixLineCoverageMedian      & \redisFullyCoveredPercent      & \redisFixesFullyLineCoveredPercent  \\
 \zeromq      & \zeromqPatchCovMedian     & \zeromqFixLineCoverageMedian     & \zeromqFullyCoveredPercent     & \zeromqFixesFullyLineCoveredPercent \\
@@ -692,14 +693,16 @@ are included for comparison.}
 %% \label{tbl:bugs}
 %% \end{table}
 
-We measured the patch coverage of these revisions and report the
-median values in Table~\ref{tbl:fixes}, together with the
-corresponding overall metric, for comparison.  For both \memcached and
-\redis, the coverage for fixes is higher than that for other types of patches. 
-For \redis, the median value jumps from \memcachedPatchCovMedian to \memcachedFixLineCoverageMedian, while
-for \memcached the difference is less pronounced.  On the other hand,
-the fixes in \zeromq are covered less than on average.  The
-fraction of fixes which have 100\% coverage follows the same trend.
+We measured the patch coverage of these revisions and report the median values
+in Table~\ref{tbl:fixes}, together with the corresponding overall metric, for
+comparison.  For \lighttpd, \memcached and \redis, the coverage for fixes is
+higher than that for other types of patches.  For \redis, the median value
+jumps from \redisPatchCovMedian to \redisFixLineCoverageMedian, while for
+\lighttpd, the median value increases from \lighttpdPatchCovMedian to
+\lighttpdFixLineCoverageMedian; for \memcached the difference is less
+pronounced.  On the other hand, the fixes in \zeromq are covered less than on
+average.  The fraction of fixes which have 100\% coverage follows the same
+trend.
 
 %% We also determined that 23 of the fixes included a regression test
 %% in \memcached, 0 in \redis and 3 in \zeromq, which was particularly
@@ -724,13 +727,13 @@ To try to understand whether buggy code is less thoroughly tested than
 the rest of the code, we started from the observation that bug-fixing
 revisions are usually only addressing the bug, without touching
 unrelated code.  Because of this, we can identify the code responsible
-for the bugs by looking at the code which is removed or modified by
-bug-fixing revisions and compute its coverage in the revision before
-the fix.  The coverage for this code is \memcachedBugLineCoverage
-for \memcached---roughly the same as the overall patch
-coverage, \redisBugLineCoverage for \redis---much larger than the
-overall patch coverage, and \zeromqBugLineCoverage
-for \zeromq---significantly lower.
+for the bugs by looking at the code which is removed or modified by bug-fixing
+revisions and compute its coverage in the revision before the fix.  The
+coverage for this code is \lighttpdBugLineCoverage for \lighttpd---slightly
+lower than the overall patch coverage, \memcachedBugLineCoverage for
+\memcached---roughly the same as the overall patch coverage,
+\redisBugLineCoverage for \redis---much larger than the overall patch coverage,
+and \zeromqBugLineCoverage for \zeromq---significantly lower.
 
 %% We report in Table~\ref{tbl:bugs} the overall coverage for
 %% this code: as it can be observed, the coverage is roughly the same as

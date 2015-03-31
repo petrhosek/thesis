@@ -15,13 +15,12 @@ software to the newest version, we run the new version in parallel with the old
 one, and carefully synchronise their execution to create a more reliable
 multi-version application.
 
-\todo{Describe the two different schemes for multi-version execution.}
-\todo{Mention the results of the empirical study.}
-
-We have also shown two different approaches for implementing the multi-version
-execution approach: \mx, focused on recovering from crashes caused by the
-faulty software updates; and \varan, focused on running a large number of
-versions in parallel with minimal performance overhead.
+We have described two schemes for implementing the multi-version execution
+technique---via failure recovery and via transparent failover---and we have
+described two possible designs for implementing these schemes: \mx, focused on
+recovering from crashes caused by the faulty software updates; and \varan,
+focused on running a large number of versions in parallel with minimal
+performance overhead.
 
 \mx uses static binary analysis, system call interposition, lightweight
 checkpointing and runtime state manipulation to implement a novel fault recovery
@@ -35,5 +34,3 @@ size of the trusted computing base, nor flexibility or ease of debugging.  Our
 experimental evaluation has demonstrated that \varan can run C10k network
 servers with low performance overhead, and can be used in various scenarios
 such as transparent failover and live sanitisation.
-
-\todo{Briefly talk about other applications and future work.}

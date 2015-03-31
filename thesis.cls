@@ -71,6 +71,9 @@
 \definecolor{pantone527}{cmyk}{0.73,0.94,0.0,0.0}
 \definecolor{pantone525}{cmyk}{0.82,1.0,0.33,0.25}
 
+\definecolor{darkgray}{gray}{0.75}
+\definecolor{lightgray}{gray}{0.25}
+
 \definecolor{iccswRed}{rgb}{0.7,0.05,0}
 \definecolor{iccswBlue}{rgb}{0.0,0.05,0.7}
 

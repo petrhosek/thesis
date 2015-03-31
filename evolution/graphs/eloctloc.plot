@@ -12,8 +12,8 @@ set ytics mirror 50
 set xrange [0:]
 set noxtics
 set key left top
-set style line 1 lc rgb '#00B5E5' lt 1 lw 2 pt 1 ps 1
-set style line 2 lc rgb '#CB2027' lt 2 lw 1 pt 2 ps 1
+set style line 1 lc rgb '#666666' lt 1 lw 2 pt 1 ps 1
+set style line 2 lc rgb '#CCCCCC' lt 2 lw 1 pt 2 ps 1
 set yrange [0:250]
 
 set title "Beanstalkd" offset 0,-0.6

@@ -23,7 +23,7 @@ together utilities affected by the same or similar bugs.}
 \mdsum & \multirow{2}{*}{Buffer underflow} & \multirow{2}{*}{v5.1 -- v6.11} \\
 \shasum & & \\
 \midrule
-\mkdir & \multirow{2}{*}{\textstt{NULL}-pointer dereference} & \multirow{2}{*}{v5.1 -- v6.11} \\
+\mkdir & \multirow{2}{*}{\lstinline`NULL`-pointer dereference} & \multirow{2}{*}{v5.1 -- v6.11} \\
 \mkfifo & & \\
 \mknod & & \\
 \midrule
@@ -65,26 +65,32 @@ from each line of a file), triggered by the following invocation:
 cut -c1234567890- --output-d=: foo
 \end{lstlisting}
 
-This bug is triggered by the conditional statement on line~\ref{line:cond}:
+This bug is triggered by the conditional statement on line~\ref{line:cond} in
+the file \texttt{src/cut.c}:
 
-\begin{lstlisting}[firstnumber=525]
+\begin{lstlisting}[firstnumber=516]
 if (output_delimiter_specified /*@\label{line:cond}@*/
     && !complement
     && eol_range_start && !is_printable_field (rsi_candidate))
 \end{lstlisting}
 
-This code uses the lower bound of the size of the printable field
-vector; however, when calculating the size of this vector, ranges going
-to the end of line (\ie \lstinline`0-`) are not considered, eventually
-resulting in an invalid memory access. The cause of this bug is an incorrectly
-calculated size of a dynamically allocated buffer, which is later used by the
-program, leading to a buffer overflow. When \mx intercepts this bug, it uses
-the last checkpoint to recover the execution of the crashing version. This
-checkpoint is taken after the \lstinline`brk` system call triggered by the
-\lstinline`malloc` call that allocates the buffer in function
-\lstinline`bindtextdomain` on line~\ref{line:bind}.
+This code uses the lower bound of the size of the printable field vector;
+however, when calculating the size of this vector, ranges going to the end of
+line (\ie \lstinline`0-`) are not considered. The cause of this bug is an
+incorrectly calculated size of a dynamically allocated buffer, which is used to
+allocate the buffer on line~\ref{line:xzalloc}:
 
-\begin{lstlisting}[firstnumber=767]
+\begin{lstlisting}[firstnumber=495]
+printable_field = xzalloc (max_range_endpoint / CHAR_BIT + 1); /*@\label{line:xzalloc}@*/
+\end{lstlisting}
+
+When \mx intercepts this bug, it uses the last checkpoint to recover the
+execution of the crashing version. This checkpoint is taken after the
+\lstinline`brk` system call triggered by the \lstinline`malloc` function call
+that allocates the buffer in function \lstinline`bindtextdomain` on
+line~\ref{line:bind}:
+
+\begin{lstlisting}[firstnumber=755]
 bindtextdomain (PACKAGE, LOCALEDIR); /*@\label{line:bind}@*/
 \end{lstlisting}
 
@@ -102,22 +108,22 @@ which originally triggered the bug.
 Below, we describe how \mx can survive the \redis bug presented in
 Section~\ref{multi-version:scenarios}; this bug, introduced during a code
 refactoring, causes \redis to crash when the \lstinline`HMGET` command is used
-with the wrong type. We are running in parallel the revision \textstt{a71f072f}
+with the wrong type. We are running in parallel the revision \texttt{a71f072f}
 (\textit{the old version}, just before the bug was introduced) with revision
-\textstt{7fb16bac} (\textit{the new version}, which contains the bug).  \mx
+\texttt{7fb16bac} (\textit{the new version}, which contains the bug).  \mx
 first invokes \sea to perform a static analysis of the two binaries and
 construct the mappings described in \sref{sec:sea}.  Then, \mx invokes the \mxm
 monitor, which executes both versions as child processes and intercepts their
 system calls.
 
 When the new version crashes after issuing the problematic
-\textstt{HMGET} command, \mxm intercepts the \textstt{SIGSEGV} signal
+\lstinline`HMGET` command, \mxm intercepts the \lstinline`SIGSEGV` signal
 which is sent to the application by the operating system.  At
 this point, \rem starts the recovery procedure.  First, \rem sends a
-\textstt{SIGKILL} signal to the new version to terminate it.  It then
+\lstinline`SIGKILL` signal to the new version to terminate it.  It then
 restores the last checkpoint of the new version, which was taken at the
 point of the last invoked system call, which in this case is an
-\textstt{epoll\_ctl} system call.  Then, \rem uses the information
+\lstinline`epoll_ctl` system call.  Then, \rem uses the information
 provided by \sea to rewrite the stack of the new version, as detailed
 in \sref{sec:rem}.  In particular, \rem replaces the return
 addresses of all functions in the new version with the corresponding
@@ -131,8 +137,8 @@ registers of the checkpointed process and restarts the execution of the
 (modified) new version.
 
 Since the checkpoint was performed right after the execution of the system
-call \textstt{epoll\_ctl}, the first thing that the code does is to
-return from the \textstt{libc} wrapper that performed this system
+call \lstinline`epoll_ctl`, the first thing that the code does is to
+return from the C library wrapper that performed this system
 call.  This in turn will return to the corresponding code in the old
 version that invoked the wrapper, since all return addresses on the
 stack have been rewritten.  From then on, the code of the old version
@@ -153,7 +159,7 @@ To evaluate \mx on \lighttpd, we have used two different crash bugs, \#1601 and
 \#2140.  The first bug is the one described in detail in Section
 \ref{multi-version:scenarios}, related to the ETag and compression
 functionalities.  As previously discussed, the crash is triggered by a very
-small change, which decrements the upper bound of a \textstt{for} loop by one.
+small change, which decrements the upper bound of a \lstinline`for` loop by one.
 \mx successfully protects the application against this crash, and allows the
 new version to survive it by using the code of the old version.
 
@@ -273,18 +279,18 @@ allow \lighttpd to start for a non-root user with GID~\lstinline`0`. \mx
 currently does not support changes to the order of system calls, but
 this limitation could be overcome by using the rewrite rules for system call
 sequences supported  by \varan (\S\ref{sec:patternmatching}). This would
-allow \mx to recognise that the pair \textstt{geteuid()} and
-\textstt{getegid()} could be matched with the call to
-\textstt{issetugid()} (\S\ref{sec:applications}).
+allow \mx to recognise that the pair \lstinline`geteuid` and
+\lstinline`getegid` could be matched with the call to
+\lstinline`issetugid` (\S\ref{sec:applications}).
 
-The upper bound for \lighttpd issue \#2169 adds a \textstt{read} call to
-\textstt{/dev/[u]random}, in order to provide a better entropy source for
-generating HTTP cookies.  This additional \textstt{read} call changed the
+The upper bound for \lighttpd issue \#2169 adds a \lstinline`read` call to
+\texttt{/dev/[u]random}, in order to provide a better entropy source for
+generating HTTP cookies.  This additional \lstinline`read` call changed the
 sequence of system calls, which \mx cannot handle, but which again could be
 handled by \varan's rewriting rules.
 
 For \lighttpd issue \#2140, both the lower and the upper bounds are
-caused by a change in a sequence of \textstt{read()} system calls.  We
+caused by a change in a sequence of \lstinline`read` system calls.  We
 believe this could be optimised by allowing \mx to recognise when two
 sequences of read system calls are used to perform the same overall
 read.
@@ -297,9 +303,9 @@ read.
 %% issue \#2147 and CVE-2010-0295 vulnerability.
 
 For the \redis bug, the lower bound is given by the revision in which the
-\textstt{HMGET} command was first implemented.  Since there was no support for
-\textstt{HMGET} before that version, \mx has no way to survive the crash caused
-by invoking \textstt{HMGET} with a wrong type (see \S\ref{sec:redis}).  The
+\lstinline`HMGET` command was first implemented.  Since there was no support for
+\lstinline`HMGET` before that version, \mx has no way to survive the crash caused
+by invoking \lstinline`HMGET` with a wrong type (see \S\ref{sec:redis}).  The
 upper bound is defined by a revision which changes the way error responses are
 being constructed and reported, which results in a very different sequence of
 system calls.
@@ -379,7 +385,7 @@ Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 \item[\redis] To measure the performance overhead for \redis, we used the
   \redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}} utility,
   which is part of the standard \redis distribution and simulates
-  \textstt{GET}/\textstt{SET} operations done by $N$ clients concurrently, with
+  \lstinline`GET`/\lstinline`SET` operations done by $N$ clients concurrently, with
   default workload. As in the case of \lighttpd, we performed two sets of
   experiments, one for the local scenario and one for the remote scenario. The
   overhead for \redis varies, depending on the operation being performed, from

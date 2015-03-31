@@ -10,8 +10,8 @@ set key left
 
 set bmargin 3.0
 
-set style line 1 lc rgb '#00B5E5' lt 1 lw 2 pt 1 ps 1
-set style line 2 lc rgb '#CB2027' lt 2 lw 1 pt 2 ps 1
+set style line 1 lc rgb '#666666' lt 1 lw 2 pt 1 ps 1
+set style line 2 lc rgb '#CCCCCC' lt 2 lw 1 pt 2 ps 1
 
 set ylabel "Differences (normalized)"
 

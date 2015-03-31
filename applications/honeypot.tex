@@ -72,7 +72,7 @@ did not use any of these.
 %\footnote{We used \lstinline`-fstack-protector-all -Wstack-protector --param
 %ssp-buffer-size=4 -pie -PIE -ftrapv -D_FORTIFY_SOURCE=2 -z relro,now` GCC
 %options for the private variant and \lstinline`-fno-stack-protector -z
-%execstack` options for the the public variant.}
+%execstack` options for the public variant.}
 We then used an existing exploit~\cite{erickson:hacking-networking} to attack the public variant and
 inject shellcode\footnote{\url{http://www.shell-storm.org/shellcode/files/shellcode-658.php}}
 which tries to add a root user with a custom password to the system. This

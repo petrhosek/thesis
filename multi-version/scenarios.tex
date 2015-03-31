@@ -140,7 +140,7 @@ is a unique string assigned by a web server to a specific version of a
 web resource, which can be used to quickly determine if the resource
 has changed.  The patch was a one-line change, which discarded the
 terminating zero when computing a hash representing the ETag.  More
-exactly, line 47 in \textstt{etag.c}:
+exactly, line 47 in \texttt{etag.c}:
 
 \begin{lstlisting}[numbers=none,breaklines=true,xleftmargin=0pt]
 for (h=0, i=0; i < etag->used; ++i) h = (h<<5)^(h>>27)^(etag->ptr[i]);
@@ -157,10 +157,10 @@ compression uses caching to avoid re-compressing files which have not
 changed since the last access.  To determine whether the cached
 file is still valid, \lighttpd internally uses ETags.  Unfortunately,
 the code implementing HTTP compression did not consider the case when
-ETags are disabled.  In this case, \textstt{etags->used}
-is \textstt{0}, and when the line above is
-executed, \textstt{etag->used-1} underflows to a very large value, and
-the code crashes while accessing \textstt{etag->ptr[i]}.
+ETags are disabled.  In this case, \lstinline`etags->used`
+is \lstinline`0`, and when the line above is
+executed, \lstinline`etag->used-1` underflows to a very large value, and
+the code crashes while accessing \lstinline`etag->ptr[i]`.
 Interestingly enough, the original code was still buggy (it always
 returns zero as the hash value, and thus it would never re-compress
 the files), but it was not vulnerable to a crash.
@@ -197,7 +197,7 @@ more than one year after it was introduced.
 %% executed and access to \texttt{etag->ptr[0]} will result in segmentation
 %% fault.
 
-\subsection{\redis crash on wrong \textstt{HMGET} type}
+\subsection{\redis crash on wrong \texttt{HMGET} type}
 
 \begin{figure}[t]
 \begin{minipage}[b]{0.90\columnwidth}
@@ -247,21 +247,21 @@ whole dataset is held in memory, reliability is critically important, as a
 crash could result in total data loss.  However, like any other large software
 system, \redis is subject to crash bugs. Issue
 344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
-such example.  This issue causes \redis to crash when the \textstt{HMGET}
+such example.  This issue causes \redis to crash when the \lstinline`HMGET`
 command is used with the wrong type.  The bug was introduced during a code
-refactoring applied in revision \textstt{7fb16bac}.  The original code of the
-problematic \textstt{hmgetCommand} function is shown in
+refactoring applied in revision \texttt{7fb16bac}.  The original code of the
+problematic \lstinline`hmgetCommand` function is shown in
 Listing~\ref{lst:original}, while the (buggy) refactored version is shown in
 Listing~\ref{lst:refactored}.
 
 In the original code, if the lookup on line~\ref{line:key-found} is successful,
-but the type is not \textstt{REDIS\_HASH} (line~\ref{line:type-found}), the
+but the type is not \lstinline`REDIS_HASH` (line~\ref{line:type-found}), the
 function returns after reporting an incorrect type
 (lines~\ref{line:report-error}--\ref{line:return}). However, in the refactored
-version (Listing~\ref{lst:refactored}), the \textstt{return} statement is
+version (Listing~\ref{lst:refactored}), the \lstinline`return` statement is
 missing, and after reporting an incorrect type (line~\ref{line:report-error2}),
 the function continues execution and causes segmentation fault inside the
-\textstt{hashGet} function invoked on line~\ref{line:hashGet}. This is a
+\lstinline`hashGet` function invoked on line~\ref{line:hashGet}. This is a
 critical bug, which may result in losing some or even all of the stored data in
 case when the Append Only File (AOF) persistence log is corrupted due to issue
 620\footnote{\url{http://code.google.com/p/redis/issues/detail?id=620}}.

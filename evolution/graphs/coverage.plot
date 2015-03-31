@@ -10,10 +10,10 @@ set yrange [0:100]
 set noxtics
 set key left top
 
-set style line 1 lc rgb '#00B5E5' lt 1 lw 1 pt 1 ps 0.5
-set style line 2 lc rgb '#CB2027' lt 2 lw 1 pt 2 ps 0.5
-set style line 3 lc rgb '#00B5E5' lt 1 lw 1.5 pt 1 ps 1
-set style line 4 lc rgb '#CB2027' lt 2 lw 1.5 pt 2 ps 1
+set style line 1 lc rgb '#666666' lt 1 lw 1 pt 1 ps 0.5
+set style line 2 lc rgb '#CCCCCC' lt 2 lw 1 pt 2 ps 0.5
+set style line 3 lc rgb '#666666' lt 1 lw 1.5 pt 1 ps 1
+set style line 4 lc rgb '#CCCCCC' lt 2 lw 1.5 pt 2 ps 1
 
 set title "Beanstalkd" offset 0,-0.6
 plot 'coverage-beanstalkd.dat' using 2 notitle w points ls 1, \

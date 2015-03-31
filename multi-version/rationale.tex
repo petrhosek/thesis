@@ -40,13 +40,13 @@ bug was introduced and the time it was diagnosed (\ie eleven months in case of
 would not know how to change the server's configuration to avoid the crash.
 
 \begin{figure}[t]
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.45\textwidth}
     \includegraphics[width=\textwidth]{overview/figures/failrecovery}
     \caption{Failure recovery scheme.}
     \label{fig:failrecovery-scheme}
   \end{subfigure}
   \quad
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.45\textwidth}
     \includegraphics[width=\textwidth]{overview/figures/failover}
     \caption{Transparent failover scheme.}
     \label{fig:failover-scheme}
@@ -236,7 +236,7 @@ Binary rewriting techniques allow transforming the executable (either statically
 or dynamically) altering its functionality; as such, they can be used to
 implement system call monitors by rewriting all system call instructions into 
 control flow transfer instructions (\eg
-\lstinline[language={[x64]Assembler}]`jmp` instruction). Existing monitors were
+\lstinline[language={[x64]Assembler}]`JMP` instruction). Existing monitors were
 built either on top of existing binary rewriting
 systems~\cite{onlinevalidation}, or using a purpose-built binary translation
 mechanism~\cite{vx32}. The advantage of binary rewriting-based monitors is

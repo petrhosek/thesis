@@ -102,9 +102,9 @@ that the trace for each process ended up stored in a separate file.
 Moreover, we used the order in which processes were started as a basis for the
 naming scheme to allow comparison of the traces across different runs and
 versions: the main thread of the first process would be stored in the file
-\textstt{000-00.trace}, the first thread spawned by the main thread would be
-stored in the file \textstt{000-01.trace}, the main thread of the second
-process would use the file \textstt{001-00.trace}, \etc
+\texttt{000-00.trace}, the first thread spawned by the main thread would be
+stored in the file \texttt{000-01.trace}, the main thread of the second
+process would use the file \texttt{001-00.trace}, \etc
 
 % We then normalised all differences caused by timing, \eg we collapsed all
 % sequences of \textstt{accept+poll} system calls, which represent repeated
@@ -201,7 +201,7 @@ To get more data points, we also did a manual analysis on a subset of revisions
 for two applications---\lighttpd and \vim.
 
 In the case of \lighttpd, we compared 164 successive revisions, namely revisions in
-the range 2379--2635 of branch \textstt{lighttpd-1.4.x}, which were developed
+the range 2379--2635 of branch \texttt{lighttpd-1.4.x}, which were developed
 and released over a span of approximately ten months, from January to October
 2009. In the case of \vim, we compared 330 successive versions, namely versions
 7.1--7.1.330, which were developed and released in approximately 13 months,

@@ -13,8 +13,8 @@ We have implemented our approach in a prototype system called \mx,
 targeted at multi-core processors running Linux.  Currently, \mx
 supports two versions run in parallel. The system works directly on
 application binaries, making it easy to deploy it and possibly integrate
-it with existing software package managers such as \textstt{apt} or
-\textstt{yum}.
+it with existing software package managers such as \texttt{apt} or
+\texttt{yum}.
 
 %Figure~\ref{fig:mx-platform} shows a platform running \mx, on which
 On a platform using \mx, conventional (\ie unmodified) applications
@@ -59,7 +59,7 @@ together to support safe software updates.
 
 \begin{figure}[t!]
 \begin{center}
-\includegraphics[width=0.5\columnwidth]{safe-updates/figures/architecture}
+\includegraphics[width=0.75\columnwidth]{safe-updates/figures/architecture}
 \caption{\mx system architecture.  
 %% The main components of \mx
 %%   are \sea (Static Executable Analyser), \mxm (Multi-eXecution
@@ -204,13 +204,13 @@ a child process, then \mxm will use two threads: one to monitor the parent
 processes, and one to monitor the child processes in each version.
 
 Due to limitations of the \ptrace interface (which was not designed to be used
-in a multi-process/multi-threaded environment), handing the control of any
+in a multi-process or multi-threaded environment), handing the control of any
 child processes being spawned by the application over to a new monitoring
 thread is somewhat complicated.  In \mxm we adopt a solution similar to
 Orchestra~\cite{orchestra09}.  When a new child process is spawned, we let the
 parent monitoring thread to supervise its execution until the first system
-call.  Then, we replace this system call with a \textstt{pause} system call,
-disconnect the parent monitor (which causes a \textstt{continue} signal to be
+call.  Then, we replace this system call with a \lstinline`pause` system call,
+disconnect the parent monitor (which causes a \lstinline`SIGCONT` signal to be
 sent to all new child processes), and spawn a new monitoring thread which
 immediately reconnects to the new child process, restores its original system
 call, and resumes its execution.
@@ -463,7 +463,7 @@ buggy code in the crashing version.
 Our exact recovery mechanism is illustrated in
 Figure~\ref{fig:solution3}.  At each system call, \mx creates a
 lightweight checkpoint of each version.  This is implemented using the
-\textstt{clone} system call in Linux, which internally uses a
+\lstinline`clone` system call in Linux, which internally uses a
 copy-on-write strategy.  
 %% As an important optimisation, we omit system
 %% calls that can be replayed safely from the last checkpoint, such
@@ -481,7 +481,7 @@ First, \rem needs the ability to read and write the application's code
 segment.  In the current implementation, we bypass this by linking
 together the two application versions after renaming all the symbols
 in one of the versions using a modified version of
-the \textstt{objcopy}
+the \texttt{objcopy}
 tool.\footnote{\url{http://sourceware.org/binutils/docs/binutils/objcopy.html}}
 However, in the future we plan to implement this transparently by
 using the cross-memory attach mechanism used by \mxm.
@@ -500,24 +500,23 @@ using the cross-memory attach mechanism used by \mxm.
 %% manipulation itself is driven by the data obtained statically by the
 %% \sea analyser before the application has been executed.
 
-Second, \rem needs to modify the contents of the stack in $v_2$.  This
-is necessary because the return addresses on the stack frames of $v_2$
-still point to $v_2$'s original code, which was now replaced by
-$v_1$'s code.  Without also modifying $v_2$'s stack, any
-function \textstt{return} instruction executed between $s_1$ and $s_2$
-would most likely veer execution to an incorrect location, since
-function addresses are likely to be different across different
-versions.  Thus, after \rem replaces $v_2$'s code, it also updates the
-return addresses on $v_2$'s stack with the corresponding return
-addresses in $v_1$, which are obtained via static analysis
-(\S\ref{sec:sea}).  Because system calls are invoked via wrapper
-functions in \textstt{libc}, this ensures that when $v_2$ resumes
-execution, it will immediately return to the code in $v_1$.
+Second, \rem needs to modify the contents of the stack in $v_2$.  This is
+necessary because the return addresses on the stack frames of $v_2$ still point
+to $v_2$'s original code, which was now replaced by $v_1$'s code.  Without also
+modifying $v_2$'s stack, any function
+\lstinline[language={[x64]Assembler}]`RET` instruction executed between $s_1$
+and $s_2$ would most likely veer execution to an incorrect location, since
+function addresses are likely to be different across different versions.  Thus,
+after \rem replaces $v_2$'s code, it also updates the return addresses on
+$v_2$'s stack with the corresponding return addresses in $v_1$, which are
+obtained via static analysis (\S\ref{sec:sea}).  Because system calls are
+invoked via wrapper functions in C library, this ensures that when $v_2$
+resumes execution, it will immediately return to the code in $v_1$.
 %% \rem obtains these addresses by analysing $v_1$'s stack at
 %% position $s_1$ accessible via checkpoint taken at that point.
 %
 To implement this functionality, \rem makes use of
-the \textstt{libunwind}
+the \texttt{libunwind}
 library,\footnote{\url{http://www.nongnu.org/libunwind/}} which provides a
 portable interface for accessing the program stack, for both x86 and
 x86-64 architectures. To actually modify the execution stack of
@@ -532,7 +531,7 @@ $v_2$ may also use function pointers to make function calls.
 %% the function pointers.
 To handle such cases, \rem inserts breakpoints to the first
 instruction of every function in $v_2$'s original code.  Then, when a
-breakpoint is encountered, \rem is notified via a \textstt{SIGTRAP}
+breakpoint is encountered, \rem is notified via a \lstinline`SIGTRAP`
 signal, and redirects execution to the equivalent function in $v_1$'s
 code (which is obtained from the \sea component) by simply changing
 the instruction pointer.
@@ -637,11 +636,11 @@ Second, \sea computes a mapping from all possible return addresses in
 one version to the corresponding return addresses in the other version.  In
 order to allow for code changes, this mapping is done by computing an
 ordered list of all possible return addresses in each function.  For
-example, if function \textstt{foo} in $v_1$ performs call instructions
-at addresses \textstt{0xabcd0000} and \textstt{0xabcd0100}, and
-function \textstt{foo} in $v_2$ performs call instructions at
-addresses \textstt{0xdcba0000} and \textstt{0xdcba0400}, then \sea
-will compute the mapping \textstt{\{0xabcd0005 $\rightarrow$
+example, if function \lstinline`foo` in $v_1$ performs call instructions
+at addresses \lstinline`0xabcd0000` and \lstinline`0xabcd0100`, and
+function \lstinline`foo` in $v_2$ performs call instructions at
+addresses \lstinline`0xdcba0000` and \lstinline`0xdcba0400`, then \sea
+will compute the mapping \texttt{\{0xabcd0005 $\rightarrow$
 0xdcba0005, 0xabcd0105 $\rightarrow$ 0xdcba0405\}} (assuming each call
 instruction takes 5 bytes).  This mapping is then used by \rem to
 rewrite return addresses on the stack.
@@ -662,16 +661,15 @@ rewrite return addresses on the stack.
 To construct these tables, \sea first needs to extract the addresses
 of all function symbols and then disassemble the code for each
 individual function in order to locate the call instructions within
-them.  The implementation is based on the \textstt{libbfd}
-and \textstt{libopcodes} libraries, which are 
+them.  The implementation is based on the \texttt{libbfd}
+and \texttt{libopcodes} libraries, which are 
 part of the
 \gnu \binutils suite.\footnote{\url{http://www.gnu.org/software/binutils/}}
 To obtain the addresses of all function symbols defined by the
-program, \sea uses \textstt{libbfd} to extract the static and dynamic
+program, \sea uses \texttt{libbfd} to extract the static and dynamic
 symbol tables and relocation tables.  To disassemble individual
-functions, \sea uses the \textstt{libbf}
-library,\footnote{\url{http://github.com/petrh/libbf}} 
-built on top of \textstt{libopcodes}.
+functions, \sea uses the \texttt{libbf}
+library~\cite{kwan:libbf}, built on top of \texttt{libopcodes}.
 
 %% Disassembled machine code is stored in a graph-like structure where
 %% individual instructions represents vertices and edges between these

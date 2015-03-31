@@ -11,7 +11,7 @@ set xlabel ""
 set ylabel "TLOC"
 set xrange [0:]
 set noxtics
-set style line 1 lc rgb '#CB2027' lt 1 lw 1 pt 1 ps 0.6
+set style line 1 lc rgb '#CCCCCC' lt 1 lw 1 pt 1 ps 0.6
 
 set title "Beanstalkd" offset 0,-0.6
 plot 'tloc-beanstalkd.dat' using 2 w points ls 1 notitle
