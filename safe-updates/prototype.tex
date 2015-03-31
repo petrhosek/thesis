@@ -59,7 +59,7 @@ together to support safe software updates.
 
 \begin{figure}[t!]
 \begin{center}
-\includegraphics[width=0.75\columnwidth]{safe-updates/figures/architecture}
+\includegraphics[width=0.6\columnwidth]{safe-updates/figures/architecture}
 \caption{\mx system architecture.  
 %% The main components of \mx
 %%   are \sea (Static Executable Analyser), \mxm (Multi-eXecution
@@ -138,18 +138,16 @@ stored at those memory locations. \mxm supports both memory buffers (by
 comparing the actual buffer content) as well as data structures
 referenced by pointers (including nested ones).
  
-Since \mxm fully controls executing programs intercepting all their
-system calls, it can ensure that both programs have the same view of
-their environment.
-
-Whenever the monitored process makes a system call, \mxm is notified
-twice---first before, then after the call has been executed.  When a
-\ptrace event is raised (\eg a new child process has been started),
-the monitor is notified as well.  Due to internal limitations of the
-\ptrace interface, once the system call has been made, it cannot be
-skipped, so when \mxm wants to execute the call on behalf of its child
-processes, it simply replaces it with a system call that does not
-change the system state (\lstinline`getpid` in our case).
+Since \mxm fully controls executing programs intercepting all their system
+calls, it can ensure that both programs have the same view of their
+environment. Whenever the monitored process makes a system call, \mxm is
+notified twice---first before, then after the call has been executed.  When a
+\ptrace event is raised (\eg a new child process has been started), the monitor
+is notified as well.  Due to internal limitations of the \ptrace interface,
+once the system call has been made, it cannot be skipped, so when \mxm wants to
+execute the call on behalf of its child processes, it simply replaces it with a
+system call that does not change the system state (\lstinline`getpid` in our
+case).
 
 There are several challenges that we encountered while implementing
 \mxm.  First, \mxm must partly understand the semantics of 
