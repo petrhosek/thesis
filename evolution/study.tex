@@ -1,9 +1,11 @@
 \section{Overview}
 \label{evolution:overview}
 
-We used the our infrastructure to understand the evolution of \numSystems
-popular open-source applications written in C/C++, over a combined period of
-\numYears years. The \numSystems evaluated applications are:
+We used our infrastructure to understand the evolution of sevelar popular
+open-source applications written in C/C++, over a combined period of \numYears
+years. To allow for faithful comparison, we have restricted our selection to
+applications which have less than \SI{100000}{\eloc} and include a regression
+test suite. The \numSystems evaluated applications are:
 
 \begin{enumerate}
 
@@ -24,7 +26,7 @@ is one the most popular distributed version control systems used by the
 open-source developer community.
 
 \item[\lighttpd\footnote{\url{http://www.lighttpd.net/}}]
-is a lightweight web server optimized for high performance environments.
+is a lightweight web server optimised for high performance environments.
 
 \item[\lighttpdtwo\footnote{\url{http://redmine.lighttpdtwo.net/projects/lighttpdtwo2/}}]
 is the new major version of the \lighttpd web server developed entirely from
@@ -54,8 +56,7 @@ number of organisations such as Los Alamos Labs, NASA and CERN.
 The \numSystems applications are representative for C/C++ open-source code: GNU
 \binutils are user-level utilities, \git is a version control system,
 \beanstalkd, \lighttpdtwo, \memcached and \redis are server applications, \vim
-is a text editor while \zeromq is a library.  All applications include a
-regression test suite.
+is a text editor while \zeromq is a library.
 
 \begin{table}[t]
 \caption{Summary of applications used in our study.
@@ -69,23 +70,23 @@ analysed.}
 \cmidrule(r){2-3}\cmidrule(l){4-5}
 \textsc{Application} & \textsc{Language} & \textsc{ELOC} & \textsc{Language} & \textsc{TLOC}          % & \bf Time         
 \\ \midrule
-\beanstalkd  & C         & \beanstalkdSize & C        & \beanstalkdTsize  % & \beanstalkdTestTime
+\beanstalkd  & C         & \num{\beanstalkdSize} & C        & \num{\beanstalkdTsize}  % & \beanstalkdTestTime
 \\
-\binutils    & C         & \binutilsSize  & DejaGnu   & \binutilsTsize    % & \binutilsTestTime 
+\binutils    & C         & \num{\binutilsSize}  & DejaGnu   & \num{\binutilsTsize}    % & \binutilsTestTime 
 \\
-\git         & C         & \gitSize       & C/shell   & \gitTsize         % & \gitTestTime 
+\git         & C         & \num{\gitSize}       & C/shell   & \num{\gitTsize}         % & \gitTestTime 
 \\
-\lighttpd    & C         & \lighttpdSize  & Perl    & \lighttpdTsize    % & \lighttpdtwoTestTime 
+\lighttpd    & C         & \num{\lighttpdSize}  & Perl    & \num{\lighttpdTsize}    % & \lighttpdtwoTestTime 
 \\
-\lighttpdtwo    & C         & \lighttpdtwoSize  & Python    & \lighttpdtwoTsize    % & \lighttpdtwoTestTime 
+\lighttpdtwo & C         & \num{\lighttpdtwoSize}  & Python    & \num{\lighttpdtwoTsize}    % & \lighttpdtwoTestTime 
 \\
-\memcached   & C         & \memcachedSize & C/Perl    & \memcachedTsize   % & \memcachedTestTime 
+\memcached   & C         & \num{\memcachedSize} & C/Perl    & \num{\memcachedTsize}   % & \memcachedTestTime 
 \\
-\redis       & C         & \redisSize     & Tcl       & \redisTsize       % & \redisTestTime    
+\redis       & C         & \num{\redisSize}     & Tcl       & \num{\redisTsize}       % & \redisTestTime    
 \\
-\vim         & C         & \vimSize       & Vim script       & \vimTsize      % & \vimTestTime   
+\vim         & C         & \num{\vimSize}       & Vim script       & \num{\vimTsize}      % & \vimTestTime   
 \\
-\zeromq      & C++       & \zeromqSize    & C++       & \zeromqTsize      % & \zeromqTestTime   
+\zeromq      & C++       & \num{\zeromqSize}    & C++       & \num{\zeromqTsize}      % & \zeromqTestTime   
 \\ \bottomrule
 \end{tabular}
 \end{center}
@@ -96,26 +97,27 @@ analysed.}
 
 Table~\ref{tbl:study-systems} shows some basic characteristics of these
 systems: the language in which the code and tests are written, the number of
-executable lines of code (ELOC) and the number of lines of test code (TLOC) in
-the last revision analysed. To accurately measure the number of ELOC, we
-leveraged the information stored by the compiler in \texttt{gcov} graph files,
-while to measure the number of TLOC we did a simple line count of the test
-files (using \texttt{cloc}, or \texttt{wc~-l} when \texttt{cloc} cannot detect
-the file types).
+executable lines of code (\si{\eloc}) and the number of lines of test code
+(\si{\tloc}) in the last revision analysed. To accurately measure the number of
+\si{\eloc}, we leveraged the information stored by the compiler in
+\texttt{gcov} graph files, while to measure the number of TLOC we did a simple
+line count of the test files (using \texttt{cloc}, or \texttt{wc~-l} when
+\texttt{cloc} cannot detect the file types).
 
-The code size for these applications varies from only \beanstalkdSize ELOC for
-\beanstalkd to \gitSize ELOC for \git.  The test code is written in a variety
-of languages and ranges from \beanstalkdTsize lines of Python code for
-\beanstalkd to \gitTsize lines of C and shell code for \git.  The test code is
-36\% larger than the application code in the case of \git, approximately as
-large as the application code for \beanstalkd and \memcached, around 40\% of
-the application code for \redis and \zeromq, around 19\% and 17\% of the
-application code for \binutils and \lighttpd respectively, and only around 10\%
-of the application code for \lighttpdtwo and \vim.  Running the test suite on
-the last version takes only a few seconds for \binutils, \lighttpd,
-\lighttpdtwo, \vim and \zeromq, \memcachedTestTime seconds for \memcached,
-\redisTestTime seconds for \redis, and 30 minutes for \git, using a four-core
-Intel Xeon E3-1280 machine with 16 GB of RAM.
+The code size for these applications varies from only
+\SI{\beanstalkdSize}{\eloc} for \beanstalkd to \SI{\gitSize}{\eloc} for \git.
+The test code is written in a variety of languages and ranges from
+\beanstalkdTsize lines of Python code for \beanstalkd to \gitTsize lines of C
+and shell code for \git.  The test code is 36\% larger than the application
+code in the case of \git, approximately as large as the application code for
+\beanstalkd and \memcached, around 40\% of the application code for \redis and
+\zeromq, around 19\% of the application code for \binutils, around 17\% of the
+application code for \lighttpd and \vim, and only around 10\% of the
+application code for \lighttpdtwo.  Running the test suite on the last version
+takes only a few seconds for \binutils, \lighttpd, \lighttpdtwo, \vim and
+\zeromq, \memcachedTestTime seconds for \memcached, \redisTestTime seconds for
+\redis, and 30 minutes for \git, using a four-core Intel Xeon E3-1280 machine
+with 16 GB of RAM.
 
 The version control system used by the majority of these applications is \git.
 Four of these projects---\git, \memcached, \redis, and \zeromq ---are hosted on
@@ -169,7 +171,7 @@ version control systems such as \git do not have a linear structure
 and the development history is a directed acyclic graph rather than a
 simple chain.  Different development styles generate different
 development histories; for example, \git, \redis and \zeromq exhibit a
-large amount of branching and merging while the other three systems
+large amount of branching and merging while the other six systems
 have a mostly linear history.  Our decision was to focus on the main branch,
 and treat each merge into it as a single revision. In other words, we
 considered each feature branch a single indivisible unit.  Our

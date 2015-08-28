@@ -1,11 +1,10 @@
 \section{Record-replay}
 \label{sec:record_replay}
 
-Although \varan shares similarities with record-replay systems, there are
-significant differences; in particular, the log is of fixed size and
+Although \varan shares similarities with existing record-replay systems, there
+are some significant differences; in particular, the log is of fixed size and
 only kept in-memory.  However, it is possible to easily extend \varan to
-provide full record-replay capabilities by implementing two artificial
-clients:
+provide full record-replay capabilities by implementing two artificial clients:
 \begin{inparaenum}[(i)]
 \item one acting as a \emph{follower} whose only goal is to write the
   content of the ring buffer to persistent storage, and

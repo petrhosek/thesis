@@ -1,36 +1,54 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
-Software updates are an integral part of the software development and
-maintenance process, but unfortunately they present a high risk, as new
-releases often introduce new bugs and security vulnerabilities; as a
-consequence, many users refuse to upgrade their software, relying instead on
-outdated versions, which often leave them exposed to known software bugs and
-security vulnerabilities.
+Software updates present a difficult challenge to the software maintenance
+process. Too often, updates result in failures, and users face the
+uncomfortable choice between using an old stable version which misses recent
+bug and security fixes, and using a new version which improves the software in
+certain ways, only to introduce other bugs and security vulnerabilities.
 
-In this thesis we have proposed a novel multi-version execution approach, a
-variant of $N$-version execution, for improving the software update process.
-Whenever a new program update becomes available, instead of upgrading the
-software to the newest version, we run the new version in parallel with the old
-one, and carefully synchronise their execution to create a more reliable
-multi-version application.
+We tackle this problem using a simple but effective \emph{multi-version
+execution} based approach. Whenever a new update becomes available, instead of
+upgrading the software to the new version, we run the new version in parallel
+with the old one; by carefully coordinating their executions and selecting the
+behaviour of the more reliable version when they diverge, we create a more
+secure and dependable multi-version application. With the widespread
+availability of multi-core processors, multi-version execution might become a
+viable approach for increasing the reliability and availability of updated
+software systems.
 
-We have described two schemes for implementing the multi-version execution
-technique---via failure recovery and via transparent failover---and we have
-described two possible designs for implementing these schemes: \mx, focused on
-recovering from crashes caused by the faulty software updates; and \varan,
-focused on running a large number of versions in parallel with minimal
-performance overhead.
+In this thesis, we have proposed two different schemes for implementing the
+multi-version execution technique. The first is a failure recovery scheme,
+which allows programs to survive errors introduced by software updates. The
+second is a transparent failover scheme, which allows $N$ versions to be run in
+parallel; if one these versions fails, the mechanism transparently switches to
+another version without any disruption in service.
 
-\mx uses static binary analysis, system call interposition, lightweight
-checkpointing and runtime state manipulation to implement a novel fault recovery
-mechanism, which enables the recovery of the crashing version using the code
-of the other, non-crashing version. We have shown how \mx can be applied
-successfully to recover from real crashes in several real applications.
+To enable these scenarios, we need a runtime monitor that enables the execution
+of multiple versions in parallel, coordinates and synchronises their execution,
+making them appear as a single application to any outside entities.
+Unfortunately, existing monitors impose a large performance overhead and none
+of them scales well with the number of versions, since the runtime monitor
+usually acts as a performance bottleneck. Moreover, none of the existing
+monitors handles the case when the execution of versions run in parallel
+diverges. We have presented two different designs for building runtime monitor
+which address these drawbacks; the first, called \mx is focused on surviving
+crashes caused by bugs introduced in software updates and the second, called
+\varan is aimed at running a large number of versions side-by-side with low
+overhead.
 
-\varan combines selective binary rewriting with high-performance event
-streaming to significantly reduce performance overhead, without sacrificing the
-size of the trusted computing base, nor flexibility or ease of debugging.  Our
-experimental evaluation has demonstrated that \varan can run C10k network
-servers with low performance overhead, and can be used in various scenarios
-such as transparent failover and live sanitisation.
+\mx is a multi-version execution system implementing a novel fault recovery
+mechanism targeting application updates which might introduce potential crash
+bugs. We have shown how \mx can be successfully applied in practice by
+recovering from real crashes in several real applications such as \gnu
+\coreutils, a set of user-level UNIX applications; \lighttpdgen, a popular web
+server used by several high-traffic websites; and \redis, an advanced key-value
+data store server used by many well-known services.
+
+\varan is a multi-version execution framework that combines binary rewriting
+with a novel event-streaming architecture to significantly reduce performance
+overhead and scale well with the number of versions, without relying on
+intrusive kernel modifications. Our evaluation shows that \varan can run
+multi-version applications based on popular C10k network servers with only a
+modest performance overhead, and can be effectively used to increase software
+reliability.

@@ -28,13 +28,13 @@ While \varan allows executing a large number of versions in parallel, the
 number of versions is currently set in the beginning. We would like enhance our
 prototype implementation with the ability to dynamically adjust the number of
 versions that are run concurrently. This will ensure that multi-version
-applications will be able to utilize all available resources (\ie idle
+applications will be able to utilise all available resources (\ie idle
 processor time) without affecting the overall system performance during peak
 load.
 
 While scaling down the number of versions is straightforward, to scale up we
 would need the ability to start new versions and allow them to catch up with the
-leader. There are different ways in which such support could be implemented. For
+leader. There are different ways in which such a support could be implemented. For
 applications structured around a central dispatch loop (\eg network servers or
 applications with graphical user interface), we could infer the loop headers
 (either statically~\cite{DJgraphs,havlak} or dynamically~\cite{sato11}) and
@@ -47,7 +47,7 @@ advantage of these annotations.
 % Finally, we would like to be able to transparently run multi-version
 % applications on multiple underlying platforms, ranging from
 % multicore processors to large-scale data centers.  This requires the
-% ability to span our virtualized environment across multiple logical as
+% ability to span our virtualised environment across multiple logical as
 % well as physical nodes.  In particular, we aim to include the
 % possibility of executing certain versions of an application remotely,
 % to enable scenarios with hundreds or even thousands of application

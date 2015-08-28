@@ -61,7 +61,7 @@ versions in parallel; as new versions arrive, we continue to execute them in
 parallel with the existing ones. Then, by selecting the output of the more
 reliable version when their executions diverge, we can increase the overall
 reliability of the software. There are multiple ways to implement this
-approach. We propose two different schemes in this thesis:%
+approach. In this thesis, we propose two different schemes:%
 \begin{description}
 \item[failure recovery] This scheme, depicted in
   Figure~\ref{fig:failrecovery-scheme}, uses two versions run in parallel, and
@@ -81,13 +81,13 @@ approach. We propose two different schemes in this thesis:%
 \end{description}
 
 The goal of both schemes is to run multiple versions of an application in
-parallel, and to synchronize their executions so that%
+parallel, and to synchronise their executions so that%
 \begin{inparaenum}[(1)]
 \item users are given the illusion that they interact with a single version of
   the application,
 \item the multi-version application is at least as reliable and secure as one
   of the individual versions in isolation, and
-\item the synchronization mechanism incurs a reasonable performance overhead.
+\item the synchronisation mechanism incurs a reasonable performance overhead.
 \end{inparaenum}
 While the first goal applies equally to both schemes, there are differences
 with respect to the second and third goal. For the failure recovery scheme, we
@@ -95,7 +95,9 @@ sacrifice some of the performance being more lenient with respect to the third
 goal, but we can make the second goal more stringent requiring the
 multi-version application to be as reliable as \emph{any} of the two versions
 ran in parallel. The transparent failover scheme has minimal performance
-overhead, but offers limited guarantees in case of failure.
+overhead, but offers limited guarantees in case of failure---we automatically
+discard failing versions, which means that we can only continue execution as
+long as there is at least one version alive.
 
 % The goal of our approach is to run multiple versions of an application in
 % parallel, and synchronize their executions so that%
@@ -106,13 +108,13 @@ overhead, but offers limited guarantees in case of failure.
 %   of the individual versions in isolation, and
 % \item the synchronization mechanism incurs a reasonable performance overhead.
 % \end{inparaenum}
-% This applies to our first scheme presented in Section~\ref{overview:problem}.
+% This applies to our first scheme presented in Section~\ref{overview:solution}.
 % For our second scheme, where we survive errors, if user is willing sacrifices
 % some of the performance being more lenient with respect to the third goal, we
 % can make the second goal more stringent by requiring the multi-version
 % application to be as reliable as any of the two versions ran in parallel.
 
-\subsection{Synchronizing the execution of different versions}
+\subsection{Synchronising the execution of different versions}
 
 \begin{figure}[t]
   \begin{center}
@@ -137,7 +139,7 @@ number of software versions run in parallel in order to balance conflicting
 requirements such as performance, reliability, security and energy consumption.
 
 This coordination mechanism can be implemented at multiple levels of
-abstraction. The simplest, but least flexible approach is to synchronize the
+abstraction. The simplest, but least flexible approach is to synchronise the
 different versions at the level of application inputs and outputs. This is
 particularly suitable for applications that use well-defined protocols such as
 web servers and web browsers. The main advantage of this option is that it can
@@ -146,18 +148,19 @@ could even run different implementations, as in \cite{cocktail}), but the main
 downside is that it is not applicable in the general case, when the
 input-output specification is not available.
 
-A more flexible approach, which we adopted, is to synchronize the different
+A more flexible approach, which we adopted, is to synchronise the different
 versions at the level of system calls.  System calls represent the
-\emph{external behaviour} of an application, as they are the only way in which
-an application can interact with the surrounding environment.  While this
-option allows fewer changes between different application versions, it does not
-require any a priori knowledge of the application's input/output behaviour, and
-is particularly suitable in the context of software updates, where the external
-application behaviour usually remains unchanged.  In fact, an empirical study
-presented in Chapter~\ref{chap:evolution}, which we conducted on several real
-applications, has shown that while the source code of these applications
-changes on a regular basis, the external behaviour changes sporadically, often
-remaining stable when security and bug fixes are introduced.
+\emph{external behaviour} of an application, and they are the primary way in
+which application interact with the surrounding environment (the other being
+shared memory and side channels). While this option allows fewer changes
+between different application versions, it does not require any a priori
+knowledge of the application's input/output behaviour, and is particularly
+suitable in the context of software updates, where the external application
+behaviour usually remains unchanged.  In fact, an empirical study presented in
+Chapter~\ref{chap:evolution}, which we conducted on several real applications,
+has shown that while the source code of these applications changes on a
+regular basis, the external behaviour often remains stable when security and
+bug fixes are introduced.
 
 % Note that one key aspect on which our approach relies is
 % \textit{having the different versions be alive at all times}.  This ensures
@@ -249,9 +252,8 @@ implementation which requires significant development effort.
 One particular challenge for our approach is to detect any divergences between
 different software versions, and resolve them in such a way as to increase the
 overall reliability of the application.  Selecting the ``correct'' behaviour of
-an application when different versions disagree is of course not possible in
-the general case without having access to a high-level specification.  However,
-one could%
+an application when different versions disagree is not possible in the general
+case without having access to a high-level specification.  However, one could%
 \begin{inparaenum}[(1)]
 \item focus on universal correctness properties, such as the absence of
   crashes, and
@@ -272,18 +274,22 @@ work~\cite{rx,compl-schedules11,fo,exec-trans06,vigilante,clearview,microreboots
 but none of these techniques focuses explicitly on faults caused by bugs
 introduced by software updates.
 
-We assume that the only difference between the two versions are the
-changes introduced by the patch, and that the patch does not modify the
-internal state in an ``incompatible'' way. Our solution is based upon the
-observation that errors in programs are usually located at particular places
-(\ie specific instructions) in the program's code. Therefore, when one of the
-versions crashes, we can use the code of the other, non-crashing version to
-execute over this critical point in that version's code. This approach may not
-work when the memory layout of the two versions differs, as the code of one
-version may fail to locate the memory structures necessary for its execution in
-the memory of the other version.  Nevertheless, the described approach still
-works in many cases when the memory layout of the two versions does not differ
-significantly (\S\ref{sec:reliability-evaluation}).
+We assume that the only difference between the two versions are the changes
+introduced by the patch, and that the patch does not modify the internal
+application state in a way which would lead to a different behaviour in each
+version. We define the internal state\marginnote{5} of the application as data
+structures managed by the application and stored on the stack or heap.
+
+Our solution is based upon the observation that errors in programs are usually
+located at particular places (\ie specific instructions) in the program's code.
+Therefore, when one of the versions crashes, we can use the code of the other,
+non-crashing version to execute over this critical point in that version's
+code. This approach may not work when the memory layout of the two versions
+differs, as the code of one version may fail to locate the memory structures
+necessary for its execution in the memory of the other version.  Nevertheless,
+the described approach still works in many cases when the memory layout of the
+two versions does not differ significantly
+(\S\ref{sec:reliability-evaluation}).
 
 % Given this assumption,  we can recover its internal state from the last
 % checkpoint, and then use the code of the other, non-crashing version, to
@@ -309,15 +315,15 @@ significantly (\S\ref{sec:reliability-evaluation}).
       \caption{Use the code of older version only to run through critical section}
       \label{fig:recovery-solution3}
     \end{subfigure}
-    \caption{Three solutions for synchronizing two divergent versions of the same application}
+    \caption{Three solutions for synchronising two divergent versions of the same application}
     \label{fig:recovery-solutions}
   \end{center}
 \end{figure}
 
 In our failure recovery approach, we run the two versions in parallel,
 monitoring their execution and taking frequent checkpoints at every
-synchronization point, which in our case are system calls. When either of the
-versions fails, there are three possible solutions to synchronize the divergent
+synchronisation point, which in our case are system calls. When either of the
+versions fails, there are three possible solutions to synchronise the divergent
 versions:%
 \begin{enumerate}
 \item\label{s1} Clone the correctly executing version to duplicate its state
@@ -325,13 +331,13 @@ versions:%
   code with the code of the failed version. Then restart both versions and
   continue their execution (Figure~\ref{fig:recovery-solution1}).
 \item\label{s2} Clone the correctly executing version to duplicate its state at
-  the last synchronization point (\ie creating checkpoint). After the crash,
+  the last synchronisation point (\ie creating checkpoint). After the crash,
   replace the code of this cloned version with the code of the failed version.
   Then restart this cloned version, execute over the \emph{critical section},
   and continue execution of both versions
   (Figure~\ref{fig:recovery-solution2}).
 \item\label{s3} Clone the failing version to duplicate its state at the last
-  synchronization point. After the crash, replace the code of this cloned
+  synchronisation point. After the crash, replace the code of this cloned
   version with the code of the correctly executing version. Then restart this
   cloned version; after the application successfully executes over the
   \emph{critical section}, replace the code of the cloned version again with

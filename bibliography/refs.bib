@@ -1978,6 +1978,12 @@ Programs},
     title = {Safe and Automatic Live Update for Operating Systems},
 }
 
+@InProceedings{ttst,
+    crossref = {lisa13},
+    author = {Giuffrida, Cristiano and Iorgulescu, C\u{a}lin and Kuijsten, Anton and Tanenbaum, Andrew S.},
+    title = {Back to the Future: Fault-tolerant Live Update with Time-traveling State Transfer},
+}
+
 @InProceedings{howard:ndss11,
     crossref = {ndss11},
     author = {Asia Slowinska and Traian Stancescu and Herbert Bos},
@@ -2151,7 +2157,7 @@ reversals},
    title = {Efficient state merging in symbolic execution},
 }
 
-@InProceedings{shadow:honeypots,
+@InProceedings{shadow-honeypots,
   crossref = {usenix-sec05},
   author = {Anagnostakis, K. G. and Sidiroglou, S. and Akritidis, P. and Xinidis, K. and Markatos, E. and Keromytis, A. D.},
   title = {Detecting targeted attacks using shadow honeypots},
@@ -2803,6 +2809,36 @@ reversals},
   title = {Detecting intrusions using system calls: alternative data models},
 }
 
+@inproceedings{shadowhoneypot,
+  crossref = {usenix-sec05},
+  author = {Anagnostakis, K. G. and Sidiroglou, S. and Akritidis, P. and Xinidis, K. and Markatos, E. and Keromytis, A. D.},
+  title = {Detecting Targeted Attacks Using Shadow Honeypots},
+} 
+
+@inproceedings{aftersight,
+  crossref = {usenix-atc08},
+  author = {Chow, Jim and Garfinkel, Tal and Chen, Peter M.},
+  title = {Decoupling Dynamic Program Analysis from Execution in Virtual Environments},
+} 
+
+@inproceedings{paranoid-android,
+  crossref = {acsac10},
+  author = {Portokalidis, Georgios and Homburg, Philip and Anagnostakis, Kostas and Bos, Herbert},
+  title = {Paranoid Android: Versatile Protection for Smartphones},
+}
+
+@inproceedings{hruby:atc13,
+  crossref = {usenix-atc13},
+  author = {Hruby, Tomas and Bos, Herbert and Tanenbaum, Andrew S.},
+  title = {When Slower is Faster: On Heterogeneous Multicores for Reliable Systems},
+}
+
+@inproceedings{russinovich:pldi96,
+  crossref = {pldi96},
+  author = {Russinovich, Mark and Cogswell, Bryce},
+  title = {Replay for Concurrent Non-deterministic Shared-memory Applications},
+} 
+
 %------------------------------- Books -----------------------------%
 
 @Book{brooks:man-month,
@@ -2981,17 +3017,17 @@ reversals},
   year = {1995}
 }
 
+@InBook{erickson:hacking-networking,
+  crossref = {erickson:hacking},
+  chapter = {0x400 Networking},
+  pages = {195--280},
+}
+
 @Book{erickson:hacking,
   author = {Jon Erickson},
   title = {Hacking: The Art of Exploitation},
   publisher = {No Starch Press},
   year = {2008},
-}
-
-@InBook{erickson:hacking-networking,
-  crossref = {erickson:hacking},
-  chapter = {0x400 Networking},
-  pages = {195--280},
 }
 
 %----------------- Journal Articles ------------------%
@@ -4393,8 +4429,20 @@ title={Open MPI: Goals, Concept, and Design of a Next Generation MPI Implementat
 
 @misc{seccomp-bpf:linux,
   key = {Yet another new approach to seccomp},
+  author = {Jonathan Corbet},
   title = {Yet another new approach to seccomp},
-  howpublished = "\url{http://lwn.net/Articles/475043/}"
+  howpublished = "\url{http://lwn.net/Articles/475043/}",
+  month = jan,
+  year = 2012,
+}
+
+@misc{ebpf:linux,
+  key = {{eBPF}},
+  author = {Jonathan Corbet},
+  title = {Extending extended BPF},
+  howpublished = "\url{https://lwn.net/Articles/603983/}",
+  month = jul,
+  year = 2014,
 }
 
 @misc{seccompsandbox,

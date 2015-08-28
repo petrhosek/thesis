@@ -1,24 +1,12 @@
-\section{Problem statement}
-\label{overview:problem}
+\section{Solution}\marginnote{1}[-3em]
+\label{overview:solution}
 
-We tackle th problem of faulty software updates using a simple but effective
+We tackle the problem of faulty software updates using a simple but effective
 \emph{multi-version execution} based approach. Whenever a new update becomes
 available, instead of upgrading the software to the new version, we run the new
 version in parallel with the old one; by carefully coordinating their
 executions and selecting the behaviour of the more reliable version when they
 diverge, we create a more secure and dependable multi-version application.
-
-In this thesis, we present two different schemes for implementing this
-multi-version execution technique. The first is a \emph{failure recovery scheme},
-which allows program to survive errors introduced by software updates. The
-mechanism is completely autonomous and operates on the off-the-shelf-binaries
-making it easy to use and deploy. This scheme is limited to two versions run in
-parallel. The second is a \emph{transparent failover scheme}, which allows $N$
-versions to be run in parallel; if the primary version fail, the mechanism
-transparently switches to another version without any disruption in service.
-This scheme is designed to have minimal performance overhead enabling the use
-of a large number of versions, but offers limited guarantees in case of a
-failure.
 
 % To tackle the software update problem, we propose \emph{multi-version
 % execution}, a novel technique, which fits within the overall theme of
@@ -36,40 +24,80 @@ failure.
 % can either discard the very oldest versions, or we can use more sophisticated
 % replacement strategies.
 
-The goal of this technique is to increase availability and reliability of
-updated software by exploiting the abundance of resources (\eg idle processor
-time) made available by modern highly parallel platforms.  We believe that
-multi-version execution updates is a timely solution in the context of today's
-computing platforms~\cite{multiplicity}. The last decade has seen the emergence
-of new hardware platforms, ranging from multi-core processors to large-scale
-data centres, which provide an abundance of computational resources and a high
-degree of parallelism. These platforms already benefit applications with a
-great amount of inherent concurrency.  However, there has been relatively
-little progress in exploiting this abundance of resources to improve software
-reliability and availability, especially in the context of software updates.
+The goal of multi-version execution is to increase availability and reliability
+of updated software by exploiting the abundance of resources (\eg idle
+processor time) made available by modern highly parallel platforms.  We believe
+that multi-version execution updates is a timely solution in the context of
+today's computing platforms~\cite{multiplicity}. The last decade has seen the
+emergence of new hardware platforms, ranging from multi-core processors to
+large-scale data centres, which provide an abundance of computational resources
+and a high degree of parallelism. These platforms already benefit applications
+with a great amount of inherent concurrency.  However, there has been
+relatively little progress in exploiting this abundance of resources to improve
+software reliability and availability, especially in the context of software
+updates.
 
 Typical data centres are designed for peak load to ensure service-level
 agreements are met. Servers are rarely completely idle but they do not operate
 near their maximum utilisation; most of the time, they operate at between 10\%
-and 50\% of their maximum utilization levels. However, even an energy-efficient
+and 50\% of their maximum utilisation levels. However, even an energy-efficient
 server consumes half its full power when doing virtually no work---and for
 normal servers, this ratio is much worse~\cite{barroso2007}.  Therefore,
 instead of dynamically switching off unused servers which is not effective, we
 aim to use the abundance of these resources (\ie processing power) to increase
 software availability and reliability.
 
-Our current focus is on multi-core processors, but we believe this solution
-could be adapted to work on other parallel platforms as well.  Furthermore,
-this update mechanism could be extended to balance conflicting requirements
-such as performance, reliability and energy consumption.
+In this thesis, we present two different schemes for implementing this
+multi-version execution technique. The first is a \emph{failure recovery scheme},
+which allows program to survive errors introduced by software updates. The
+mechanism is completely autonomous and operates on the off-the-shelf-binaries
+making it easy to use and deploy. This scheme is limited to two versions run in
+parallel. The second is a \emph{transparent failover scheme}, which allows $N$
+versions to be run in parallel; if the primary version fails, the mechanism
+transparently switches to another version without any disruption in service.
+This scheme is designed to have minimal performance overhead enabling the use
+of a large number of versions, but offers limited guarantees in case of a
+failure.
+
+In order for our approach to be successful, the external behaviour of the
+versions that are run in parallel has to be similar enough to allow us to
+synchronise their execution. In practice, it means that the external behaviour
+of all the versions has to be the same.\marginnote{4} The empirical study
+presented in this thesis shows that changes to the external behaviour of an
+application are often minimal, so our approach should work well with versions
+that are not too distant from one another (\ie several revisions apart).
+
+Similarly, our system relies on the assumption that versions re-converge to the
+same behaviour after a divergence.  Therefore, we believe multi-version
+execution would be a good fit for applications that perform a series of mostly
+independent requests, such as network servers.\marginnote{4} These applications
+are usually structured around a main dispatch loop, which provides a useful
+re-convergence point. Our approach is also suitable to local code changes,
+which have small propagation distances, thus ensuring that the different
+versions will eventually re-converge to the same behaviour.
+
+Our approach is targeted toward scenarios where the availability and
+reliability of a software system is more important than strict correctness,
+high performance and low energy consumption.  In terms of correctness
+guarantees, it is similar to previous approaches such as failure oblivious
+computing~\cite{fo} which may sacrifice strict correctness for increased
+availability and reliability. We aim to alleviate potential problems by
+regularly checking if all versions exhibit the same external behaviour and by
+reverting to running a single version when a non-resolvable divergence is
+detected making this a best-effort approach.
+
+%Our current focus is on multi-core processors, but we believe this solution
+%could be adapted to work on other parallel platforms as well.  Furthermore,
+%this update mechanism could be extended to balance conflicting requirements
+%such as performance, reliability and energy consumption.
 
 There are three main challenges that we need to address to make this approach
 viable. First, we need to implement mechanisms for effectively coordinating the
 parallel execution of multiple program versions.  Second, when executions
 diverge, we need to select the output of the more reliable one.  Finally, we
-would like to be able to scale up and down the number of program versions run
-in parallel in order to balance conflicting requirements such as performance,
-reliability, and energy consumption.
+would like to be able to scale the number of program versions run in parallel
+in order to balance conflicting requirements such as performance, reliability,
+and energy consumption.
 
 %We aim to tackle this problem using a simple but effective approach based on
 %application-level virtualization.  Whenever a new program update becomes
@@ -82,3 +110,9 @@ reliability, and energy consumption.
 %be extended to work with a large number of versions run in parallel, and can
 %be applied to several different platforms, ranging from multicore processors
 %to large-scale data centers.  
+
+%% is never worse than simply using one version of the software: if a
+%% non-crashing divergence is detected, \mx can simply continue execution
+%% with a single program version.
+
+

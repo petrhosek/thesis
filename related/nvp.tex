@@ -4,15 +4,15 @@
 The original idea of concurrently running multiple versions of the same
 application was first explored in the context of $N$-version programming, a
 software development approach introduced in the 1970's in which multiple teams
-of programmers independently develop functionally equivalent versions of the
+of programmers independently develop functionally-equivalent versions of the
 same program in order to minimise the risk of having the same bugs in all
 versions~\cite{chen1995}. During runtime, these versions are executed in
 parallel on top of an $N$-version execution (NVX) environment in order to
 improve the fault tolerance of the overall system. Both the version generation
-and the synchronization mechanism required manual effort.
+and the synchronisation mechanism required manual effort.
 
 % More moder instantiation of N-version programming paradigm is
-A possible realization of the original N-version programming paradigm is
+A possible realisation of the original $N$-version programming paradigm is
 Cocktail~\cite{cocktail}, which proposes the idea of running different web
 browsers in parallel under the assumption that any two of them are unlikely to
 be vulnerable to the same attacks. Compared to \mx and \varan, Cocktail's task
@@ -79,7 +79,7 @@ generate a large number of application variants that can be combined to reduce
 the probability of failure or improve various non-functional
 requirements~\cite{gismoe}. Yumerefendi \etal~\cite{tightlip} run multiple
 sandboxed copies of the same process to detect potential privacy leaks and to
-enforce access control and privacy management; Shye \etal~\cite{shye2009} use
+enforce access control and privacy management; Shye \etal~\cite{shye2009} used
 multiple instances of the same application in order to overcome transient
 hardware failures. Cadar \etal have also argued that automatically generated
 software variants are a good way for exploiting the highly parallel nature of
@@ -95,8 +95,10 @@ semantically equivalent. This eliminates the challenge of generating
 diversified variants and creates opportunities in terms of recovery from
 failures, but also introduces additional challenges in terms of synchronising
 the execution of the different versions.  Second, prior work has mostly focused
-on detecting divergences, while our main concern is to survive them, in order
-to increase the availability of the overall application.
+on detecting divergences, while our main concern is to handle them, either
+by recovering as in case of \mx or by discarding the crashing version as in
+case of \varan, in order to increase the availability of the overall
+multi-version application.
 
 %Recent work on NVX systems has moved in the direction of
 %opportunistically using existing versions---\eg different browser

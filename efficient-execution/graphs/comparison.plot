@@ -35,6 +35,4 @@ plot 'comparison.dat' using 2:xticlabels(1) linecolor rgb "#666666", \
                    '' using 6:xticlabels(1) linecolor rgb "#AAAAAA", \
 	                 '' using 0:6:6 with labels left offset 3.1,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
                    '' using 7:xticlabels(1) linecolor rgb "#BBBBBB", \
-	                 '' using 0:7:7 with labels left offset 5.0,0.25 rotate by 90 font "Myriad Pro,11" notitle, \
-                   '' using 8:xticlabels(1) linecolor rgb "#CCCCCC", \
-	                 '' using 0:8:8 with labels left offset 7.0,0.25 rotate by 90 font "Myriad Pro,11" notitle
+	                 '' using 0:7:7 with labels left offset 5.0,0.25 rotate by 90 font "Myriad Pro,11" notitle

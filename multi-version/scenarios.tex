@@ -1,12 +1,11 @@
 \section{Real-world scenarios}
 \label{multi-version:scenarios}
 
-To motivate the multi-version execution technique, we present three existing
-scenarios involving the \vim editor, as well as \lighttpd, and \redis servers.
-These correspond to two categories of applications that could benefit from our
-approach: user applications such as text editors for which reliability is a key
-concern; and network servers, with stringent security and availability
-requirements.
+To motivate the multi-version execution technique, we present three scenarios
+involving the \vim editor,\lighttpd and \redis servers.  These correspond to
+two categories of applications that could benefit from our approach: user
+applications such as text editors for which reliability is a key concern; and
+network servers, with stringent security and availability requirements.
 
 % To motivate the multi-version execution technique, we present several existing
 % scenarios involving the \chrome browser and the \vim editor, as well as the
@@ -122,7 +121,7 @@ incorporating new changes except for critical security bug fixes. This meant
 that the \vim users affected by this bug had to build and install their own
 version of \vim from the source.
 
-\subsection{\lighttpd mod\_compress segfault with disabled ETag support}
+\subsection{\lighttpd \lstinline`mod_compress` segfault with disabled ETag support}
 
 \lighttpd\footnote{\url{http://www.lighttpd.net/}} is a popular open-source 
 web-server used either alone or in conjunction with other web-servers
@@ -130,8 +129,7 @@ by several high-traffic websites such as Wikipedia and Xkcd.
 Despite its popularity, crash bugs are still a common
 occurrence in \lighttpd, as evident from its bug tracking
 database.\footnote{\url{http://redmine.lighttpd.net/issues/}}  Below
-we discuss one such bug, which our approach could successfully
-eliminate.
+we discuss one such bug.
 
 In April 2009, a patch was
 applied\footnote{\url{http://redmine.lighttpd.net/projects/lighttpd/repository/revisions/2438}}
@@ -243,9 +241,10 @@ for (i = 2; i < c->argc; i++) {
 server,\footnote{\url{http://redis.io/}} often referred to as one the most
 popular NoSQL databases.  Due to its performance and low-resource requirements,
 \redis is being used by many well-known services such as GitHub.  Because the
-whole dataset is held in memory, reliability is critically important, as a
-crash could result in total data loss.  However, like any other large software
-system, \redis is subject to crash bugs. Issue
+entire dataset is held in memory, reliability is critically important, as the
+server crash and subsequent restart requires reloading data into memory, which
+can lead to a prolonged server downtime.\marginnote{3} Nevertheless, like any
+other large software system, \redis is subject to crash bugs.  Issue
 344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
 such example.  This issue causes \redis to crash when the \lstinline`HMGET`
 command is used with the wrong type.  The bug was introduced during a code
@@ -262,11 +261,10 @@ version (Listing~\ref{lst:refactored}), the \lstinline`return` statement is
 missing, and after reporting an incorrect type (line~\ref{line:report-error2}),
 the function continues execution and causes segmentation fault inside the
 \lstinline`hashGet` function invoked on line~\ref{line:hashGet}. This is a
-critical bug, which may result in losing some or even all of the stored data in
-case when the Append Only File (AOF) persistence log is corrupted due to issue
-620\footnote{\url{http://code.google.com/p/redis/issues/detail?id=620}}.
+critical bug, which may negatively affect the service availability and
+reliability as described above.\marginnote{3}
 
 The bug was introduced in April 2010, diagnosed and reported only half a year
-later in October 2010 and then fixed after fifteen days.  As in the case of the
+later in October 2010 and then fixed after fifteen days. As in the case of the
 \lighttpd bug, this means that for several months, any \redis instance was
 susceptible to a crash and vulnerable to a possible attack.

@@ -8,10 +8,10 @@ security critical services, and compare their behaviour, in real time, against
 that of a known secure version.  Any divergence detected could be resolved in
 favour of the secure version and logged for further analysis.  This would
 provide a fine-grained understanding of the anatomy of an attack, which is
-typically not possible with today's honeypot deployments. The construction
-of such a honeypot system using an existing multi-variant execution
-environment has been already proposed in the past~\cite{jackson10} but,
-to our knowledge, no implementation of such mechanism exists.
+typically not possible with today's honeypot deployments. The construction of
+such a honeypot system using an existing multi-variant execution environment
+has been already proposed in the past~\cite{jackson10} but, to our knowledge,
+no implementation of such mechanism exists.
 %The use of multi-variant execution to construct such honeypot systems has been
 %already proposed in the past~\cite{jackson10}. However, to our knowledge, no
 %general-purpose implementation of such mechanism exists.
@@ -41,6 +41,14 @@ access local resources; this will result in a divergence which will be detected
 and recorded by the monitor. The monitor will also close the connection to the
 private variant to protect any critical resources.
 
+An altenative approach has been used in the past to implement shadow
+honeypots~\cite{shadow-honeypots}, where both the vulnerable and secure version
+share the same process and address space and the runtime monitor switches
+between the two versions depending on the request. This approach can reduce the
+resource usage, but significantly increases the potential attack surface
+thereby reducing the security compared to our solution where both versions are
+stricly isolated.
+
 \begin{figure}[t]
   \begin{center}
     \includegraphics[width=0.75\columnwidth]{applications/figures/honeypot}
@@ -55,9 +63,9 @@ can be run on a different machine. Even if attackers manage to subvert our
 monitoring infrastructure and gain full access to the operating system, the
 impact of such an intrusion can be minimal as the machine which runs the public
 version would not contain any critical resources and would ideally be running
-inside a demilitarized zone (DMZ) to prevent access to other machines on the
+inside a demilitarised zone (DMZ) to prevent access to other machines on the
 network.  Such an architecture, however, precludes the use of the shared ring
-buffer and the streaming architecture (\S\ref{sec:streaming}). Instead, in our
+buffer and the event streaming (\S\ref{sec:streaming}). Instead, in our
 prototype, we use network sockets to transfer events between variants and the
 monitor. This has a negative impact on the performance; we have observed a
 per-system call overhead of \numrange{18}{25}$\times$ in our microbenchmarks.

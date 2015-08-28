@@ -19,12 +19,12 @@ common.
 
 We assume that the sequence of system calls performed by all versions, \ie
 their external behaviour, is the same (although we can relax this assumption,
-as shown in \S\ref{sec:patternmatching}). Given that, we can run all version in
-lockstep as shown in Figure~\ref{fig:lockstep-execution}.  The monitor runs all
-versions in parallel. When any of the versions performs a system call, it
-notifies the monitor, which then waits for other versions to perform the system
-call as well and checks that all versions performed the same system call by
-comparing the values of all arguments.
+as shown in Section~\ref{sec:patternmatching}). Given that, we can run all
+versions in lockstep as shown in Figure~\ref{fig:lockstep-execution}.  The
+monitor runs all versions in parallel. When any of the versions performs a
+system call, it notifies the monitor, which then waits for other versions to
+perform the system call as well and checks that all versions performed the same
+system call by comparing the values of all arguments.
 
 This approach is used by \mx, a prototype system described in
 Chapter~\ref{chap:safe-updates}, which implements the failure recovery scheme

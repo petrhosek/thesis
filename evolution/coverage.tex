@@ -11,11 +11,11 @@
 % Do executable and test code evolve in sync?
 
 Figure~\ref{fig:codebase-evol} shows the evolution of each system in
-terms of ELOC.  As discussed above, we measured the number of ELOC in
+terms of \si{\eloc}.  As discussed above, we measured the number of \si{\eloc} in
 each revision by using the information stored in \gcov graph files.
 This eliminates all lines which were not compiled, such as those
 targeting architectures different from our machine.  One of the main
-reasons for which we have decided to measure ELOC rather than other
+reasons for which we have decided to measure \si{\eloc} rather than other
 similar metrics is that they can be easily related to the dynamic
 metrics, such as patch coverage, presented in
 Sections~\ref{sec:code-cov}.
@@ -25,22 +25,22 @@ Sections~\ref{sec:code-cov}.
 %% using \stt{gcov} data as above.
 
 As evident from this figure, all \numSystems systems grow over time,
-with periods of intense development that increase the ELOC
+with periods of intense development that increase the \si{\eloc}
 significantly, alternating with periods of code tuning and testing,
 where the code size increases at a slower pace.  It is interesting to
-note that there are also several revisions where the number of ELOC
+note that there are also several revisions where the number of \si{\eloc}
 decreases (\eg in \zeromq): upon manual inspection, we noticed that
 they relate to refactorings such as using macros or removing duplicate
 code.
 
 %% An interesting behavior occurs in \lighttpdtwo and \memcached at the
-%% beginning of the period analysed, with higher ELOC churn than during
+%% beginning of the period analysed, with higher \si{\eloc} churn than during
 %% the rest of their evolution.  We hypothesize that as a project reaches
 %% maturity, churn disappears leaving place to a smoother evolution.
 
-The total number of ELOC added or modified varies
+The total number of \si{\eloc} added or modified varies
 between \redisPatchTotal for \redis and \lighttpdtwoPatchTotal
-for \lighttpdtwo, while the end-to-end difference in ELOC varies
+for \lighttpdtwo, while the end-to-end difference in \si{\eloc} varies
 between \beanstalkdDeltaSize for \beanstalkd and \lighttpdtwoDeltaSize
 for \lighttpdtwo.
 
@@ -139,10 +139,11 @@ The first observation is that a substantial amount of time is spent in
 maintenance activities that do not involve code nor tests.  For example, during
 the period analysed, in addition to the 250 target patches, there were around
 120 additional such patches in \binutils, \memcached and \zeromq,
-\beanstalkdNoTestNoExecutableRevs in \beanstalkd and \gitNoTestNoExecutableRevs
-in \git. Note that some of these patches may modify code that is excluded
-during preprocessing on our machine, but most cases involved changes to build
-scripts, documentation, and other similar software artefacts.
+\beanstalkdNoTestNoExecutableRevs in \beanstalkd, \gitNoTestNoExecutableRevs in
+\git and \vimNoTestNoExecutableRevs in \vim. Note that some of these patches
+may modify code that is excluded during preprocessing on our machine, but most
+cases involved changes to build scripts, documentation, and other similar
+software artefacts.
 
 From the 250 patches selected for each application, the majority only
 modify code, with a relatively small number of patches
@@ -162,14 +163,14 @@ accompanied by a test case. % exercising them.
 % How spread out is each patch through the code?
 
 The size of a patch and the number of locations affected by it can provide
-useful guidance for the external behaviour changes---small, localized changes
+useful guidance for the external behaviour changes---small, localised changes
 are likely to introduce small changes in behaviour. The \textit{Lines} column
 in Table~\ref{tbl:exec-patch} provides information about the size of the
-executable code patches analysed in each system, measured in ELOC. Note that
+executable code patches analysed in each system, measured in \si{\eloc}. Note that
 our measurements ignore changes in the amount of whitespace, \eg whitespace at
 the end of the line, characters, because our target programming languages, C
 and C++, are insensitive to such modifications.  Most patches are small, with
-the median number of ELOC ranging from \redisPatchMedian to \gitPatchMedian.
+the median number of \si{\eloc} ranging from \vimPatchMedian to \gitPatchMedian.
 
 %% All systems exhibit a large standard deviation of this metric,
 %% corresponding to a skewed distribution of executable lines across the
@@ -203,7 +204,7 @@ single file is, in increasing order, \vimOneeFilePatches for \vim,
 for \redis, and \binutilsOneeFilePatches for \binutils.
 
 While these results are based on static analysis only, the fact that most
-patches are small and localized suggests that individual patches are likely to
+patches are small and localised suggests that individual patches are likely to
 have only a small impact on the external behaviour. This hypothesis is further
 confirmed in Section~\ref{evolution:external} which analyses the dynamic
 behaviour.
@@ -250,7 +251,7 @@ succeeds/fails, and the maximum, median and average number of lines
 which are non-deterministically executed in a revision.}
 \begin{tabular}{lrrrr}
 \toprule
-\multicolumn{1}{c}{}  & \textsc{Nondet.} & \multicolumn{3}{c}{\sc Nondet. ELOC} \\ 
+\multicolumn{1}{c}{}  & \textsc{Nondet.} & \multicolumn{3}{c}{\sc Nondet. \si{\eloc}} \\ 
 \cmidrule{3-5}
 \textsc{Application} & \multicolumn{1}{c}{\sc Result}  & \textsc{Max} & \textsc{Median} & \textsc{Average} \\
 \midrule
@@ -287,9 +288,9 @@ We measured the overall coverage achieved by the regression test suite using
 different coverage in each run of the test suite.  Therefore, we first
 quantified this non-determinism by running the test suite five times for each
 revision and measuring how many revisions obtained mixed results, \ie one run
-reported success while another reported failure.  We were surprised to see a
-fair number of revisions displaying this behaviour, as listed in
-Table~\ref{tbl:nondet} under the column \textit{Nondet Result}.
+reported success while another reported failure.  We have found a number of
+revisions displaying this behaviour, as listed in Table~\ref{tbl:nondet} under
+the column \textit{Nondet Result}.
 %We believe that many of these failures were
 %invluenced by the Docker environment, as some tests rely on custom timeouts
 %which make them more fragile in the environment with slightly different
@@ -303,7 +304,7 @@ another one executes it. We only did this for revisions in which the
 test suite completes successfully to avoid spurious results that would
 occur if we compare a run which completed with one that was
 prematurely terminated due to a failure.  As shown in Table~\ref{tbl:nondet},
-\binutils, \lighttpd and \vim seems to be completely deterministic with respect
+\binutils, \lighttpd and \vim seems to be deterministic with respect
 to its test suite, while \redis, for example, contains on average
 \redisNonDetAverage lines that are non-deterministically executed.
 
@@ -312,7 +313,7 @@ coverage information across all five runs.\footnote{With the exception
 of \git, where for convenience we considered a single run, as the
 number of lines affected by non-determinism represent less than
 $0.3\%$ of the total codebase.} Therefore, the results aim to count a
-line as covered if the test suite {\em may} execute it.  The blue
+line as covered if the test suite {\em may} execute it.  The darker grey
 (upper) lines in Figure~\ref{fig:coverage} plot the overall line
 coverage for all benchmarks.  It can be seen that coverage level
 varies significantly, with \beanstalkd at one end achieving
@@ -365,7 +366,7 @@ reasonable overhead, the existing solutions are already usable for many
 real-world applications~\cite{coredet:asplos10,dthreads:sosp11}. \varan uses
 logical clocks to enforce ordering across threads. While this approach provides
 weaker guarantees than those typically provided by other DMT systems, it can
-still handle most cases, as described in Section~\ref{sec:threading}).
+still handle most cases, as described in Section~\ref{sec:threading}.
 
 \begin{figure}[t]
 \centering
@@ -510,7 +511,7 @@ covered.
 
 \begin{table}[t]
 \centering
-\caption{Overall patch coverage bucketed by the size of the patch in ELOC. \textsc{NP} is the number of patches in the bucket and \textsc{C} is their overall coverage.  Only patches which add or modify executable code are considered.}
+\caption{Overall patch coverage bucketed by the size of the patch in \si{\eloc}. \textsc{NP} is the number of patches in the bucket and \textsc{C} is their overall coverage.  Only patches which add or modify executable code are considered.}
 \begin{tabular}{lrcrcrc}
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{2}{c}{\sc $\le$10} & \multicolumn{2}{c}{\sc 11-100} & \multicolumn{2}{c}{\sc >100}  \\
@@ -531,17 +532,18 @@ covered.
 \label{tbl:patch-coverage-buckets}
 \end{table}
 
-Table~\ref{tbl:patch-coverage-buckets} presents the same patch
-coverage statistics, but with the patches bucketed by their size into
-three categories: less than 10 ELOC, between 11 and 100 ELOC, and
-greater than 100 ELOC.  For all benchmarks, patches are distributed
-similarly across buckets, with the majority of patches having $le$10
-ELOC and only a few exceeding 100 ELOC. Except for \beanstalkd and \vim, the
-average coverage of patches with $\le$10 ELOC is higher than for those with
-\textgreater100 ELOC, but the coverage of the middle-size category varies.
+Table~\ref{tbl:patch-coverage-buckets} presents the same patch coverage
+statistics, but with the patches bucketed by their size into three categories:
+less than \SI{10}{\eloc}, between \SIrange{11}{100}{\eloc}, and greater than
+\SI{100}{\eloc}.  For all benchmarks, patches are distributed similarly across
+buckets, with the majority of patches having $\le$\SI{10}{\eloc} and only a few
+exceeding \SI{100}{\eloc}. Except for \beanstalkd and \vim, the average
+coverage of patches with $\le$\SI{10}{\eloc} is higher than for those with
+\textgreater\SI{100}{\eloc}, but the coverage of the middle-size category
+varies.
 
 Finally, the first column in Table~\ref{tbl:latent} shows the overall
-patch coverage, \ie the percentage of covered ELOC across all patches.  For
+patch coverage, \ie the percentage of covered \si{\eloc} across all patches.  For
 \beanstalkd, \binutils, \git, \memcached and \vim, it is within five percentage
 points from the overall program coverage, while for the other benchmarks it is
 substantially lower---for example, the average overall program coverage in
@@ -563,10 +565,10 @@ In some projects, tests exercising the patch are added only after the
 code has been submitted, or the patch is only enabled (\eg by changing
 the value of a configuration parameter) after related patches or tests
 have been added.  To account for this development style, we also
-recorded the number of ELOC in each patch which are only covered in
+recorded the number of \si{\eloc} in each patch which are only covered in
 the next few revisions (we considered up to ten subsequent revisions).
-We refer to the ratio between the number of such ELOC and the total
-patch ELOC as \textit{latent patch coverage}.
+We refer to the ratio between the number of such \si{\eloc} and the total
+patch \si{\eloc} as \textit{latent patch coverage}.
 
 We counted these lines by keeping a sliding window of uncovered
 patch lines from the past ten revisions and checking whether the
@@ -607,12 +609,11 @@ tests in the same revision.
 
 As conjectured, we found two main causes of latent patch coverage:
 tests being added only after the patch was written (this was the case
-in \lighttpdtwo, where 12 revisions which only add tests cover an
-additional 74 ELOC) and patch code being enabled later on. In fact,
-the majority of latent patch coverage in \lighttpdtwo---337 lines---is
-obtained by 6 revisions which change no test files.  Upon manual
-inspection, we found that the code involved was initially unused, and
-only later revisions added calls to it.
+in \lighttpdtwo, where 12 revisions which only add tests cover an additional
+\SI{74}{\eloc}) and patch code being enabled later on. In fact, the majority of
+latent patch coverage in \lighttpdtwo---337 lines---is obtained by 6 revisions
+which change no test files.  Upon manual inspection, we found that the code
+involved was initially unused, and only later revisions added calls to it.
 
 Latent patch coverage is important to consider in various coverage
 analyses. The delay of several revisions until obtaining the patch
@@ -771,7 +772,7 @@ metric, with bugs still being introduced even by patches which are
 fully covered by the regression test suite. Therefore, even well-tested
 code may contain bugs, which can manifest themselves after prolonged
 operation in the production environment, and runtime technologies like
-NVX can be useful in those scenarios.
+multi-version execution can be useful in those scenarios.
 
 %Therefore, even for
 %well-tested code, tools which thoroughly check each program statement

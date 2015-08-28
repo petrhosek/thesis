@@ -9,24 +9,20 @@
 %% \label{fig:mx-platform}
 %% \end{figure}
 
-We have implemented our approach in a prototype system called \mx,
-targeted at multi-core processors running Linux.  Currently, \mx
-supports two versions run in parallel. The system works directly on
-application binaries, making it easy to deploy it and possibly integrate
-it with existing software package managers such as \texttt{apt} or
-\texttt{yum}.
+We have implemented our approach in a prototype system called \mx, targeted at
+multi-core processors running Linux.  Currently, \mx supports two versions run
+in parallel. The system works directly on application binaries, making it easy
+to deploy it and possibly integrate it with existing software package managers.
 
-%Figure~\ref{fig:mx-platform} shows a platform running \mx, on which
-On a platform using \mx, conventional (\ie unmodified) applications
-and multi-version (\mv) applications run side by side.  The key
-property that must hold on such a platform is that without purposely
-trying to do so, applications should not be able to distinguish
-between conventional and \mv applications running on the platform. In
-particular, the multiple versions of an \mv application should appear
-as one to any other entity interacting with them (\eg user, operating
-system, other machines).  Furthermore, \mv applications should be more
-reliable and secure than their component versions, and their
-performance should not be significantly degraded.
+On a platform using \mx, conventional (\ie unmodified) applications and
+multi-version (\mv) applications run side by side.  The key property that must
+hold on such a platform is that without purposely trying to do so, applications
+should not be able to distinguish between conventional and \mv applications
+running on the platform. In particular, the multiple versions of an \mv
+application should appear as one to any other entity interacting with them (\eg
+user, operating system, other machines).  Furthermore, \mv applications should
+be more reliable than their component versions, and their performance should
+not be significantly degraded.
 
 To achieve these goals, our prototype \mx employs several different
 components, as shown in the architectural overview of
@@ -48,10 +44,11 @@ it is resolved by \rem (Runtime Execution Manipulator), which selects
 between the available behaviours, and resynchronises the two versions
 after the divergence (\S\ref{sec:rem}).
 
-The system prototype has been implemented in C with a small amount of
-assembly, and the current version has approximately \mxSLOC source
-lines of code. The implementation currently supports Linux kernels
-3.2.0 and above, running x86 and x86-64 architectures.
+The system prototype has been implemented in C with a small amount of assembly,
+and the current version has approximately \mxSLOC, with majority being the code
+for handling individual system calls and their arguments. The implementation
+currently supports Linux kernels 3.2.0 and above, running x86 and x86-64
+architectures.
 
 The rest of this section describes the main \mx system components and
 their implementation in more detail, and discusses how they work
@@ -73,14 +70,13 @@ together to support safe software updates.
 \subsection{System call interposition}
 \label{sec:mxm}
 
-One of the main components of our multi-version execution environment
-is the \mxm monitor.  \mxm's main jobs are to run the two versions
-concurrently, mediate their interaction with the outside world,
-synchronise their executions, and detect any divergences in their
-external behaviour. \mxm works by intercepting all system calls issued
-by each application version, and manipulating them to ensure that the
-two versions are executed in a synchronised fashion and act as one to
-the outside world.
+One of the main components of our multi-version execution environment is the
+\mxm monitor.  \mxm's main jobs are to run the two versions concurrently,
+mediate their interaction with the outside world, synchronise their executions,
+and detect any divergences in their external behaviour. \mxm works by
+intercepting all system calls issued by each application version, and
+manipulating them to ensure that the two versions are executed in a
+synchronised fashion.
 
 \mxm provides functionality similar to conventional virtual machine monitors.
 Whenever the MV application is executed, the \mxm connects to the two
@@ -88,8 +84,7 @@ application versions running in parallel, intercepting their kernel system
 calls.  \mxm ensures that the two versions act as one to the outside world by
 mediating access to the underlying operating system to achieve complete
 isolation of the running application from other application instances as well
-as from the external environment, making sure the combined application versions
-act as one to the outside world.  The environment controlled by the monitor
+as from the external environment.  The environment controlled by the monitor
 consists mainly of a restricted file system access, socket interceptors and
 signal handlers.
 
@@ -168,17 +163,18 @@ Second, the arguments of a system call are often passed through pointers,
 which are only valid in the application address space, which is not directly
 available to \mxm.  Therefore, \mxm needs to copy the contents pointed to by
 these structures to its own address space in order to perform their
-comparison.  The \ptrace interface on x86-64 only allows to copy one quadword
-per system call, which is very expensive. Previous approaches either used
-various ad-hoc optimisations~\cite{orchestra09} such as named pipes or shared
-memory with custom shellcode, or a modified kernel~\cite{tachyon12} to
-overcome this limitation. Instead, \mxm uses \emph{cross memory attach}, a new
-mechanism for fast interprocess communication which has been recently added to
-the Linux kernel~\cite{crossmemoryattach}.  This mechanism provides two new
-system calls---\lstinline`process_vm_readv` and
-\lstinline`process_vm_writev`---which allows the tracer to directly access the
-memory space of the tracee using an interface similar to the \lstinline`readv`
-and \lstinline`writev` system calls without any additional overhead.
+comparison.  The \ptrace interface on only allows to copy a single doubleword
+on x86 and a single quadword on x86-64 per system call, which is very
+expensive. Previous approaches either used various ad-hoc optimisations such as
+named pipes or shared memory with custom shellcode~\cite{orchestra09}, or a
+modified kernel~\cite{tachyon12} to overcome this limitation. Instead, \mxm
+uses \emph{cross memory attach}, a new mechanism for fast interprocess
+communication which has been recently added to the Linux
+kernel~\cite{crossmemoryattach}.  This mechanism provides two new system
+calls---\lstinline`process_vm_readv` and \lstinline`process_vm_writev`---which
+allows the tracer to directly access the memory space of the tracee using an
+interface similar to the \lstinline`readv` and \lstinline`writev` system calls
+without any additional overhead.
 
 Third, because the structures passed as arguments to system calls often have
 variable size, \mxm also needs a fast way to allocate and deallocate memory
@@ -188,7 +184,8 @@ namely the \textsf{obstack}
 library,\footnote{\url{http://www.gnu.org/software/hello/manual/libc/Obstacks.html}}
 which is part of the \gnu C Library.  Each monitored process has its own
 region, which is used for allocating memory to store the copy of the process'
-system call arguments
+system call arguments. After the comparison of arguments between the versions,
+the entire region can be disposed at once.
 
 \subsubsection{Multi-process and multi-threaded applications}
 
@@ -341,9 +338,9 @@ As discussed in Section~\ref{multi-version:rationale}, in \mx we focus
 our attention on surviving crash errors, so the key challenge is to
 allow the crashing version to survive the crash.  This is essential to
 the success of our approach, which relies on having both versions alive
-at all times, so that the overall application can survive any crash bugs
-that happen in either the old or the new version (although of course,
-not in both at the same time).
+at all times, so that the overall application can survive any crash bugs that
+happen in either the old or the new version (although not in both at the same
+time).
 
 We emphasise that we apply our approach only to crash errors (those
 raising a \lstinline`SIGSEGV` signal), and not to other types of program

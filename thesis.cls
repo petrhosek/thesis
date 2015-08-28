@@ -176,7 +176,9 @@
 % Fancy
 %
 \RequirePackage{booktabs}
+\RequirePackage{tabularx}
 \RequirePackage{textcase}
+\RequirePackage{fnpct}
 
 \newcommand*{\@supervisor}{}
 \newcommand*{\@university}{Imperial College London}
@@ -207,9 +209,8 @@
 
 \renewcommand{\maketitle}{
 \begin{titlepage}
- \par
  \clearpage
- \thispagestyle{plain}
+ \thispagestyle{empty}
  \noindent\begin{minipage}[t]{\textwidth}
   \centering\large
   \@university
@@ -237,15 +238,6 @@
   \@degree\ in \ifx\empty\@field{\@department}\else{\@field}\fi\ of
   the \@university, \@submitdate
  \end{minipage}
- \ifx\@declaration\@empty\else{
- \cleardoublepage
- \chapter*{Declaration}
- \thispagestyle{plain}
- \@declaration
- \par\vspace{3cm}
- \hfill\@author
- \cleardoublepage
- }\fi
 \end{titlepage}
 }
 
@@ -304,6 +296,7 @@
 %
 % Layout
 %
+\RequirePackage{marginnote}
 \RequirePackage{titlesec}
 
 % chapters
@@ -425,23 +418,7 @@
 \cftsetindents{table}{0em}{\figurelabelwidth}
 
 % listings
-\newlistof{listings}{lol}{\lstlistlistingname}%
-\renewcommand{\cftlistingspresnum}{\scshape\MakeTextLowercase}%
-\renewcommand{\cftlistingsfont}{\normalfont}%
-\renewcommand{\cftlistingspresnum}{\lstlistingname~}%
-\renewcommand{\cftlistingspagefont}{\normalfont}%
-\iftoggle{@dottedtoc}{\relax}%
-{%  
-  \renewcommand{\cftlistingsleader}{\hspace{1.5em}}%
-  \renewcommand{\cftlistingsafterpnum}{\cftparfillskip}%
-}
-\newlength{\listingslabelwidth}%
-\settowidth{\listingslabelwidth}{\cftlistingspresnum~999}%
-\addtolength{\listingslabelwidth}{2.5em}%
-%\cftsetindents{listings}{0em}{\listingslabelwidth}%
-\cftsetindents{listings}{0em}{\figurelabelwidth}%
-\let\l@lstlisting\l@listings%
-\let\lstlistoflistings\listoflistings%
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}%
 
 % dirty work-around to get the spacing after the toc/lot/lof-titles right    
 \AtBeginDocument{\addtocontents{toc}{\protect\vspace{-\cftbeforechapskip}}}

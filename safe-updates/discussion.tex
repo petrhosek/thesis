@@ -1,9 +1,8 @@
 \section{Discussion}
 \label{safe-updates:discussion}
 
-This section discusses in more detail the scope of our approach with
-regard to the type of software updates suitable to multi-version
-execution and the different trade-offs involved.
+This section discusses in more detail the scope of our approach, its limitation
+and the different trade-offs involved.
 
 %% This section discusses in more detail the scope of our approach
 %% with regard to (1) the type of applications and code changes that
@@ -11,65 +10,43 @@ execution and the different trade-offs involved.
 %% availability/reliability/availability and strict
 %% correctness/performance/energy consumption.
 
-\paragraph{Types of code changes} In order for \mx to be successful, the
-external behaviour of the versions that are run in parallel has to be similar
-enough to allow us to synchronise their execution.  Our empirical study in
-\S\ref{evolution:external} shows that changes to the external behaviour of
-an application are often minimal, so our approach should work well with
-versions that are not too distant from one another.  Similarly, our system
-relies on the assumption that versions re-converge to the same behaviour after
-a divergence.  As a result, we believe \mx would be a good fit for applications
-that perform a series of mostly independent requests, such as network servers.
-These applications are usually structured around a main dispatch loop, which
-provides a useful re-convergence point.  Our approach is also suitable to local
-code changes, which have small propagation distances, thus ensuring that the
-different versions will eventually re-converge to the same behaviour.
-
-\paragraph{Trade-offs involved} Our approach is targeted toward scenarios
-where the availability, reliability and security of a software system is more
-important than strict correctness, high performance and low energy consumption.  
-
-In terms of correctness guarantees, \mx is similar to previous approaches such
-as failure oblivious computing~\cite{fo} which may sacrifice strict correctness
-for increased availability and security (see \S\ref{sec:rem} for details
-regarding possible problems caused by \mx).  However, \mx alleviates this
-problem by using a previously correct piece of code to execute through the
-crash, and by discovering most potential problems by regularly checking if the
-two versions have the same external behaviour after recovery.  Finally, note
-that \mx always reverts to running a single version when a non-resolvable
-divergence is detected.
-
-%% is never worse than simply using one version of the software: if a
-%% non-crashing divergence is detected, \mx can simply continue execution
-%% with a single program version.
-
-\paragraph{CPU utilisation} \mx incurs a performance overhead, as discussed in
-\sref{sec:performance}.  In our experience, \mx is readily deployable to
-interactive applications such as command-line utilities, text editors and other
-office tools, where the performance degradation is not noticeable to the user.
-We believe it is also applicable to server scenarios where the end-to-end
-overhead is masked by network latency, and where availability is more important
-than high performance.  \mx is not applicable to servers requiring
-high-throughput and to patches that fix performance bugs, as the system runs no
-faster than the slowest version.
+\paragraph{CPU utilisation and memory consumption} \mx incurs a performance
+overhead, as discussed in \sref{sec:performance}. In our experience, \mx is
+applicable to interactive applications such as command-line utilities and
+interactive applications, where the performance degradation is not noticeable
+to the user. \mx is not applicable to servers requiring high-throughput or to
+patches that fix performance bugs, as the system runs no faster than the
+slowest version.  Both of of these issues are addressed by
+\varan.\marginnote{12}
 
 Our approach of using idle CPU time to run additional versions also increases
-energy consumption.  However, it is interesting to note that idle CPUs are not
-``free'' either: even without considering the initial cost of purchasing the
-cores left idle, an energy-efficient server consumes half its full power when
+energy consumption and therefore might not be applicable to energy-constrained
+devices such as smartphones. However, it is interesting to note that idle CPUs
+are not ``free'' either: even without considering the initial cost of
+purchasing the, an energy-efficient server consumes half its full power when
 doing virtually no work---and for other servers, this ratio is usually much
 worse~\cite{barroso2007}.
-% and therefore might not be applicable to energy-constrained devices
-%such as smartphones.
+
+Similarly, \mx also doubles the memory consumption, which in practice is less
+of an issue but could still lead to a performance degradation due to increased
+memory pressure for some applications.
+
+\paragraph{Memory-based communication.} The current \mx prototype does not
+support shared memory, which is often used for efficient communication between
+processes, as its use would be invisible to our system call interposition
+mechanism. One way we could handle this scenario is by serialising all accesses
+to shared memory using using a repeatable deterministic task
+scheduler~\cite{russinovich:pldi96}. This approach has been used by Paranoid
+Android~\cite{paranoid-android} in the same context.
 
 \paragraph{Deployment strategy} While our approach eases the decision of
 applying a software update---as incorporating a new version would never
-decrease the security and reliability of the overall multi-version
-application---the number of versions that can be run in parallel is limited,
-being dictated by the number of available resources (\eg the number of
-available CPU cores).  As a result, we need a deployment strategy to decide
-what versions to use.  For example, we could always run the last $N$ released
-versions (where $N$ is the number of available resources), or we could always
-keep a one-year old version, etc.  This thesis focuses on designing and
-implementing multi-version execution techniques, but in future work we plan to
-explore deployment strategies in more detail.
+decrease the reliability\marginnote{10} of the multi-version application---the
+number of versions that can be run in parallel is limited, being dictated by
+the number of available resources (\eg the number of available CPU cores).  As
+a result, we need a deployment strategy to decide what versions to use.  For
+example, we could always run the last $N$ released versions (where $N$ is the
+number of available resources), or we could always keep a one-year old version,
+etc.  This thesis focuses on designing and implementing multi-version execution
+techniques, but in future work we plan to explore deployment strategies in more
+detail.

@@ -1,26 +1,26 @@
 \section{Software updates}
 
 Closely related to the execution of multiple versions is the management of
-multiple versions, environment and software updates, such as deciding when to
-upgrade, applying updates, \etc
+multiple versions and software updates, such as deciding when to upgrade,
+applying updates, \etc Previous work on improving the software update process
+has also looked at different aspects related to managing and deploying new
+software versions.
+
+\subsection{Dynamic software updates}
 
 Dynamic software updating (DSU) systems are concerned with the problem of
 updating programs while they are running. These systems have been implemented
 both in kernel-space~\cite{k42,dynamos,ksplice,proteos} and in
 user-space~\cite{opus,ginseng,polus,upstare,ekiden,kitsune}.
 
-Previous work on improving the software update process has looked at different
-aspects related to managing and deploying new software versions.
-
-\subsection{Dynamic software updates}
-
 The dynamic update process typically consists of two stages---code update and
-state transfer---with different approaches available.
+state transfer---and existing systems employed different approaches to handle
+these.
 
 Ginseng~\cite{ginseng} and K42~\cite{k42} employ indirection to enable the code
 update. This simplifies the code update mechanism, but the indirection
 introduces performance overhead during normal execution. Ginseng uses a
-specialized compiler which creates a ``dynamically updateable program'' where
+specialised compiler which creates a ``dynamically updatable program'' where
 all function symbols are replaced with function pointers and all direct
 function calls are replaced with indirect call through these pointers. During
 update, these pointers are updated to point to the new version of the code,
@@ -33,7 +33,7 @@ OPUS~\cite{opus}, DynAMOS~\cite{dynamos}, POLUS~\cite{polus} and
 Ksplice~\cite{ksplice} use binary rewriting instead of indirection to replace
 the entry point of the functions being updated with a jump to a trampoline.
 Compared to indirection, this approach does not require the use of a
-specialized compiler, but it is highly platform-dependent. We use the same
+specialised compiler, but it is highly platform-dependent. We use the same
 approach in \varan to handle virtual system calls (\S\ref{sec:vsyscall}).
 
 The aforementioned systems treat individual functions or objects as the unit of
@@ -49,7 +49,15 @@ frames for old functions with their new versions. Ekiden and Kitsune on the
 other hand rely on manual approach requiring the programmer to direct the
 execution into the equivalent update point in the new version.
 
-%\textsc{PROTEOS}~\cite{proteos}.
+\textsc{Proteos}~\cite{proteos} and TTST~\cite{ttst} use a custom
+instrumentation component implemented on top of LLVM compiler framework to
+automate state transfer and state management to a large degree, only requiring
+programmer-provided state transfer callback for complex state changes
+(and cases of pointer ambiguity). Unlike previous systems which use in-place
+live update strategies, \textsc{Proteos} and TTST confine different program
+versions into separate processes which simplifies state managements and enables
+simple fail-over in case of a failed update. While \textsc{Proteos} is a new
+research operating system, TTST is implemented entirely in Linux user-space.
 
 Compared to \mx and \varan, in DSU systems the two versions co-exist only for
 the duration of the software update, but DSU and the \rem component of \mx face
@@ -76,7 +84,7 @@ the system by applying a broken patch, patching too late could on the other
 hand lead to the risk of penetration by an attacker exploiting a well known
 security issue. Using the cost functions of corruption and penetration, based
 upon real world empirical data, they have shown that 10 and 30 days after the
-patch's release date are the optimal times to apply the patch to minimize the
+patch's release date are the optimal times to apply the patch to minimise the
 risk of a defective patch.  Such a delay still opens a lot of opportunities for
 potential attackers.
 
@@ -114,11 +122,11 @@ engineering of security patches for these diversified versions.
 
 In relation to this work, \mx and \varan try to ease the decision of applying a
 software update, because incorporating a new version should only increase the
-security and reliability of the overall multi-version application.  However, in
-practice the number of versions that can be run in parallel is dictated by the
-number of available resources (\eg the number of available CPU cores), so
-effective update strategies are still needed in this context, and work in this
-area could provide helpful solutions to this problem.
+reliability and availability\marginnote{10} of the overall multi-version
+application.  However, in practice the number of versions that can be run in
+parallel is dictated by the number of available resources (\eg the number of
+available CPU cores), so effective update strategies are still needed in this
+context, and work in this area could provide helpful solutions to this problem.
 
 %In relation to this work, \mx tries to encourage users to always apply
 %a software update, but it would still benefit from effective update
@@ -129,7 +137,7 @@ Many large-scale services, such as Facebook and Flickr use a {\it continuous
 deployment} approach, where new versions are continuously released to
 users~\cite{johnson2009,flickr}, but each version is often made accessible only
 to a fraction of users to prevent complete outage in case of newly introduced
-errors.  While this approach helps minimize the number of users affected by new
+errors.  While this approach helps minimise the number of users affected by new
 bugs, certain bugs may manifest themselves only following prolonged operation,
 after the release has been deployed to the entire user base.  We believe our
 proposed approach is complementary to continuous deployment, and could be

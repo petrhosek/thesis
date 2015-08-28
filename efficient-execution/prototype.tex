@@ -18,10 +18,11 @@
 \end{figure}
 
 
-We have implemented our approach in a prototype (to which we will also
-refer as \varan), targeted at multi-core processors running x86-64 Linux.
-\varan works on off-the-shelf binaries (both stripped and unstripped)
-and supports single- as well as multi-threaded applications.
+We have implemented our approach in a prototype, targeted at multi-core x86 and
+x86-64 processors running Linux. The system has been implemented in C and
+Assembly and the current prototype has approximately \varanSLOC. \varan works
+on off-the-shelf binaries (both stripped and unstripped) and supports single-
+as well as multi-threaded applications.
 
 When it starts, \varan first sets up the address spaces of all program
 versions and establishes the needed communication channels
@@ -93,7 +94,7 @@ address spaces: the shared memory segment used for communication among
 versions (``shm'') and the \varan statically-linked library
 (``varan'').  Note that \varan does not prevent address-space layout
 randomisation schemes to be used by the operating system, because the
-\varan library is compiled as PIC.
+\varan library is compiled as position independent code (PIC).
 
 %% \varan is operates at the thin boundary between the operating system and
 %% the user-space application---\ie below the C library and the dynamic
@@ -106,7 +107,7 @@ randomisation schemes to be used by the operating system, because the
 \subsubsection{Coordinator}
 
 To set up the address spaces of the versions, the coordinator acts as a
-specialized preloader, inspired by
+specialised preloader, inspired by
 \emph{rtldi}.\footnote{\url{http://www.bitwagon.com/rtldi/rtldi.html}} However,
 the coordinator does not attempt to replace the existing dynamic linker, which
 would be unnecessarily complex and may affect compatibility with existing
@@ -118,8 +119,8 @@ One important advantage of our interception mechanism is that we do not make
 use of \ptrace to intercept calls to the dynamic linker---instead, the binary
 rewriter is used to rewrite all the system calls done by the linker with jumps
 into the coordinator code.  As a result, \varan can be used in combination with
-existing \lstinline`ptrace`-based tools such as \gdb or \strace, which greatly
-simplifies debugging.
+existing \ptrace-based tools such as \gdb or \strace, which greatly simplifies
+debugging.
 
 This architecture has several advantages over other possible approaches. \varan
 does not require the use of dynamic linker, as required by
@@ -263,7 +264,7 @@ the call.
 %% different use cases (\S\ref{sec:failover}). For our prototype, we have
 %% provide three different system call tables (\ie record, replay and
 %% passthrough). 
-\varan  also provides a Python script which can produce new tables
+\varan  also provides a Python script which can produce new system call tables
 and their implementations using templates.
 %% ; in fact, the passthrough table was implemented using this
 %% generator. We have also used the generator throughout the \varan
@@ -307,20 +308,20 @@ as \gnu C library, which checks whether the vDSO page is available and if so
 uses the virtual system call, or alternatively falls back to the regular system
 call implementation.
 
-Virtual system calls represents one of the major limitations of
-\lstinline`ptrace`-based monitors. Since these system calls are entirely
-implemented in user space, they cannot be intercepted via \ptrace.
-This is an important limitation: as these system calls provide access
-to timing information, they are often used as a source of
-non-determinism (\eg for random number generators) and their handling
-is critical for any NVX system. %Despite this, previous systems either
-%omit discussion on virtual system call handling~\cite{mx,orchestra11}
-%or explicitly mention their inability to handle them~\cite{tachyon12}.
+Virtual system calls represents one of the major limitations of \ptrace-based
+monitors. Since these system calls are entirely implemented in user space, they
+cannot be intercepted via \ptrace.  This is an important limitation: as these
+system calls provide access to timing information, they are often used as a
+source of non-determinism (\eg for random number generators) and their handling
+is therefore important to ensure deterministic execution across versions.
+Previous systems either omit discussion on virtual system call
+handling~\cite{mx,orchestra11} or explicitly mention their inability to handle
+them~\cite{tachyon12}.
 
-To our knowledge, \varan is the first NVX system which handles virtual system
-calls, using binary rewriting.  Previous systems either omit discussion on
-virtual system call handling~\cite{orchestra11} or explicitly mention their
-inability to handle them~\cite{tachyon12}.
+%To our knowledge, \varan is the first NVX system which handles virtual system
+%calls, using binary rewriting.  Previous systems either omit discussion on
+%virtual system call handling~\cite{orchestra11} or explicitly mention their
+%inability to handle them~\cite{tachyon12}.
 %In \varan, binary rewriting is also used to intercept virtual system
 %calls.
 Handling calls made via the \textit{vsyscall} page is easier because
@@ -700,10 +701,20 @@ the user to modify and recompile the monitor on every rule
 change. This is particularly important as rewrite rules can be
 application specific. Second, the BPF machine language was designed to
 be simple enough to prevent certain classes of errors---in particular,
-all filters are statically verified when loaded to ensure termination.
-% (\ie every filter has to end with a \lstinline`ret` instruction).
+all filters are statically verified when loaded to ensure termination (\ie
+every filter has to end with a \lstinline[language={[bpf]Assembler}]`ret`
+instruction).
 
-
+We expect that these rules will be written by the application developer and
+distributed alongside the new version.\marginnote{7} Alternatively, they could
+be also written by administrators after deployment when a divergence is
+detected. For the prototype implementation, we have opted for the classic BPF
+(cBPF) filters, which use an Assembly-like instruction set, as they are easier
+to implement and are already used by seccomp-bpf~\cite{seccomp-bpf:linux}.
+However, they could be also tedious to write and have limited expressivity.
+Hence, in the future we plan to replace the cBPF with extended BPF
+(eBPF)~\cite{ebpf:linux}, which allow filters to be written in C and translated
+into eBPF instructions using Clang/LLVM.
 
 %We also argue that the choice of BPF as a language for stream rewriting rules
 %makes it easier to adopt by administrators, the most likely users of \varan,

@@ -1,9 +1,9 @@
 \subsection{C10k servers}
 \label{sec:c10k}
 
-Existing NVX systems, including those based on \lstinline`ptrace`, can
-already run many (two-version) CPU-bound applications efficiently with an overhead
-typically less than \SI{20}{\percent}.  As a result, we focus our evaluation on
+Existing NVX systems, including those based on \ptrace, can already run many
+(two-version) CPU-bound applications efficiently with an overhead typically
+less than \SI{20}{\percent}.  As a result, we focus our evaluation on
 high-performance, heavily I/O-bound C10k servers which%
 \begin{inparaenum}[(1)]
 \item represent the worst-case scenario for a system call monitor; and
@@ -12,7 +12,7 @@ high-performance, heavily I/O-bound C10k servers which%
 \end{inparaenum}
 
 The \nservers server applications used in our evaluations are
-summarized in Table~\ref{tbl:apps} (the size is measured in lines of
+summarised in Table~\ref{tbl:apps} (the size is measured in lines of
 code, as reported by the \emph{cloc} tool). For our performance experiments, we
 ran multiple instances of the same version of each application.
 %(in practice you would typically run different versions as shown in Section \ref{sec:applications}).  
@@ -61,11 +61,11 @@ was calculated as the median of the remaining five measurements.
 
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\textwidth]{efficient-execution/graphs/c10k}
+ \includegraphics[width=\textwidth]{efficient-execution/graphs/c10k-loopback}
  \caption{Performance overhead for the \beanstalkd, \lighttpd, \memcached, \nginx
    and \redis servers for different number of followers.  The client
-   and server are located on the same rack, simulating a worst-case scenario.}
- \label{fig:servers}
+   and server are running on the same machine, simulating a worst-case scenario.}
+   \label{fig:servers}\marginnote{6}[-1em]
 \end{figure}
 
 % Even though some of the servers used in our evaluation were already introduced
@@ -79,14 +79,14 @@ measure performance (namely throughput) in our experiments:
 \begin{enumerate}
 
 \item[\beanstalkd\footnote{\url{http://kr.github.io/beanstalkd/}}]
-is a simple and fast work queue, used by many websites to
-distribute jobs among workers. We used revision \lstinline`157d88b` from the
-official \git repository, the latest revision at the time of
-writing.  To measure performance, we used
-\lstinline`beanstalkd-benchmark`\footnote{\url{https://github.com/fangli/beanstalkd-benchmark}}
+is a simple and fast work queue, used by many websites to distribute jobs among
+workers. We used revision \lstinline`157d88b` from the official \git
+repository, the latest revision at the time of writing.  To measure
+performance, we used
+\beanstalkdbenchmark\footnote{\url{https://github.com/fangli/beanstalkd-benchmark}}
 with \num{10} concurrent workers each performing \num{10000} push operations
 using \SI{256}{\byte} of data per operation.
-%The results are summarized in Figure~\ref{fig:macro_beanstalkd}.
+%The results are summarised in Figure~\ref{fig:macro_beanstalkd}.
 
 %\boldtext{\textit{Lighttpd}}\footnote{\url{http://www.lighttpd.net/}}
 %is a lightweight web server optimized for high performance
@@ -96,21 +96,21 @@ using \SI{256}{\byte} of data per operation.
 %\lstinline`wrk`, which was run for \SI{10}{\second} with \num{10} clients.
 
 \item[\lighttpdtwo\footnote{\url{https://github.com/lighttpd/lighttpd2}}]
-is a lightweight web server optimized for high performance environments,
-reimplemented entirely from scratch in the version 2.0.  We used
-revision \lstinline`93d04a3` from the official \git repository, the
-latest revision at the time of writing. We measured the performance of serving
-a \SI{4}{\kilo\byte} page using
-\lstinline`wrk`,\footnote{\url{https://github.com/wg/wrk}}, which was run for
-\SI{10}{\second} with \num{10} clients.
+is a~lightweight web server optimised for high performance environments,
+reimplemented entirely from scratch in the version 2.0.  We used revision
+\lstinline`93d04a3` from the official \git repository, the latest revision at
+the time of writing. We measured the performance of serving a
+\SI{4}{\kilo\byte} page using \wrk,\footnote{\url{https://github.com/wg/wrk}}
+which was run for \SI{10}{\second} with \num{10} clients.
 
 \item[\memcached\footnote{\url{http://memcached.org/}}]
 is a high-performance, distributed memory object caching system, used by
 many high-profile websites to alleviate database load. We used 
 revision 1.4.17, the latest at the time of writing. To measure the performance
-overhead, we used the \emph{memslap} benchmark,\footnote{\url{http://libmemcached.org/}}
-part of the \emph{libMemcached} library. We used the default workload,
-\ie an initial load of \num{10000} key pairs and \num{10000} test executions.
+overhead, we used the \memslap
+benchmark,\footnote{\url{http://libmemcached.org/}} part of the \libmemcached
+library. We used the default workload, \ie an initial load of \num{10000} key
+pairs and \num{10000} test executions.
 
 %% To measure the performance overhead introduced by \varan when running
 %% \memcached, we used \lstinline`memslap`, a load generation and benchmarking
@@ -132,33 +132,30 @@ performance using the same workload as for \lighttpdtwo.
 is a high-performance in-memory key-value data store, used by many
 well-known services. % such as Twitter, GitHub and StackOverflow.
 % Pinterest, Snapchat, Craigslist, Digg, Flickr 
-We used version 2.9.11 in our experiments.  To measure
-performance, we used
-\emph{redis-benchmark},\footnote{\url{http://redis.io/topics/benchmarks}}
-distributed as part of Redis. The benchmark issues different types
-of commands supported by Redis and measures both the throughput and
-the latency for each type. We used the default workload, \ie 50
-clients issuing \num{10000} requests and calculated the average overhead
-across all commands.
+We used version 2.9.11 in our experiments.  To measure performance, we used
+\redisbenchmark,\footnote{\url{http://redis.io/topics/benchmarks}} distributed
+as part of \redis. The benchmark issues different types of commands supported
+by \redis and measures both the throughput and the latency for each type. We
+used the default workload, \ie 50 clients issuing \num{10000} requests and
+calculated the average overhead across all commands.
 
 \end{enumerate}
 
 \begin{figure}[!t]
  \centering
- \includegraphics[width=\textwidth]{efficient-execution/graphs/redis}
+ \includegraphics[width=\textwidth]{efficient-execution/graphs/redis-loopback}
  \caption{Performance overhead for individual \redis operations for different
- number of followers. The client and server are located on the same rack,
+ number of followers. The client and server are running on the same machine,
  simulating a worst-case scenario.}
  \label{fig:redis-ops}
 \end{figure}
 
 Figure~\ref{fig:servers} shows the results for all servers and
-Figure~\ref{fig:redis-ops} for individual \redis operations. All
-performance numbers are obtained using the client-side tools presented
-above.  Since the client machine is located on the same rack as the
-server, these numbers represent a worst-case scenario, as the network
-latency would hide some of the overhead for a more distant client
-machine.
+Figure~\ref{fig:redis-ops} for individual \redis operations. All performance
+numbers are obtained using the client-side tools presented above.  Since both
+the client and the server run on the same machine using the loopback device,
+these numbers represent a worst-case scenario, as the network throughtput and
+latency could hide some of the overhead.
 
 %Figures~\ref{fig:servers} and \ref{fig:redis} show the results for all
 %servers.  The results for \redis are shown separately, because \redis
@@ -168,28 +165,25 @@ machine.
 %worst-case scenario, as the network latency would hide some of the
 %overhead for a more distant client machine.
 
-For each benchmark, we show one bar, normalised relative to native
-execution, showing the performance of \varan using a given number of
-followers.  We stop at six followers, because our machine has eight
-threads, and we also need one thread for the leader and one for the
-coordinator.  
-%For space reasons, for \redis we show results for only 0, 3 and 6 followers.
+For each benchmark, we show one bar, normalised relative to native execution,
+showing the performance of \varan using a given number of followers.  We stop
+at five followers, because our machine has four cores/eight threads, and we
+also needed additional thread for the leader and coordinator as well as for the
+client application itself.
 
 The set of bars for zero followers measure the interception overhead
 of \varan using binary rewriting.  This overhead is negligible for
 \lighttpdtwo, \memcached and most \redis operations, \nginxIntercept for
 \nginx, and \beanstalkdIntercept for \beanstalkd.
 
-For all benchmarks, we see that the performance overhead increases
-slightly with the number of followers.  For instance, the overhead for
-\beanstalkd increases from \beanstalkdOneFollower for one follower to
-\beanstalkdSixFollowers for six followers, while the overhead for
-\memcached increases from \memcachedOneFollower to
-\memcachedSixFollowers.
+For all benchmarks, we see that the performance overhead increases slightly
+with the number of followers. For instance, the overhead for \beanstalkd
+increases from \beanstalkdOneFollower for one follower to
+\beanstalkdFiveFollowers for five followers, while the overhead for \memcached
+increases from \memcachedOneFollower to \memcachedFiveFollowers.
 
-The figure also shows that there is a significant difference across
-benchmarks: the worst performer is \beanstalkd, which sees performance
-degradations in the range of \SIrange{55}{81}{\percent}, while the best performers are
-\memcached, with only \SIrange{14}{32}{\percent} overhead and some operations in \redis
-%such as \lstinline`LRANGE_300`, \lstinline`LRANGE_500` and \lstinline`LRANGE_600`
-with under \SI{3}{\percent} overhead.
+The figure also shows that there is a significant difference across benchmarks:
+the worst performer is \redis, which sees performance degradations in the range
+of \SIrange{39}{138}{\percent}, while the best performers are \lighttpdtwo,
+with only \SIrange{6}{23}{\percent} overhead and some operations in \redis with
+under \SI{3}{\percent} overhead.

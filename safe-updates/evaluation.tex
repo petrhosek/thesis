@@ -242,11 +242,10 @@ recover the failing version in both cases.
 In the previous sections, we have shown how \mx can help software
 survive crash bugs, by running two \textit{consecutive} versions of an
 application, one which suffers from the bug, and one which does not.
-%
 One important question is how far apart can be the versions run
 by \mx.  To answer this question, we determined for each of the bugs
 discussed above the most distant revisions that can be run together to
-survive the bug.  
+survive the bug as shown in Table~\ref{tbl:bug-bounds}.
 
 For the \coreutils benchmarks, we are able to run versions which are
 hundreds of revisions apart: \maxDistMdsum~revisions (corresponding to
@@ -307,7 +306,7 @@ For the \redis bug, the lower bound is given by the revision in which the
 \lstinline`HMGET` before that version, \mx has no way to survive the crash caused
 by invoking \lstinline`HMGET` with a wrong type (see \S\ref{sec:redis}).  The
 upper bound is defined by a revision which changes the way error responses are
-being constructed and reported, which results in a very different sequence of
+being constructed and reported, which results in a different sequence of
 system calls.
 
 %% , including the call on line
@@ -352,14 +351,14 @@ Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 %% $n$-fold slowdown, so the relatively high measure overhead is
 %% therefore unsurprising.
 
-\item[\gnu~\coreutils] The six \coreutils applications discussed in
+\item[\gnu~\coreutils] The six \gnu~\coreutils applications discussed in
   \sref{sec:coreutils} are mostly used in an interactive fashion via the
   command-line interface (CLI). In this context, a high performance
   overhead is acceptable as long as it is not perceptible to the user; prior
-  studies have shown that response times of less than 100ms typically feel
-  instantaneous~\cite{card:human_proc}. In many common use cases (\eg creating
-  a directory, or using \cut on a small text file), the overhead of \mx was
-  imperceptible---\eg creating a directory takes around \avgMkdirNative
+  studies have shown that response times of less than \SI{100}{\milli\second}
+  typically feel instantaneous~\cite{card:human_proc}. In many common use cases
+  (\eg creating a directory, or using \cut on a small text file), the overhead
+  of \mx was imperceptible---creating a directory takes around \avgMkdirNative
   natively and \avgMkdirMx with \mx. For the three utilities that process
   files, we calculated the maximum file size for which the response time with
   \mx stays under the 100ms threshold.  For \cut, the maximum file size is
@@ -370,90 +369,30 @@ Xeon E3-1280 and 16~GB of RAM running 64-bit Linux v3.1.9.
 \item[\lighttpd] We used the
   \httpload\footnote{\url{http://www.acme.com/software/http_load/}}
   multiprocessing test client that is also used by the \lighttpd developers.
-  This benchmark measures the end-to-end time as perceived by users. As a
-  result, we performed two sets of experiments: (1) with the client and server
-  located on the same machine, which represents the worst case performance-wise
-  for \mx; and (2) with the client and server located on different continents
-  (one in England and the other in California), which represents the best case.
-  The overhead for \lighttpd varies from \minLighttpdRemote to
-  \maxLighttpdRemote in the remote scenario, and from \minLighttpdOver to
-  \maxLighttpdOver in the local scenario.  Despite the relatively large
-  overhead in the local experiments, the remote overhead is negligible because
-  times are dominated by the network latency (which in our case is over
-  \SI{150}{\milli\second}).
+  This benchmarks runs multiple fetches in parallel, to test the throughput of
+  a web server. To measure the performance overhead, we performed \num{10000}
+  fetches using \num{5} parallel connections serving \num{1000} files, and we
+  used three different file sizes---\SI{1}{\kilo\byte}, \SI{10}{\kilo\byte}
+  and \SI{100}{\kilo\byte}.  fetches  When run on top of \mx, the overhead for
+  \lighttpd ranges from \minLighttpdOver to \maxLighttpdOver depending on the
+  file size. This result is comparable to existing \ptrace-based multi-variant
+  systems that used \lighttpd to measure performance~\cite{tachyon12}.
 
 \item[\redis] To measure the performance overhead for \redis, we used the
   \redisbenchmark\footnote{\url{http://redis.io/topics/benchmarks}} utility,
-  which is part of the standard \redis distribution and simulates
-  \lstinline`GET`/\lstinline`SET` operations done by $N$ clients concurrently, with
-  default workload. As in the case of \lighttpd, we performed two sets of
-  experiments, one for the local scenario and one for the remote scenario. The
+  which is part of the standard \redis distribution and simulates different
+  types of operations supported by \redis being issued concurrently by $N$
+  clients. We used the default workload of \num{50} clients issuing \num{10000}
+  requests and calculated the average overhead across all commands. The
   overhead for \redis varies, depending on the operation being performed, from
-  \minRedisRemote to \maxRedisRemote in the remote scenario, and from
-  \minRedisOver to \maxRedisOver in the local scenario. 
-
+  \minRedisOver to \maxRedisOver.
 \end{enumerate}
 
-Given the results presented hereinbefore, we believe \mx is most suitable for
-scenarios for which its execution overhead does not degrade the performance of
-the end-to-end task, such as the remote \redis and \lighttpd scenarios
-discussed above, or interactive tasks such as those performed using
-command-line utilities, where users would not notice the overhead as long as
-the response time stays within a certain range. On the other hand, it is
-clearly not suitable for applications requiring high-throughput, which is what
-motivated us design the high-performance mechanism of \varan.
-
-%% \mx's performance overhead is strongly correlated with the frequency of
-%% system calls that have to be intercepted.  Therefore, we could also
-%% imagine \mx being automatically turned on and off during execution,
-%% depending on the frequency of system calls experienced by the
-%% application.
-
-%% and only checkpoint at epoch boundaries.  To make this approach viable, we also
-%% need to record system calls in each epoch, so that they can be
-%% replayed during recovery. Second, 
-
-%% instead of using \textstt{clone}
-%% directly, we could implement the checkpointing functionality as a
-%% loadable kernel module and only store the part of the state needed for
-%% recovery as in~\cite{flashback}. Finally, we could explore the
-%% possibility of not intercepting system calls in certain parts of the
-%% code that were previously shown to be safe and do not need to be
-%% replicated across multiple versions (\eg similarly
-%% to~\cite{onlinevalidation}).
-
-%The measured overhead is higher than
-%for the SPEC~CPU2006 benchmarks (with a slowdown of up to \maxRedisOver
-%for some operations in \redis) and we are currently investigating the
-%reasons for this slowdown.
-
-%First, we could to synchronise versions at a coarser
-%granularity, by using a window/epoch approach~\cite{compl-schedules11},
-%and by performing certain synchronisations at the level of shared
-%library calls.  Second, we could explore the possibility of not
-%intercepting system calls in certain parts of the code that were
-%previously shown to be safe and do not need to be replicated across
-%multiple versions.  Finally, we could decrease the checkpointing
-%overhead, by performing them at a lower frequency, and record the
-%external behaviour since the last checkpoint, so that it can be
-%successfully replayed during recovery (\eg as in Rx~\cite{rx}).
-
-%We also examined how the frequency of system calls affects the
-%performance overhead of application executed on top \mx.
-%Figure~\ref{fig:syscall} shows the average number of system calls during
-%the execution of SPEC~CPU2006.  Rather surprising result is the fact
-%that \textsf{452.libquantum}, even though having the largest run time
-%overhead had the lowest average number of system calls.  On the hand,
-%the performance overhead of \textsf{400.perlbench}, despite having the
-%highest average number system, was bellow average. \todo{What is the
-%conclusion here?}
-
-% For example, as we discuss in related work, our
-% monitor \mxm is very similar to the monitor used by
-% Orchestra~\cite{orchestra09}, which by employing various optimisations
-% manages to obtain an average overhead of only about 15\% when
-% synchronising two program variants at the level of system calls.  In
-% terms of checkpointing, the Rx system~\cite{rx} implements a similar
-% approach based on the Linux copy-on-write mechanism, and which through
-% various optimisations manages to achieve a performance penalty of less
-% than 5\% when checkpointing every 200 milliseconds.
+Given the results presented hereinbefore, it is clear that while \mx might be
+suitable for interactive applications such as \gnu~\coreutils or \vim where the
+increased performance overhead does not degrade the user experience or
+CPU-bound compute kernels such as \speczerosix, it is clearly
+unsuitable\marginnote{13} for high-performance, heavily I/O-bound server
+appications such as \lighttpd or \redis. This is what motivated
+us\marginnote{12} to design the high-performance event-streaming mechanism of
+\varan, which is a more practical and more readily deployable solution.

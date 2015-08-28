@@ -1,4 +1,4 @@
-\newcommand{\mxSLOC}[0]{28,200\xspace}
+\newcommand{\mxSLOC}[0]{\SI{28200}{\loc}\xspace}
 
 % number of syscalls in Linux-x64 2.6.39
 \newcommand{\syscallsTotal}[0]{311\xspace}
@@ -8,14 +8,14 @@
 
 %% lighttpd feasibility study: data across 164 analysed versions
 
-% size of the smallest patch (in LOC)
-\newcommand{\lighttpdMinPatch}[0]{1\xspace} 
+% size of the smallest patch
+\newcommand{\lighttpdMinPatch}[0]{\SI{1}{\loc}\xspace} 
 
-% size of the smallest patch (in LOC)
-\newcommand{\lighttpdMaxPatch}[0]{2959\xspace} 
+% size of the smallest patch
+\newcommand{\lighttpdMaxPatch}[0]{\SI{2959}{\loc}\xspace} 
 
-% size of the patch median (in LOC)
-\newcommand{\lighttpdMedPatch}[0]{33\xspace} 
+% size of the patch median
+\newcommand{\lighttpdMedPatch}[0]{\SI{33}{\loc}\xspace} 
 
 
 
@@ -32,18 +32,18 @@
 % URL: http://redmine.lighttpd.net/issues/2169
 
 % lower bound
-\newcommand{\lighttpdOneLB}[0]{2,436\xspace}
+\newcommand{\lighttpdOneLB}[0]{2436\xspace}
 % upper bound
-\newcommand{\lighttpdOneUB}[0]{2,523\xspace}
+\newcommand{\lighttpdOneUB}[0]{2523\xspace}
 
 
 %%% lighttpd bug 2140 %%%
 % URL: http://redmine.lighttpd.net/issues/2140
 
 % lower bound
-\newcommand{\lighttpdTwoLB}[0]{2,696\xspace}
+\newcommand{\lighttpdTwoLB}[0]{2696\xspace}
 % upper bound
-\newcommand{\lighttpdTwoUB}[0]{2,708\xspace}
+\newcommand{\lighttpdTwoUB}[0]{2708\xspace}
 
 
 %% bug bounds: maximum distance between versions and time span between versions
@@ -57,27 +57,27 @@
 % 
 % r2524 2009-06-11 10:53:34 +0100 (Thu, 11 Jun 2009)
 % Add support for "real" entropy from /dev/[u]random (fixes #1977)
-\newcommand{\maxDistLighttpdOne}[0]{87\xspace}
+\newcommand{\maxDistLighttpdOne}[0]{\num{87}\xspace}
 \newcommand{\timeSpanLighttpdOne}[0]{2 months 2 days\xspace}
 
 % second lighttpd bug (2140)
-\newcommand{\maxDistLighttpdTwo}[0]{12\xspace}
+\newcommand{\maxDistLighttpdTwo}[0]{\num{12}\xspace}
 \newcommand{\timeSpanLighttpdTwo}[0]{2 months 1 day\xspace}
 
 % redis bug
-\newcommand{\maxDistRedis}[0]{27\xspace}
+\newcommand{\maxDistRedis}[0]{\num{27}\xspace}
 \newcommand{\timeSpanRedis}[0]{6 days\xspace}
 
 % md5sum bug
-\newcommand{\maxDistMdsum}[0]{1,124\xspace} % v6.10..v7.6
+\newcommand{\maxDistMdsum}[0]{\num{1124}\xspace} % v6.10..v7.6
 \newcommand{\timeSpanMdsum}[0]{over one year and seven months\xspace} % 1 year 7 months 20 days
 
 % mkdir bug
-\newcommand{\maxDistMkdir}[0]{2,937\xspace} % v6.10..latest (v8.21)
+\newcommand{\maxDistMkdir}[0]{\num{2937}\xspace} % v6.10..latest (v8.21)
 \newcommand{\timeSpanMkdir}[0]{over four years\xspace} % 4 years 23 days
 
 % cut bug
-\newcommand{\maxDistCut}[0]{1,201\xspace} % v8.6..latest (v8.21)
+\newcommand{\maxDistCut}[0]{\num{1201}\xspace} % v8.6..latest (v8.21)
 \newcommand{\timeSpanCut}[0]{over two years and three months\xspace} % 2 years 3 months 30 days
 
 %% performance numbers
@@ -128,20 +128,20 @@
 
 
 % performance overhead
-\newcommand{\numSPECbench}[0]{29\xspace}
-\newcommand{\maxOverSPECNoCkpt}[0]{3.23\%\xspace}
-\newcommand{\minOverSPECNoCkpt}[0]{55.95\%\xspace}
-\newcommand{\avgOverSPECNoCkpt}[0]{18.75\%\xspace}
-\newcommand{\minOverSPEC}[0]{3.43\%\xspace}
-\newcommand{\maxOverSPEC}[0]{105.16\%\xspace}
-\newcommand{\avgOverSPEC}[0]{17.91\%\xspace}
+\newcommand{\numSPECbench}[0]{\num{29}\xspace}
+\newcommand{\maxOverSPECNoCkpt}[0]{\SI{3.23}{\percent}\xspace}
+\newcommand{\minOverSPECNoCkpt}[0]{\SI{55.95}{\percent}\xspace}
+\newcommand{\avgOverSPECNoCkpt}[0]{\SI{18.75}{\percent}\xspace}
+\newcommand{\minOverSPEC}[0]{\SI{3.43}{\percent}\xspace}
+\newcommand{\maxOverSPEC}[0]{\SI{105.16}{\percent}\xspace}
+\newcommand{\avgOverSPEC}[0]{\SI{17.91}{\percent}\xspace}
 
-\newcommand{\avgOverhead}[0]{17.9\%\xspace}
+\newcommand{\avgOverhead}[0]{\SI{17.9}{\percent}\xspace}
 
 % coreutils overhead
 % mkdir a
-\newcommand{\avgMkdirNative}[0]{$1$ms\xspace}
-\newcommand{\avgMkdirMx}[0]{$4$ms\xspace}
+\newcommand{\avgMkdirNative}[0]{\SI{1}{\milli\second}\xspace}
+\newcommand{\avgMkdirMx}[0]{\SI{4}{\milli\second}\xspace}
 
 % small 1.307MB, large 129.7MB
 \newcommand{\avgCutSmallNativeTime}[0]{$0.00$s\xspace}

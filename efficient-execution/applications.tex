@@ -86,8 +86,9 @@ comparison in Section~\ref{sec:comparison}.
 
 Multiple different software versions (revisions) can be run inside an NVX
 system only as long as they all issue the same sequence of system calls. This
-limitation is due to the fact that prior NVX systems, including \mx, run
-versions in lockstep (\S\ref{sec:rw}).
+limitation is due to the fact that prior NVX systems, either run versions in
+lockstep as in case of \mx, or do not support rewriting system call traces in
+case of divergence.
 
 Because \varan does not run the versions in lockstep and can use system call
 rewrite rules, it can often overcome this limitation. To illustrate, we used

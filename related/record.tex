@@ -4,23 +4,23 @@
 Event streaming in \varan can be seen as a variant of record \& replay. Record
 \& replay technique has been an active research topic for more than forty years
 and different approaches have been developed over this period. However, unlike
-traditional record-replay systems that require a persistent log, \varan keeps
+traditional record \& replay systems that require a persistent log, \varan keeps
 the shared ring buffer in memory, and deallocates events as soon as they are
 not needed, which minimises performance overhead and space requirements in the
 NVX context.
 
 %Record \& replay has been an active topic for many years and there has been
-%numerous systems implemented at different layers, they all shared the same
+%numerous systemssimplemented at different layers, they all shared the same
 %basic concepts.
 
 BugNet~\cite{bugnet}, Jockey~\cite{jockey}, liblog~\cite{geels06}, and
 R2~\cite{r2} use a library approach where the replay tool is provided as a
 library which is inserted into a target application to allow for record \&
-replay. Jockey and liblog try to minimize the interference with the application
+replay. Jockey and liblog try to minimise the interference with the application
 being recorded to ensure that the application behaves the same with and without
 the tool, and rely solely on intercepting of a set of C library calls. BugNet
 provides a special API applications must use to support record \& replay while
-R2 requires developers to annonate functions which can be recorded and replayed
+R2 requires developers to annotate functions which can be recorded and replayed
 correctly. RecPlay~\cite{recplay} also uses a library approach, but focuses on
 debugging of non-deterministic parallel programs. The approach combines the
 record \& replay mechanism with automatic data race detection implemented using
@@ -31,14 +31,14 @@ debugging, but rather than library, it is implemented as a kernel extension.
 The key concept is the use of shadow processes, which duplicate the state of a
 process in memory allowing fast rollback of the debugged program with small
 overhead. Scribe~\cite{scribe} is another kernel-based solution focused on
-transparent, low-overhead record-replay with the ability to switch from
+transparent, low-overhead record \& replay with the ability to switch from
 replayed to live execution. While the kernel-based implementation results in
 lower performance overhead, it makes these systems less easy to develop and
 debug, and less safe to use compared to library based approaches.
 
 RR~\cite{rr} is similar to \varan by replicating an application into multiple
 instances for fault tolerance. As \varan, it also uses a variant of
-record-replay to synchronize the primary replica with others. Unlike \varan, RR
+record \& replay to synchronise the primary replica with others. Unlike \varan, RR
 is focused on fail-stop scenarios and does not support running different
 versions of the same application. The preliminary prototype has been
 implemented as a Linux kernel extension, with all the associated limitations
@@ -49,14 +49,42 @@ implement record \& replay mechanism as part of a virtual machine hypervisor,
 allowing to record and replay the entire system, including the operating system
 and the target applications. ReVirt is built on top of UML, which lacks support
 for multiprocessor virtual machines. This limitation has been addressed in
-SMP-ReVirt which builds on top of Xen. iDNA uses a custom virtualization engine
-called Nirvana. The virtualization-based record-replay mechanism allow faithful
+SMP-ReVirt which builds on top of Xen. iDNA uses a custom virtualisation engine
+called Nirvana. The virtualisation-based record \& replay mechanism allow faithful
 replay of every aspect of the application's environment, including the
 scheduling decisions of the operating system, with a small performance
 overhead.  On the other hand, these systems are more difficult to deploy and
 their use is more expensive as they require an entire operating system to
 record a single application.
 
-There are numerous record-replay tools focused on restricted programming models
-such as distributed shared memory~\cite{russinovich96}, MPI~\cite{rrmpi} and
-programming language runtimes such as Java~\cite{choi98}.
+Aftersight~\cite{aftersight}\marginnote{14} uses virtualisation-based record \&
+replay mechanism to enable running heavyweight analyses on production workloads
+by decoupling the analysis from normal execution. The system supports three
+different modes of operation: in the synchronous safety and best-effort safety
+modes, the analysis is being run in parallel with the workload, while in the
+offline mode, the execution log is stored for later analysis akin to
+traditional record \& replay systems. The synchronous safety model resembles
+the \mx's mode of operation where the workload and the analysis are run in
+lockstep.  The best-effort safety mode is similar to \varan, and in particular
+the live sanitisation deployment model described in
+Section~\ref{sec:sanitization}, where there is no synchronisation between the
+output of the workload and the analysis.
+
+Paranoid Android~\cite{paranoid-android}\marginnote{14} uses a similar approach
+for protecting mobile phones---rather than running the attack detection
+mechanism directly on the device, negatively affecting the performance and the
+battery life, the phone records a minimal execution trace, and sends it to the
+server, where it is replayed inside a virtual machine. This enables the use of
+multiple attack detection techniques that can be all run in parallel. Same as
+\mx, Paranoid Android also uses \ptrace mechanism for system call interception.
+Similarly to \varan's event streaming mechanism, Paranoid Android uses
+asynchronous record \& replay mechanism to decouple the execution of the
+monitored application from its replicas.
+
+%There are numerous record \& replay tools focused on restricted programming
+%models such as distributed shared memory~\cite{russinovich96}, MPI~\cite{rrmpi}
+%and programming language runtimes such as Java~\cite{choi98}.
+
+% \cite{shadowhoneypot}
+% \cite{aftersight}
+% \cite{paranoid-android}
