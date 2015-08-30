@@ -18,7 +18,8 @@ ran multiple instances of the same version of each application.
 %(in practice you would typically run different versions as shown in Section \ref{sec:applications}).  
 Each experiment was performed six times, with
 the first measurement used to warm up the caches and discarded.  The overhead
-was calculated as the median of the remaining five measurements.
+was calculated as the median of the remaining five measurements. To measure
+the CPU utilisation, we used the \mpstat utility.
 
 \begin{table}
 \begin{center}
@@ -187,3 +188,13 @@ the worst performer is \redis, which sees performance degradations in the range
 of \SIrange{39}{138}{\percent}, while the best performers are \lighttpdtwo,
 with only \SIrange{6}{23}{\percent} overhead and some operations in \redis with
 under \SI{3}{\percent} overhead.
+
+The CPU utilisation is dependent on the number versions run in parallel and
+varies slightly for different servers. For one follower it is around
+\memcachedOneCpuFollower for \memcached, \lighttpdtwoCpuOneFollower for
+\lighttpdtwo and \nginx, \redisCpuOneFollower for \redis and
+\beanstalkdCpuOneFollower for \beanstalkd. For five followers, the CPU
+utilisation increases to \memcachedCpuFiveFollowers for \memcached,
+\beanstalkdCpuFiveFollowers for \beanstalkd, \redisCpuFiveFollowers for \redis,
+\nginxCpuFiveFollowers for \nginx and \lighttpdtwoCpuFiveFollowers for
+\lighttpdtwo.
