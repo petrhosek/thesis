@@ -17,7 +17,7 @@ interactive applications, where the performance degradation is not noticeable
 to the user. \mx is not applicable to servers requiring high-throughput or to
 patches that fix performance bugs, as the system runs no faster than the
 slowest version.  Both of of these issues are addressed by
-\varan.\marginnote{12}
+\varan.
 
 Our approach of using idle CPU time to run additional versions also increases
 energy consumption and therefore might not be applicable to energy-constrained
@@ -41,12 +41,12 @@ Android~\cite{paranoid-android} in the same context.
 
 \paragraph{Deployment strategy} While our approach eases the decision of
 applying a software update---as incorporating a new version would never
-decrease the reliability\marginnote{10} of the multi-version application---the
-number of versions that can be run in parallel is limited, being dictated by
-the number of available resources (\eg the number of available CPU cores).  As
-a result, we need a deployment strategy to decide what versions to use.  For
-example, we could always run the last $N$ released versions (where $N$ is the
-number of available resources), or we could always keep a one-year old version,
-etc.  This thesis focuses on designing and implementing multi-version execution
+decrease the reliability of the multi-version application---the number of
+versions that can be run in parallel is limited, being dictated by the number
+of available resources (\eg the number of available CPU cores).  As a result,
+we need a deployment strategy to decide what versions to use.  For example, we
+could always run the last $N$ released versions (where $N$ is the number of
+available resources), or we could always keep a one-year old version, etc.
+This thesis focuses on designing and implementing multi-version execution
 techniques, but in future work we plan to explore deployment strategies in more
 detail.

@@ -706,15 +706,15 @@ every filter has to end with a \lstinline[language={[bpf]Assembler}]`ret`
 instruction).
 
 We expect that these rules will be written by the application developer and
-distributed alongside the new version.\marginnote{7} Alternatively, they could
-be also written by administrators after deployment when a divergence is
-detected. For the prototype implementation, we have opted for the classic BPF
-(cBPF) filters, which use an Assembly-like instruction set, as they are easier
-to implement and are already used by seccomp-bpf~\cite{seccomp-bpf:linux}.
-However, they could be also tedious to write and have limited expressivity.
-Hence, in the future we plan to replace the cBPF with extended BPF
-(eBPF)~\cite{ebpf:linux}, which allow filters to be written in C and translated
-into eBPF instructions using Clang/LLVM.
+distributed alongside the new version. Alternatively, they could be also
+written by administrators after deployment when a divergence is detected. For
+the prototype implementation, we have opted for the classic BPF (cBPF) filters,
+which use an Assembly-like instruction set, as they are easier to implement and
+are already used by seccomp-bpf~\cite{seccomp-bpf:linux}.  However, they could
+be also tedious to write and have limited expressivity.  Hence, in the future
+we plan to replace the cBPF with extended BPF (eBPF)~\cite{ebpf:linux}, which
+allow filters to be written in C and translated into eBPF instructions using
+Clang/LLVM.
 
 %We also argue that the choice of BPF as a language for stream rewriting rules
 %makes it easier to adopt by administrators, the most likely users of \varan,

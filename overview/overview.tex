@@ -57,18 +57,17 @@ consequences of failed software updates.
 Nowadays, many services including large-scale ones such as Google, Facebook or
 Amazon employ \emph{continuous deployment}, whereby new versions are
 continuously released to users~\cite{johnson2009}. Multiple versions can be
-released throughout the day, and A/B testing\marginnote{2} is often used to
-prevent complete outage in case of an error caused by one of the versions by
-making each version accessible only to a fraction of users. While this
-approach helps minimise the number of users affected by newly introduced bugs,
-it is not foolproof---bugs introduced by new releases may manifest themselves
-only in particular cases or following prolonged operation, after a single
-version has been deployed to the entire user base, as evident from past cases
-affecting services such as Blogger~\cite{blogger-incident2011} or
-Facebook~\cite{facebook-incident2010}. Failures and outages affecting the
-majority of the user-base therefore occur even in these applications. Such
-outages might cause significant financial losses and frustration among users,
-and it is therefore critical to avoid them.
+released throughout the day, and A/B testing is often used to prevent complete
+outage in case of an error caused by one of the versions by making each version
+accessible only to a fraction of users. While this approach helps minimise the
+number of users affected by newly introduced bugs, it is not foolproof---bugs
+introduced by new releases may manifest themselves only in particular cases or
+following prolonged operation, after a single version has been deployed to the
+entire user base, as evident from past cases affecting services such as
+Blogger~\cite{blogger-incident2011} or Facebook~\cite{facebook-incident2010}.
+Failures and outages affecting the majority of the user-base therefore occur
+even in these applications. Such outages might cause significant financial
+losses and frustration among users, and it is therefore critical to avoid them.
 
 Our goal is to improve the software update process in such a way as to
 encourage users to upgrade to the latest software version, without sacrificing

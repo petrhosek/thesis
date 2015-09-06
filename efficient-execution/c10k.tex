@@ -66,7 +66,7 @@ the CPU utilisation, we used the \mpstat utility.
  \caption{Performance overhead for the \beanstalkd, \lighttpd, \memcached, \nginx
    and \redis servers for different number of followers.  The client
    and server are running on the same machine, simulating a worst-case scenario.}
-   \label{fig:servers}\marginnote{6}[-1em]
+   \label{fig:servers}
 \end{figure}
 
 % Even though some of the servers used in our evaluation were already introduced
@@ -189,7 +189,7 @@ of \SIrange{39}{138}{\percent}, while the best performers are \lighttpdtwo,
 with only \SIrange{6}{23}{\percent} overhead and some operations in \redis with
 under \SI{3}{\percent} overhead.
 
-The CPU utilisation is dependent on the number versions run in parallel and
+The CPU utilisation is dependent on the number of versions run in parallel and
 varies slightly for different servers. For one follower it is around
 \memcachedOneCpuFollower for \memcached, \lighttpdtwoCpuOneFollower for
 \lighttpdtwo and \nginx, \redisCpuOneFollower for \redis and

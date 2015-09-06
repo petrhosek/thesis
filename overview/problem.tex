@@ -1,4 +1,4 @@
-\section{Solution}\marginnote{1}[-3em]
+\section{Solution}
 \label{overview:solution}
 
 We tackle the problem of faulty software updates using a simple but effective
@@ -62,19 +62,19 @@ failure.
 In order for our approach to be successful, the external behaviour of the
 versions that are run in parallel has to be similar enough to allow us to
 synchronise their execution. In practice, it means that the external behaviour
-of all the versions has to be the same.\marginnote{4} The empirical study
-presented in this thesis shows that changes to the external behaviour of an
-application are often minimal, so our approach should work well with versions
-that are not too distant from one another (\ie several revisions apart).
+of all the versions has to be the same. The empirical study presented in this
+thesis shows that changes to the external behaviour of an application are often
+minimal, so our approach should work well with versions that are not too
+distant from one another (\ie several revisions apart).
 
 Similarly, our system relies on the assumption that versions re-converge to the
 same behaviour after a divergence.  Therefore, we believe multi-version
 execution would be a good fit for applications that perform a series of mostly
-independent requests, such as network servers.\marginnote{4} These applications
-are usually structured around a main dispatch loop, which provides a useful
-re-convergence point. Our approach is also suitable to local code changes,
-which have small propagation distances, thus ensuring that the different
-versions will eventually re-converge to the same behaviour.
+independent requests, such as network servers. These applications are usually
+structured around a main dispatch loop, which provides a useful re-convergence
+point. Our approach is also suitable to local code changes, which have small
+propagation distances, thus ensuring that the different versions will
+eventually re-converge to the same behaviour.
 
 Our approach is targeted toward scenarios where the availability and
 reliability of a software system is more important than strict correctness,

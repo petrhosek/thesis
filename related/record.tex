@@ -57,9 +57,9 @@ overhead.  On the other hand, these systems are more difficult to deploy and
 their use is more expensive as they require an entire operating system to
 record a single application.
 
-Aftersight~\cite{aftersight}\marginnote{14} uses virtualisation-based record \&
-replay mechanism to enable running heavyweight analyses on production workloads
-by decoupling the analysis from normal execution. The system supports three
+Aftersight~\cite{aftersight} uses virtualisation-based record \& replay
+mechanism to enable running heavyweight analyses on production workloads by
+decoupling the analysis from normal execution. The system supports three
 different modes of operation: in the synchronous safety and best-effort safety
 modes, the analysis is being run in parallel with the workload, while in the
 offline mode, the execution log is stored for later analysis akin to
@@ -70,16 +70,16 @@ the live sanitisation deployment model described in
 Section~\ref{sec:sanitization}, where there is no synchronisation between the
 output of the workload and the analysis.
 
-Paranoid Android~\cite{paranoid-android}\marginnote{14} uses a similar approach
-for protecting mobile phones---rather than running the attack detection
-mechanism directly on the device, negatively affecting the performance and the
-battery life, the phone records a minimal execution trace, and sends it to the
-server, where it is replayed inside a virtual machine. This enables the use of
-multiple attack detection techniques that can be all run in parallel. Same as
-\mx, Paranoid Android also uses \ptrace mechanism for system call interception.
-Similarly to \varan's event streaming mechanism, Paranoid Android uses
-asynchronous record \& replay mechanism to decouple the execution of the
-monitored application from its replicas.
+Paranoid Android~\cite{paranoid-android} uses a similar approach for protecting
+mobile phones---rather than running the attack detection mechanism directly on
+the device, negatively affecting the performance and the battery life, the
+phone records a minimal execution trace, and sends it to the server, where it
+is replayed inside a virtual machine. This enables the use of multiple attack
+detection techniques that can be all run in parallel. Same as \mx, Paranoid
+Android also uses \ptrace mechanism for system call interception.  Similarly to
+\varan's event streaming mechanism, Paranoid Android uses asynchronous record
+\& replay mechanism to decouple the execution of the monitored application from
+its replicas.
 
 %There are numerous record \& replay tools focused on restricted programming
 %models such as distributed shared memory~\cite{russinovich96}, MPI~\cite{rrmpi}

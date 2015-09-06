@@ -243,8 +243,8 @@ popular NoSQL databases.  Due to its performance and low-resource requirements,
 \redis is being used by many well-known services such as GitHub.  Because the
 entire dataset is held in memory, reliability is critically important, as the
 server crash and subsequent restart requires reloading data into memory, which
-can lead to a prolonged server downtime.\marginnote{3} Nevertheless, like any
-other large software system, \redis is subject to crash bugs.  Issue
+can lead to a prolonged server downtime. Nevertheless, like any other large
+software system, \redis is subject to crash bugs.  Issue
 344\footnote{\url{http://code.google.com/p/redis/issues/detail?id=344}} is one
 such example.  This issue causes \redis to crash when the \lstinline`HMGET`
 command is used with the wrong type.  The bug was introduced during a code
@@ -262,7 +262,7 @@ missing, and after reporting an incorrect type (line~\ref{line:report-error2}),
 the function continues execution and causes segmentation fault inside the
 \lstinline`hashGet` function invoked on line~\ref{line:hashGet}. This is a
 critical bug, which may negatively affect the service availability and
-reliability as described above.\marginnote{3}
+reliability as described above.
 
 The bug was introduced in April 2010, diagnosed and reported only half a year
 later in October 2010 and then fixed after fifteen days. As in the case of the

@@ -296,7 +296,6 @@
 %
 % Layout
 %
-\RequirePackage{marginnote}
 \RequirePackage{titlesec}
 
 % chapters
